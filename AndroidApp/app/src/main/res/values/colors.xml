@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#43a7e0</color>
+    <color name="colorPrimaryDark">#3383b0</color>
+    <color name="colorAccent">#43a7e0</color>
+    <color name="notificationColorTrue">#FFC107</color>
+    <color name="notificationColorFalse">#00FFFFFF</color>
+    <color name ="leidoColorTrue">#CA0433</color>
+    <color name="leidoColorFalse">#00FFFFFF</color>
+    <color name="messageColorTrue">#FFC107</color>
+    <color name="messageColorFalse">#00FFFFFF</color>
+</resources>

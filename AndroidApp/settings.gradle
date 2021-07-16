@@ -1,0 +1,3 @@
+rootProject.name='LifeGuard'
+include ':app'
+include ':wear'
