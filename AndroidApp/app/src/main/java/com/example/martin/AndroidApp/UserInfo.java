@@ -1,4 +1,4 @@
-package com.example.martin.AndroidApp.ui.datosUsuario;
+package com.example.martin.AndroidApp;
 
 public class UserInfo {
     private String uID;

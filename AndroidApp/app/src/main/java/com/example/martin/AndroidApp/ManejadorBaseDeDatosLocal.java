@@ -8,8 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.util.Pair;
 
-import com.example.martin.AndroidApp.ui.datosUsuario.UserInfo;
-import com.google.firebase.firestore.auth.User;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.json.JSONException;
