@@ -1,13 +1,14 @@
 package com.example.martin.AndroidApp;
 
 import android.app.PendingIntent;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.util.Log;
 
-import com.example.martin.AndroidApp.ui.dashboard.NotificationInfo;
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,57 +20,44 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private ConexionSQLiteHelper mConectionSQLiteHelper;
+    FirebaseFirestore baseDeDatosFirebase;
+    private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private FirebaseAuth mAuth;
-    FirebaseFirestore db;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
         mAuth = FirebaseAuth.getInstance();
-        mConectionSQLiteHelper = new ConexionSQLiteHelper(getApplicationContext(), "lifeguard", null, 2);
+        mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        db = FirebaseFirestore.getInstance();
+        baseDeDatosFirebase = FirebaseFirestore.getInstance();
 
         Log.d("LOG", "From: " + remoteMessage.getFrom());
 
         if (remoteMessage.getData().size() > 0) {
             Log.d("LOG", "Message data payload: " + remoteMessage.getData());
 
-            Date c = Calendar.getInstance().getTime();
-            Log.d("LOG","Current time => " + c);
+            String fecha = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
+                    .format(Calendar.getInstance().getTime());
+            long idNotificacion =
+                    mManejadorBaseDeDatosLocal
+                            .agregarNotificacion(remoteMessage, currentUser.getUid(), fecha);
 
-            SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-            String formattedDate = df.format(c);
-            Log.d("LOG","Current time FORMATTED => " + formattedDate);
+            NotificationInfo notificacion =
+                    new NotificationInfo(idNotificacion, fecha, remoteMessage.getData().get("nombre"),
+                            remoteMessage.getData().get("mensaje"), false,
+                            remoteMessage.getData().get("userID"));
 
-            SQLiteDatabase writingDatabase = mConectionSQLiteHelper.getWritableDatabase();
-            ContentValues userValues = new ContentValues();
-            userValues.put("fecha", formattedDate);
-            userValues.put("nombre", remoteMessage.getData().get("nombre"));
-            userValues.put("mensaje", remoteMessage.getData().get("mensaje"));
-            userValues.put("leido", 0);
-            userValues.put("userID", currentUser.getUid());
-            long idRes = writingDatabase.insert("notificacion", "id", userValues);
-            Log.d("LOG", "Notificación agregada. ID: "+idRes);
-            writingDatabase.close();
-
-            NotificationInfo notification = new NotificationInfo(idRes, formattedDate, userValues.get("nombre").toString(), userValues.get("mensaje").toString(), false, userValues.get("userID").toString());
-
-            db.collection("notificacion").add(notification)
+            baseDeDatosFirebase.collection("notificacion").add(notificacion)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
-                            Log.d("LOG", "DocumentSnapshot added with ID: " + documentReference.getId());
+                            Log.d("LOG",
+                                    "DocumentSnapshot added with ID: " + documentReference.getId());
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -85,25 +73,33 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("mensaje", remoteMessage.getData().get("mensaje"));
             String uid = currentUser.getUid();
             intent.putExtra("userID", uid);
-            String idS = ""+idRes;
+            String idS = "" + idNotificacion;
             intent.putExtra("idS", idS);
-            intent.putExtra("id", idRes);
-            intent.putExtra("fecha", formattedDate);
+            intent.putExtra("id", idNotificacion);
+            intent.putExtra("fecha", fecha);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent =
+                    PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "Alerta LifeGuard")
-                    .setSmallIcon(R.drawable.ic_warning_black_24dp)
-                    .setContentTitle("Nueva alerta de "+remoteMessage.getData().get("nombre"))
-                    .setContentText("Has recibido una alerta de "+remoteMessage.getData().get("nombre")+". Haz click aquí para ver la notificación y ayudarle.")
-                    .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText("Has recibido una alerta de "+remoteMessage.getData().get("nombre")+". Haz click aquí para ver la notificación y ayudarle."))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setVibrate(new long[] { 3000, 3000, 3000, 3000, 3000,})
-                    .setLights(Color.RED, 2000, 2000)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
+            NotificationCompat.Builder builder =
+                    new NotificationCompat.Builder(this, "Alerta LifeGuard")
+                            .setSmallIcon(R.drawable.ic_warning_black_24dp)
+                            .setContentTitle(
+                                    "Nueva alerta de " + remoteMessage.getData().get("nombre"))
+                            .setContentText("Has recibido una alerta de " +
+                                    remoteMessage.getData().get("nombre") +
+                                    ". Haz click aquí para ver la notificación y ayudarle.")
+                            .setStyle(new NotificationCompat.BigTextStyle()
+                                    .bigText("Has recibido una alerta de " +
+                                            remoteMessage.getData().get("nombre") +
+                                            ". Haz click aquí para ver la notificación y ayudarle" +
+                                            "."))
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                            .setVibrate(new long[]{3000, 3000, 3000, 3000, 3000,})
+                            .setLights(Color.RED, 2000, 2000)
+                            .setContentIntent(pendingIntent)
+                            .setAutoCancel(true);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
             notificationManager.notify(1, builder.build());

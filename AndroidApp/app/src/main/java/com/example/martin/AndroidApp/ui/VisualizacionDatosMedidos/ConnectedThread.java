@@ -2,15 +2,12 @@ package com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
-import android.util.Log;
 
 import com.example.martin.AndroidApp.MainActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 //Crea la clase que permite crear el evento de conexion

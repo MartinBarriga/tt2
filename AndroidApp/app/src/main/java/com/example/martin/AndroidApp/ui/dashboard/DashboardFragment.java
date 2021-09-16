@@ -22,21 +22,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.martin.AndroidApp.ConexionSQLiteHelper;
-import com.example.martin.AndroidApp.Countdown;
-import com.example.martin.AndroidApp.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.messaging.FirebaseMessaging;
-
-
-import java.util.ArrayList;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -46,26 +31,64 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.martin.AndroidApp.Countdown;
+import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
+import com.example.martin.AndroidApp.NotificationInfo;
+import com.example.martin.AndroidApp.R;
+import com.example.martin.AndroidApp.ui.datosUsuario.UserInfo;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.ArrayList;
+
 /*PARA AGREGAR UNA NUEVA NOTIFICACION SE DEBE DE EJECUTAR LA SIGUIENTE LINEA:
  !!!!!!!!!!!!!!!!!!!!!!!!!!
- Y CAMBIAR LOS STRINGS QUE CONTIENEN LA PALABRA "OBTENIDA/OBTENIDO", NO MOVER EL NULL, EL FALSE Y EL USER.GETUID
- mNotificationsManager.addNewNotification(new NotificationInfo(null, "FECHA OBTENIDA", "NOMBRE OBTENIDO", "MENSAJE OBTENIDO", false, user.getUid()));
+ Y CAMBIAR LOS STRINGS QUE CONTIENEN LA PALABRA "OBTENIDA/OBTENIDO", NO MOVER EL NULL, EL FALSE Y
+  EL USER.GETUID
+ mNotificationsManager.addNewNotification(new NotificationInfo(null, "FECHA OBTENIDA", "NOMBRE
+ OBTENIDO", "MENSAJE OBTENIDO", false, user.getUid()));
  !!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!
  */
-public class DashboardFragment extends Fragment implements  NotificationRecyclerAdapter.OnNotificationListener{
+public class DashboardFragment extends Fragment
+        implements NotificationRecyclerAdapter.OnNotificationListener {
 
-    private ConexionSQLiteHelper mConectionSQLiteHelper;
     private static final int PERMISSION_SEND_SMS = 123;
-    private DashboardViewModel dashboardViewModel;
+    private final int REQUEST_CODE_LOCATION_PERMISSION = 1;
     FirebaseAuth mAuth;
     FirebaseUser user;
     FirebaseFirestore db;
+    private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
+    private DashboardViewModel dashboardViewModel;
     private NotificationsManager mNotificationsManager;
     private NotificationRecyclerAdapter mNotificationsRecyclerAdapter;
     private View root;
     private ArrayList<NotificationInfo> mNotifications;
-    private final int REQUEST_CODE_LOCATION_PERMISSION = 1;
+    ItemTouchHelper.SimpleCallback itemTouchHelperCallback =
+            new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+
+                @Override
+                public boolean onMove(@NonNull RecyclerView recyclerView,
+                                      @NonNull RecyclerView.ViewHolder viewHolder,
+                                      @NonNull RecyclerView.ViewHolder target) {
+                    return false;
+                }
+
+                @Override
+                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                    int position = viewHolder.getAdapterPosition();
+                    mNotificationsManager.deleteNotification(position);
+                    mNotifications = mNotificationsManager.getArrayNotifications();
+                    mNotificationsRecyclerAdapter.notifyItemRemoved(position);
+
+                }
+            };
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -77,58 +100,53 @@ public class DashboardFragment extends Fragment implements  NotificationRecycler
         user = mAuth.getCurrentUser();
         db = FirebaseFirestore.getInstance();
         mNotificationsManager = new NotificationsManager(getContext());
-        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED|| ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat
+                .checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED || ContextCompat
+                .checkSelfPermission(this.getContext(), Manifest.permission.SEND_SMS) !=
+                PackageManager.PERMISSION_GRANTED || ContextCompat
+                .checkSelfPermission(this.getContext(), Manifest.permission.READ_PHONE_STATE) !=
+                PackageManager.PERMISSION_GRANTED) {
             final AlertDialog.Builder newNameDialog = new AlertDialog.Builder(getContext());
             newNameDialog.setTitle("Permiso para enviar SMS.");
-            newNameDialog.setMessage("Debido a que la función de esta aplicación es enviar mensajes de emergencia, a continuación se le pedirá permiso para enviar mensajes desde su celular y acceder a su localización.");
-            newNameDialog.setPositiveButton( "Aceptar", new DialogInterface.OnClickListener() {
+            newNameDialog.setMessage(
+                    "Debido a que la función de esta aplicación es enviar mensajes de emergencia," +
+                            " a continuación se le pedirá permiso para enviar mensajes desde su " +
+                            "celular y acceder a su localización.");
+            newNameDialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_PHONE_STATE}, PERMISSION_SEND_SMS);
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.SEND_SMS,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.READ_PHONE_STATE}, PERMISSION_SEND_SMS);
                 }
             });
             Log.d("LOG", "no hay permisos de enviar sms");
 
-            newNameDialog.setNegativeButton(getString(R.string.newNameDialogCancelingButton), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    //imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    dialog.cancel();
-                }
-            });
-
+            newNameDialog.setNegativeButton(getString(R.string.newNameDialogCancelingButton),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // InputMethodManager imm = (InputMethodManager)getSystemService
+                            // (Context.INPUT_METHOD_SERVICE);
+                            //imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                            dialog.cancel();
+                        }
+                    });
 
 
             final AlertDialog sameNameDialog = newNameDialog.create();
             sameNameDialog.show();
-
-        }else{
+        } else {
             Log.d("LOG", "sí hay permisos de enviar sms");
         }
 
+        mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getContext(), null);
+        UserInfo usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(user.getUid());
 
-        mConectionSQLiteHelper = new ConexionSQLiteHelper(getContext(), "lifeguard", null, 2);
-        SQLiteDatabase readingDatabase = mConectionSQLiteHelper.getReadableDatabase();
-        Cursor cursor = readingDatabase.rawQuery("SELECT * FROM usuario WHERE Uid LIKE '"+user.getUid()+"'", null);
-        String test = "";
 
-        for (int i=0; i<cursor.getColumnCount(); i++){
-            test+=" Columna "+i+": "+cursor.getColumnNames()[i];
-        }
-        Log.d("LOG", test);
-        test="";
-        String myPhone = "";
-        if(cursor.getCount()>0)
-        while(cursor.moveToNext()){
-            test = cursor.getString(0) + "\n " + cursor.getString(1) + "\n " + String.valueOf(cursor.getLong(2))+ "\n " +
-                    cursor.getString(3)+ "\n " + cursor.getInt(4)+ "\n " +cursor.getString(5)+"\n "+cursor.getLong(6)+ "\n " +
-                    cursor.getString(7)+"\n "+cursor.getString(8)+"\n "+cursor.getString(9)
-                    +"\n "+cursor.getString(10)+"\n "+cursor.getString(11)+"\n "+cursor.getString(12);
-            myPhone = String.valueOf(cursor.getLong(2));
-        }
-
-        FirebaseMessaging.getInstance().subscribeToTopic(myPhone)
+        FirebaseMessaging.getInstance().subscribeToTopic(Long.toString(usuario.getTelefono()))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -140,23 +158,26 @@ public class DashboardFragment extends Fragment implements  NotificationRecycler
                     }
                 });
 
-        db.collection("contact").whereEqualTo("phoneNumber", myPhone).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    String usuarios = "Soy contacto de los usuarios:";
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Log.d("LOG", document.getId() + " => " + document.getData());
-                        usuarios+=" "+document.getData().get("userID");
-                        Log.d("LOG", "String usuarios: "+usuarios);
-                    }
-                } else {
-                    Toast.makeText(getContext(), "No se pudo buscar el número.", Toast.LENGTH_LONG).show();
+        db.collection("contact").whereEqualTo("phoneNumber", Long.toString(usuario.getTelefono()))
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            String usuarios = "Soy contacto de los usuarios:";
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("LOG", document.getId() + " => " + document.getData());
+                                usuarios += " " + document.getData().get("userID");
+                                Log.d("LOG", "String usuarios: " + usuarios);
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "No se pudo buscar el número.",
+                                    Toast.LENGTH_LONG).show();
 
-                    Log.d("LOG", "Error getting documents: ", task.getException());
-                }
-            }
-        });
+                            Log.d("LOG", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
 
         Button sendSMS = root.findViewById(R.id.sendSMS);
         sendSMS.setOnClickListener(new View.OnClickListener() {
@@ -171,51 +192,38 @@ public class DashboardFragment extends Fragment implements  NotificationRecycler
         return root;
     }
 
-    private void displayNotifications(){
-        final RecyclerView notificationsRecyclerView = (RecyclerView) root.findViewById(R.id.notificationsRecyclerView);
-        final LinearLayoutManager notifiactionsLayoutManager = new LinearLayoutManager(getContext());
+    private void displayNotifications() {
+        final RecyclerView notificationsRecyclerView =
+                (RecyclerView) root.findViewById(R.id.notificationsRecyclerView);
+        final LinearLayoutManager notifiactionsLayoutManager =
+                new LinearLayoutManager(getContext());
         notificationsRecyclerView.setLayoutManager(notifiactionsLayoutManager);
         mNotifications = mNotificationsManager.getArrayNotifications();
-        mNotificationsRecyclerAdapter = new NotificationRecyclerAdapter(getContext(), mNotifications, this);
-        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(notificationsRecyclerView);
+        mNotificationsRecyclerAdapter =
+                new NotificationRecyclerAdapter(getContext(), mNotifications, this);
+        new ItemTouchHelper(itemTouchHelperCallback)
+                .attachToRecyclerView(notificationsRecyclerView);
         notificationsRecyclerView.setAdapter(mNotificationsRecyclerAdapter);
     }
 
-    ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT){
-
-        @Override
-        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            return false;
-        }
-
-        @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            int position = viewHolder.getAdapterPosition();
-            mNotificationsManager.deleteNotification(position);
-            mNotifications = mNotificationsManager.getArrayNotifications();
-            mNotificationsRecyclerAdapter.notifyItemRemoved(position);
-
-        }
-    };
-
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[],
+                                           int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_SEND_SMS: {
 
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("LOG", "se concedieron permisos de enviar sms");
                 } else {
                     Log.d("LOG", "no nos dieron persmiso :c");
                 }
                 return;
             }
-            case REQUEST_CODE_LOCATION_PERMISSION:{
-                if(grantResults.length > 0){
+            case REQUEST_CODE_LOCATION_PERMISSION: {
+                if (grantResults.length > 0) {
                     Log.d("LOG", "se concedieron permisos de consultar localización");
-                }
-                else{
+                } else {
                     Log.d("LOG", "no nos dieron persmiso para localizacion:c");
                 }
                 return;
@@ -224,7 +232,7 @@ public class DashboardFragment extends Fragment implements  NotificationRecycler
         }
     }
 
-    public void sendSMS(View view, Context context){
+    public void sendSMS(View view, Context context) {
 
         Intent intent = new Intent(getContext(), Countdown.class);
         startActivity(intent);
@@ -238,13 +246,14 @@ public class DashboardFragment extends Fragment implements  NotificationRecycler
         Linkify.addLinks(s, Linkify.WEB_URLS);
         newNameDialog.setMessage(s);
         newNameDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
         final AlertDialog sameNameDialog = newNameDialog.create();
         sameNameDialog.show();
-        ((TextView)sameNameDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+        ((TextView) sameNameDialog.findViewById(android.R.id.message))
+                .setMovementMethod(LinkMovementMethod.getInstance());
         mNotificationsManager.changeLeido(position);
         (new Handler()).postDelayed(new Runnable() {
             public void run() {

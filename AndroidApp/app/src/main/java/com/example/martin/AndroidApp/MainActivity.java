@@ -1,6 +1,5 @@
 package com.example.martin.AndroidApp;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,7 +8,6 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.SpannableString;
@@ -19,11 +17,16 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+
 import com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos.ConnectedThread;
 import com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos.DispositivosVinculados;
-import com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos.VisualizacionDatosMedidosFragment;
-import com.example.martin.AndroidApp.ui.dashboard.NotificationInfo;
-import com.github.mikephil.charting.charts.LineChart;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -33,15 +36,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -149,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         if(bundle.getBoolean("nuevaAlerta")){
             Toast.makeText(getApplicationContext(), "Nueva alerta", Toast.LENGTH_LONG).show();
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-            ConexionSQLiteHelper mConnectionSQLiteHelper = new ConexionSQLiteHelper(MainActivity.this, "lifeguard", null, 2);;
+            ManejadorBaseDeDatosLocal mConnectionSQLiteHelper = new ManejadorBaseDeDatosLocal(MainActivity.this, null);;
             SQLiteDatabase writingDatabase = mConnectionSQLiteHelper.getWritableDatabase();
 
             Log.d("LOG", "Table update: "+"id = "+ bundle.getString("idS") +" AND userID LIKE '"+bundle.getString("userID")+"'");

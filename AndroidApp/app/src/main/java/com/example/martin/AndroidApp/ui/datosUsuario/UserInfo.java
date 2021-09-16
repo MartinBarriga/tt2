@@ -6,6 +6,7 @@ public class UserInfo {
     private Long telefono;
     private String correo;
     private int edad;
+    private String mensaje;
     private Long nss;
     private String medicacion;
     private String enfermedades;
@@ -14,12 +15,15 @@ public class UserInfo {
     private String alergias;
     private String religion;
 
-    public UserInfo(String uID, String nombre, Long telefono, String correo, int edad, Long nss, String medicacion, String enfermedades, String toxicomanias, String tipoSangre, String alergias, String religion) {
+    public UserInfo(String uID, String nombre, Long telefono, String correo, int edad,
+                    String mensaje, Long nss, String medicacion, String enfermedades,
+                    String toxicomanias, String tipoSangre, String alergias, String religion) {
         this.uID = uID;
         this.nombre = nombre;
         this.telefono = telefono;
         this.correo = correo;
         this.edad = edad;
+        this.mensaje = mensaje;
         this.nss = nss;
         this.medicacion = medicacion;
         this.enfermedades = enfermedades;
@@ -31,6 +35,10 @@ public class UserInfo {
 
     public String getMedicacion() {
         return medicacion;
+    }
+
+    public void setMedicacion(String medicacion) {
+        this.medicacion = medicacion;
     }
 
     public Long getTelefono() {
@@ -47,10 +55,6 @@ public class UserInfo {
 
     public void setNss(Long nss) {
         this.nss = nss;
-    }
-
-    public void setMedicacion(String medicacion) {
-        this.medicacion = medicacion;
     }
 
     public String getuID() {
@@ -123,5 +127,13 @@ public class UserInfo {
 
     public void setReligion(String religion) {
         this.religion = religion;
+    }
+
+    public String getMensaje() {
+        return mensaje;
+    }
+
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
     }
 }

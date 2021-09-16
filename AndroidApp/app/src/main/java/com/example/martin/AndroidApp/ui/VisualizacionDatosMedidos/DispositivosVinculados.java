@@ -1,7 +1,5 @@
 package com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -11,12 +9,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.martin.AndroidApp.MainActivity;
 import com.example.martin.AndroidApp.R;
 
-import java.util.Iterator;
 import java.util.Set;
 
 public class DispositivosVinculados extends AppCompatActivity {
