@@ -55,7 +55,6 @@ public class Countdown extends AppCompatActivity {
 
         cdt = new CountDownTimer(11000, 1000) {
             TextView text = findViewById(R.id.segundos);
-
             public void onTick(long millisUntilFinished) {
                 text.setText("" + millisUntilFinished / 1000);
             }

@@ -26,7 +26,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
-
 public class VisualizacionDatosMedidosFragment extends Fragment{
 
     // TODO: Rename parameter arguments, choose names that match

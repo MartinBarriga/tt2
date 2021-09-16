@@ -97,7 +97,6 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
         text = root.findViewById(R.id.religion);
         text.setText(usuario.getReligion());
 
-
         Button cerrarSesion = root.findViewById(R.id.cerrarsSesion);
         cerrarSesion.setOnClickListener(new View.OnClickListener() {
             @Override

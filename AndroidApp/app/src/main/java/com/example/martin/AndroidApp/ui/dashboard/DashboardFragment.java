@@ -138,11 +138,9 @@ public class DashboardFragment extends Fragment
 
             final AlertDialog sameNameDialog = newNameDialog.create();
             sameNameDialog.show();
-
         } else {
             Log.d("LOG", "sí hay permisos de enviar sms");
         }
-
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getContext(), null);
         UserInfo usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(user.getUid());

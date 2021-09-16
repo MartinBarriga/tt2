@@ -34,6 +34,7 @@ public class LoadingLogin extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private UserInfo newUser;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
+  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
