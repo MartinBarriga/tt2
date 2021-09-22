@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -31,16 +30,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
+import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.NotificationInfo;
 import com.example.martin.AndroidApp.R;
 import com.example.martin.AndroidApp.UserInfo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
@@ -59,10 +54,8 @@ public class DashboardFragment extends Fragment
 
     private static final int PERMISSION_SEND_SMS = 123;
     private final int REQUEST_CODE_LOCATION_PERMISSION = 1;
-    FirebaseAuth mAuth;
-    FirebaseUser user;
-    FirebaseFirestore db;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
+    private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
     private DashboardViewModel dashboardViewModel;
     private NotificationsManager mNotificationsManager;
     private NotificationRecyclerAdapter mNotificationsRecyclerAdapter;
@@ -94,9 +87,7 @@ public class DashboardFragment extends Fragment
                 ViewModelProviders.of(this).get(DashboardViewModel.class);
         root = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
-        db = FirebaseFirestore.getInstance();
+        mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
         mNotificationsManager = new NotificationsManager(getContext());
         if (ContextCompat
                 .checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
@@ -141,7 +132,7 @@ public class DashboardFragment extends Fragment
         }
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getContext(), null);
-        UserInfo usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(user.getUid());
+        UserInfo usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
 
 
         FirebaseMessaging.getInstance().subscribeToTopic(Long.toString(usuario.getTelefono()))
@@ -153,27 +144,6 @@ public class DashboardFragment extends Fragment
                             msg = "No suscrito";
                         }
                         Log.d("LOG", msg);
-                    }
-                });
-
-        db.collection("contact").whereEqualTo("phoneNumber", Long.toString(usuario.getTelefono()))
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            String usuarios = "Soy contacto de los usuarios:";
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-                                usuarios += " " + document.getData().get("userID");
-                                Log.d("LOG", "String usuarios: " + usuarios);
-                            }
-                        } else {
-                            Toast.makeText(getContext(), "No se pudo buscar el número.",
-                                    Toast.LENGTH_LONG).show();
-
-                            Log.d("LOG", "Error getting documents: ", task.getException());
-                        }
                     }
                 });
 

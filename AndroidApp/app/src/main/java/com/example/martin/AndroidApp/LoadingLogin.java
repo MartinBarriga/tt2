@@ -19,13 +19,10 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoadingLogin extends AppCompatActivity {
@@ -142,20 +139,8 @@ public class LoadingLogin extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "La dirección ha sido verificada.",
                             Toast.LENGTH_LONG);
                     FirebaseFirestore fdb = FirebaseFirestore.getInstance();
-                    fdb.collection("usuario").add(newUser)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    Log.d("LOG", "DocumentSnapshot added with ID: " +
-                                            documentReference.getId());
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.w("LOG", "Error adding document", e);
-                                }
-                            });
+                    ManejadorBaseDeDatosNube manejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
+                    manejadorBaseDeDatosNube.agregarUsuario(newUser);
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.putExtra("firstLaunch", true);
                     startActivity(intent);

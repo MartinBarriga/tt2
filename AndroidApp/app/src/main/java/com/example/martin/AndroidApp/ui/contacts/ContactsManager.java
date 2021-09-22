@@ -2,49 +2,32 @@ package com.example.martin.AndroidApp.ui.contacts;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 
 import com.example.martin.AndroidApp.ContactsInfo;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 
 import java.util.ArrayList;
 
 public class ContactsManager {
-    FirebaseFirestore db;
-    FirebaseAuth mAuth;
-    FirebaseUser user;
+
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
+    private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
     private ArrayList<ContactsInfo> mContacts;
     private Context mContext;
-    private String contactID;
 
     public ContactsManager(Context context) {
         mContext = context;
         mContacts = new ArrayList<ContactsInfo>();
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(context, null);
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
-
+        mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
         fillContactArrayList();
-        db = FirebaseFirestore.getInstance();
     }
 
     private void fillContactArrayList() {
         mContacts.clear();
-        for (ContactsInfo contacto : mManejadorBaseDeDatosLocal.obtenerContactos(user.getUid())) {
+        for (ContactsInfo contacto : mManejadorBaseDeDatosLocal
+                .obtenerContactos(mManejadorBaseDeDatosNube.obtenerIdUsuario())) {
             mContacts.add(contacto);
         }
     }
@@ -54,37 +37,7 @@ public class ContactsManager {
         ContentValues contacto = getContactValue(mContacts.get(position));
         mManejadorBaseDeDatosLocal
                 .eliminarContacto(Long.toString(mContacts.get(position).getId()), contacto);
-
-        db.collection("contact").whereEqualTo("userID", mContacts.get(position).getUserID())
-                .whereEqualTo("phoneNumber", mContacts.get(position).getPhoneNumber()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-
-                                db.collection("contact").document(document.getId()).delete()
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully deleted!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error deleting document", e);
-                                            }
-                                        });
-
-                            }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+        mManejadorBaseDeDatosNube.eliminarContacto(contacto);
         fillContactArrayList();
     }
 
@@ -93,126 +46,26 @@ public class ContactsManager {
         ContentValues contacto = getContactValue(mContacts.get(position));
         mManejadorBaseDeDatosLocal
                 .actualizarContacto(Long.toString(mContacts.get(position).getId()), contacto);
-
-        db.collection("contact").whereEqualTo("userID", mContacts.get(position).getUserID())
-                .whereEqualTo("phoneNumber", mContacts.get(position).getPhoneNumber()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-
-                                DocumentReference contact =
-                                        db.collection("contact").document(document.getId());
-                                contact.update("name", newName)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-
-                            }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+        mManejadorBaseDeDatosNube.actualizarContacto(contacto, "name");
     }
 
     public void changeIsMessageSelected(int position) {
-        final Boolean bool;
         if (mContacts.get(position).getIsMessageSelected()) {
             mContacts.get(position).setIsMessageSelected(false);
-            bool = false;
         } else {
             mContacts.get(position).setIsMessageSelected(true);
-            bool = true;
         }
         ContentValues contacto = getContactValue(mContacts.get(position));
         mManejadorBaseDeDatosLocal
                 .actualizarContacto(Long.toString(mContacts.get(position).getId()), contacto);
-
-        db.collection("contact").whereEqualTo("userID", mContacts.get(position).getUserID())
-                .whereEqualTo("phoneNumber", mContacts.get(position).getPhoneNumber()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-
-                                DocumentReference contact =
-                                        db.collection("contact").document(document.getId());
-                                contact.update("isMessageSelected", bool)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-
-                            }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+        mManejadorBaseDeDatosNube.actualizarContacto(contacto, "isMessageSelected");
     }
 
     private void updateNotifications(final int position) {
-
         ContentValues contacto = getContactValue(mContacts.get(position));
         mManejadorBaseDeDatosLocal
                 .actualizarContacto(Long.toString(mContacts.get(position).getId()), contacto);
-        db.collection("contact").whereEqualTo("userID", mContacts.get(position).getUserID())
-                .whereEqualTo("phoneNumber", mContacts.get(position).getPhoneNumber()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-
-                                DocumentReference contact =
-                                        db.collection("contact").document(document.getId());
-                                contact.update("isNotificationSelected",
-                                        mContacts.get(position).getIsNotificationSelected())
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-
-                            }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+        mManejadorBaseDeDatosNube.actualizarContacto(contacto, "isNotificationSelected");
     }
 
     public void changeIsNotificationSelected(final int position) {
@@ -234,27 +87,11 @@ public class ContactsManager {
             }
 
             Long telefonoLong = Long.parseLong(telefonoFiltrado);
-            db.collection("usuario").whereEqualTo("telefono", telefonoLong).get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                if (!task.getResult().isEmpty()) {
-                                    mContacts.get(position).setIsNotificationSelected(true);
-                                    updateNotifications(position);
-                                } else {
-                                    Toast.makeText(mContext,
-                                            "No encontramos un usuario con ese teléfono",
-                                            Toast.LENGTH_LONG).show();
-                                }
-                            } else {
-                                Toast.makeText(mContext, "No se puede ejecutar esta petición",
-                                        Toast.LENGTH_LONG).show();
-
-                                Log.d("LOG", "Error getting documents: ", task.getException());
-                            }
-                        }
-                    });
+            if (mManejadorBaseDeDatosNube
+                    .existeNumeroDeContactoRegistradoEnFirebaseComoUsuario(telefonoLong, mContext)) {
+                mContacts.get(position).setIsNotificationSelected(true);
+                updateNotifications(position);
+            }
         }
     }
 
@@ -285,20 +122,7 @@ public class ContactsManager {
         ContentValues contactoConFormato = getContactValue(contacto);
         Long idNuevoContacto = mManejadorBaseDeDatosLocal.agregarNuevoContacto(contactoConFormato);
         contacto.setId(idNuevoContacto);
-        db.collection("contact").add(contacto)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("LOG",
-                                "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("LOG", "Error adding document", e);
-                    }
-                });
+        mManejadorBaseDeDatosNube.agregarContacto(contacto);
         mContacts.clear();
         fillContactArrayList();
     }
