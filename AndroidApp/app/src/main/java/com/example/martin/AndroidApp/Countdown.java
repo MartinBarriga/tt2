@@ -25,8 +25,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,24 +35,22 @@ import java.util.Map;
 
 public class Countdown extends AppCompatActivity {
 
-    FirebaseAuth mAuth;
-    FirebaseUser user;
     CountDownTimer cdt;
     private String location;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
+    private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_countdown);
 
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
-
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
+        mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
 
         cdt = new CountDownTimer(11000, 1000) {
             TextView text = findViewById(R.id.segundos);
+
             public void onTick(long millisUntilFinished) {
                 text.setText("" + millisUntilFinished / 1000);
             }
@@ -91,7 +87,7 @@ public class Countdown extends AppCompatActivity {
                 try {
                     JSONObject datosDelUsuario = mManejadorBaseDeDatosLocal
                             .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
-                                    user.getUid(), location);
+                                    mManejadorBaseDeDatosNube.obtenerIdUsuario(), location);
                     RequestQueue myrequest = Volley.newRequestQueue(getApplicationContext());
                     String URL = "https://fcm.googleapis.com/fcm/send";
 
@@ -112,6 +108,7 @@ public class Countdown extends AppCompatActivity {
                             };
 
                     myrequest.add(request);
+
                     Log.d("LOG", "Request añadida.");
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -130,7 +127,8 @@ public class Countdown extends AppCompatActivity {
             public void run() {
                 Pair<String, ArrayList<String>> mensajeYNumerosDeTelefonos =
                         mManejadorBaseDeDatosLocal
-                                .obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(user.getUid(),
+                                .obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
+                                        mManejadorBaseDeDatosNube.obtenerIdUsuario(),
                                         location);
                 for (String telefono : mensajeYNumerosDeTelefonos.second) {
                     SmsManager sms = SmsManager.getDefault();
@@ -187,7 +185,8 @@ public class Countdown extends AppCompatActivity {
                                     locationResult.getLocations().get(latestLocationIndex)
                                             .getLongitude();
                             location =
-                                    "\nMi ubicación es: https://www.google.com/maps/search/?api=1&query=" +
+                                    "\nMi ubicación es: https://www.google" +
+                                            ".com/maps/search/?api=1&query=" +
                                             Double.toString(latitude) + "," +
                                             Double.toString(longitude);
                         }

@@ -29,37 +29,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.martin.AndroidApp.ContactsInfo;
+import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 
 public class ContactsFragment extends Fragment implements  ContactsRecyclerAdapter.OnContactListener{
 
     private static final int PICK_CONTACT = 1;
-    private ContactsViewModel mContactsViewModel;
     private ContactsManager mContactsManager;
     private ContactsRecyclerAdapter mContactsRecyclerAdapter;
     private View root;
     private ArrayList<ContactsInfo> mContacts;
-    FirebaseAuth mAuth;
-    FirebaseUser user;
+    private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        //contactsViewModel =
-        //        ViewModelProviders.of(this).get(ContactsViewModel.class);
         root = inflater.inflate(R.layout.fragment_contacts, container, false);
         mContactsManager = new ContactsManager(getContext());
-
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
-
+        mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
         displayContacts();
-
-
         return root;
     }
 
@@ -117,10 +107,9 @@ public class ContactsFragment extends Fragment implements  ContactsRecyclerAdapt
                     cursor.moveToFirst();
                     int  nameIndex =cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
                     String name = cursor.getString(nameIndex);
-                    String userID = user.getUid();
 
                     Toast.makeText(getContext(), "Contacto Agregado!", Toast.LENGTH_SHORT).show();
-                    mContactsManager.addNewContact(new ContactsInfo(null, number, name , false, false, false, userID));
+                    mContactsManager.addNewContact(new ContactsInfo(null, number, name , false, false, false, mManejadorBaseDeDatosNube.obtenerIdUsuario()));
 
 
                 } catch (Exception e) {

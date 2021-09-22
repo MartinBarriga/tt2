@@ -50,7 +50,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             NotificationInfo notificacion =
                     new NotificationInfo(idNotificacion, fecha, remoteMessage.getData().get("nombre"),
                             remoteMessage.getData().get("mensaje"), false,
-                            remoteMessage.getData().get("userID"));
+                            currentUser.getUid());
 
             baseDeDatosFirebase.collection("notificacion").add(notificacion)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

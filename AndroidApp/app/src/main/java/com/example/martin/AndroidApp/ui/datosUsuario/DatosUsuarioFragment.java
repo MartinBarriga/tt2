@@ -17,18 +17,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
+import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
 import com.example.martin.AndroidApp.UserInfo;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthStateListener {
 
@@ -48,9 +40,9 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
             }
         }
     };
-    private FirebaseFirestore fdb;
     private DatosUsuarioViewModel datosUsuarioViewModel;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
+    private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -59,12 +51,12 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
         mAuth = FirebaseAuth.getInstance();
         auth.addAuthStateListener(asl);
 
-        final FirebaseUser currentUser = mAuth.getCurrentUser();
-        fdb = FirebaseFirestore.getInstance();
         Log.d("LOG", "Ya se debió agregar el listener");
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(this.getContext(), null);
-        UserInfo usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(currentUser.getUid());
+        mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
+        UserInfo usuario = mManejadorBaseDeDatosLocal
+                .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
 
         root = inflater.inflate(R.layout.fragment_datos_usuario, container, false);
 
@@ -196,166 +188,11 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
         usuario.put("tiposangre", tipoSangre);
         usuario.put("alergias", alergias);
         usuario.put("religion", religion);
-        String idUsuario = mAuth.getCurrentUser().getUid();
 
-        mManejadorBaseDeDatosLocal.actualizarUsuario(idUsuario, usuario);
+        mManejadorBaseDeDatosLocal
+                .actualizarUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario(), usuario);
+        mManejadorBaseDeDatosNube.actualizarUsuario(usuario);
 
-        fdb.collection("usuario").whereEqualTo("uID", idUsuario).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-
-                                DocumentReference user =
-                                        fdb.collection("usuario").document(document.getId());
-                                user.update("nombre", nombre)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("telefono", telefono)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("edad", edad)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("nss", nss)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("medicacion", medicacion)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("enfermedades", enfermedades)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("taxicomanias", taxicomanias)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("tipoSangre", tipoSangre)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("alergias", alergias)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                                user.update("religion", religion)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("LOG",
-                                                        "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("LOG", "Error updating document", e);
-                                            }
-                                        });
-                            }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
         Toast.makeText(context, "Datos actualizados.", Toast.LENGTH_LONG).show();
     }
 
