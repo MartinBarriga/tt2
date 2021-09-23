@@ -12,9 +12,9 @@
         android:title="@string/title_dashboard" />
 
     <item
-        android:id="@+id/navigation_datos_usuario"
+        android:id="@+id/navigation_usuario"
         android:icon="@drawable/ic_person_black_24dp"
-        android:title="@string/title_datos" />
+        android:title="@string/title_usuario" />
 
     <item
         android:id="@+id/navigation_visualizacion_datos_medidos"

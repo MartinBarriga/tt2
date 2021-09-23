@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_contacts, R.id.navigation_dashboard, R.id.navigation_datos_usuario)
+                R.id.navigation_contacts, R.id.navigation_dashboard, R.id.navigation_usuario)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         if (bundle.getBoolean("firstLaunch")) {
             Toast.makeText(getApplicationContext(), "Aquí puede completar o editar sus datos.",
                     Toast.LENGTH_LONG).show();
-            navController.navigate(R.id.navigation_datos_usuario);
+            navController.navigate(R.id.navigation_usuario);
         }
         if (bundle.getBoolean("nuevaAlerta")) {
             Toast.makeText(getApplicationContext(), "Nueva alerta", Toast.LENGTH_LONG).show();

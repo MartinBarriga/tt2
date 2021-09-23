@@ -1,117 +1,76 @@
-package com.example.martin.AndroidApp.ui.datosUsuario;
+package com.example.martin.AndroidApp.ui.usuario;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
 import com.example.martin.AndroidApp.UserInfo;
-import com.google.firebase.auth.FirebaseAuth;
 
-public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthStateListener {
-
-    FirebaseAuth mAuth;
-    View root;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    FirebaseAuth.AuthStateListener asl = new FirebaseAuth.AuthStateListener() {
-        @Override
-        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            if (firebaseAuth.getCurrentUser() == null) {
-                Log.d("LOG", "Current user = null.");
-                (new Handler()).postDelayed(new Runnable() {
-                    public void run() {
-                        System.exit(0);
-                    }
-                }, 3000);
-            }
-        }
-    };
-    private DatosUsuarioViewModel datosUsuarioViewModel;
+public class DatosUsuario extends AppCompatActivity {
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        datosUsuarioViewModel =
-                ViewModelProviders.of(this).get(DatosUsuarioViewModel.class);
-        mAuth = FirebaseAuth.getInstance();
-        auth.addAuthStateListener(asl);
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_datos_usuario);
 
         Log.d("LOG", "Ya se debió agregar el listener");
 
-        mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(this.getContext(), null);
+        mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
         UserInfo usuario = mManejadorBaseDeDatosLocal
                 .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
 
-        root = inflater.inflate(R.layout.fragment_datos_usuario, container, false);
-
         EditText text;
 
-        text = root.findViewById(R.id.nombre);
+        text = findViewById(R.id.nombre);
         text.setText(usuario.getNombre());
-        text = root.findViewById(R.id.telefono);
+        text = findViewById(R.id.telefono);
         if (usuario.getTelefono() != 0)
             text.setText(String.valueOf(usuario.getTelefono()));
-        text = root.findViewById(R.id.edad);
+        text = findViewById(R.id.edad);
         if (usuario.getEdad() != 0)
             text.setText(String.valueOf(usuario.getEdad()));
-        text = root.findViewById(R.id.mensaje);
+        text = findViewById(R.id.mensaje);
         text.setText(usuario.getMensaje());
-        text = root.findViewById(R.id.nss);
+        text = findViewById(R.id.nss);
         if (usuario.getNss() != 0)
             text.setText(String.valueOf(String.valueOf(usuario.getNss())));
-        text = root.findViewById(R.id.medicacion);
+        text = findViewById(R.id.medicacion);
         text.setText(usuario.getMedicacion());
-        text = root.findViewById(R.id.enfermedades);
+        text = findViewById(R.id.enfermedades);
         text.setText(usuario.getEnfermedades());
-        text = root.findViewById(R.id.toxicomanias);
+        text = findViewById(R.id.toxicomanias);
         text.setText(usuario.getToxicomanias());
-        text = root.findViewById(R.id.tipoSangre);
+        text = findViewById(R.id.tipoSangre);
         text.setText(usuario.getTipoSangre());
-        text = root.findViewById(R.id.Alergias);
+        text = findViewById(R.id.Alergias);
         text.setText(usuario.getAlergias());
-        text = root.findViewById(R.id.religion);
+        text = findViewById(R.id.religion);
         text.setText(usuario.getReligion());
 
-        Button cerrarSesion = root.findViewById(R.id.cerrarsSesion);
-        cerrarSesion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cerrarSesion(v, getContext());
-            }
-        });
-
-        Button guardar = root.findViewById(R.id.guardar);
+        Button guardar = findViewById(R.id.guardar);
         guardar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                guardarDatos(v, getContext());
+                guardarDatos(v, getApplicationContext());
             }
         });
-
-
-        return root;
     }
 
-    public void cerrarSesion(View view, Context context) {
-        Toast.makeText(context, "Cerrando sesión...", Toast.LENGTH_LONG).show();
-        auth.signOut();
-    }
 
     public void guardarDatos(View view, Context context) {
         EditText text;
@@ -121,10 +80,10 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
         final Long nss, telefono;
 
         ContentValues usuario = new ContentValues();
-        text = root.findViewById(R.id.nombre);
+        text = findViewById(R.id.nombre);
         nombre = text.getText().toString();
 
-        text = root.findViewById(R.id.telefono);
+        text = findViewById(R.id.telefono);
         if (!text.getText().toString().matches("")) {
             String tel = text.getText().toString().replace(" ", "");
             telefono = Long.valueOf(tel.substring(tel.length() - 10));
@@ -133,7 +92,7 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
             telefono = Long.valueOf(0);
         }
 
-        text = root.findViewById(R.id.edad);
+        text = findViewById(R.id.edad);
         if (!text.getText().toString().matches("")) {
             edad = Integer.parseInt(text.getText().toString());
 
@@ -141,7 +100,7 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
             edad = 0;
         }
 
-        text = root.findViewById(R.id.mensaje);
+        text = findViewById(R.id.mensaje);
         if (!text.getText().toString().matches("")) {
             mensaje = text.getText().toString();
         } else {
@@ -151,7 +110,7 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
         }
 
 
-        text = root.findViewById(R.id.nss);
+        text = findViewById(R.id.nss);
         if (!text.getText().toString().matches("")) {
             nss = Long.valueOf(text.getText().toString());
         } else {
@@ -159,22 +118,22 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
         }
 
 
-        text = root.findViewById(R.id.medicacion);
+        text = findViewById(R.id.medicacion);
         medicacion = text.getText().toString();
 
-        text = root.findViewById(R.id.enfermedades);
+        text = findViewById(R.id.enfermedades);
         enfermedades = text.getText().toString();
 
-        text = root.findViewById(R.id.toxicomanias);
+        text = findViewById(R.id.toxicomanias);
         taxicomanias = text.getText().toString();
 
-        text = root.findViewById(R.id.tipoSangre);
+        text = findViewById(R.id.tipoSangre);
         tipoSangre = text.getText().toString();
 
-        text = root.findViewById(R.id.Alergias);
+        text = findViewById(R.id.Alergias);
         alergias = text.getText().toString();
 
-        text = root.findViewById(R.id.religion);
+        text = findViewById(R.id.religion);
         religion = text.getText().toString();
 
         usuario.put("nombre", nombre);
@@ -194,18 +153,5 @@ public class DatosUsuarioFragment extends Fragment implements FirebaseAuth.AuthS
         mManejadorBaseDeDatosNube.actualizarUsuario(usuario);
 
         Toast.makeText(context, "Datos actualizados.", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
-        if (auth.getCurrentUser() == null) {
-            Log.d("LOG", "Current user = null.");
-            Toast.makeText(getContext(), "Ha cerrado su sesión.", Toast.LENGTH_LONG).show();
-            (new Handler()).postDelayed(new Runnable() {
-                public void run() {
-                    System.exit(0);
-                }
-            }, 3000);
-        }
     }
 }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.datosUsuario.DatosUsuarioFragment">
+    tools:context=".ui.usuario.DatosUsuario">
 
     <ScrollView
         android:id="@+id/scrollView2"
@@ -227,14 +227,6 @@
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
-            <Button
-                android:id="@+id/cerrarsSesion"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Cerrar sesión"
-                android:textColor="?attr/colorError" />
 
         </LinearLayout>
     </ScrollView>
