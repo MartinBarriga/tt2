@@ -37,8 +37,8 @@ void setup()
     Serial.begin(9600);
     pinMode(pinLOMasAD8232, INPUT);
     pinMode(pinLOMenosAD8232, INPUT);
-    //pox.begin();
-    //pox.setIRLedCurrent(MAX30100_LED_CURR_7_6MA);
+    pox.begin();
+    pox.setIRLedCurrent(MAX30100_LED_CURR_7_6MA);
     /*pinMode(13,OUTPUT);
     digitalWrite(13,HIGH); // Enciende el LED 13 durante 4s antes de configurar el Bluetooth
     delay(4000);
@@ -86,8 +86,7 @@ void loop()
    //Serial.println(analogRead(pinOutputAD8232));
   }
   // Se mete el número arrojado por el ECG en el mensaje, en los indices 6 al 9 (El entero más grande que puede arrojar analogRead es 1024).
-  //int valorOximetro = pox.getSpO2();
-  int valorOximetro = 10;
+  int valorOximetro = pox.getSpO2();
   int indice = 8;
   while(valorOximetro > 0) {
     mensaje[indice] = valorOximetro%10 + '0';
