@@ -13,4 +13,5 @@
     <string name="title_sensor_data_visualization">Datos del sensor</string>
     <string name="textoEncenderBluetooth">Encender bluetooth</string>
     <string name="textoVincularSensor">Vincular Sensor</string>
+    <string name="title_usuario">usuario</string>
 </resources>
