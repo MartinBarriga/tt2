@@ -5,8 +5,9 @@
       <map>
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/drawable/ic_baseline_backup_24.xml" value="0.346875" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/drawable/ic_baseline_medical_services_24.xml" value="0.346875" />
-        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_datos_usuario.xml" value="0.2151268115942029" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_datos_usuario.xml" value="0.33" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_main.xml" value="0.31979166666666664" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_respaldo.xml" value="0.44427083333333334" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/dispositivos.xml" value="0.31979166666666664" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_contacts.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_dashboard.xml" value="0.3307291666666667" />

@@ -1,4 +1,4 @@
-package com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos;
+package com.example.martin.AndroidApp.ui.mediciones;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -26,15 +26,17 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
-public class VisualizacionDatosMedidosFragment extends Fragment{
+public class VisualizacionDatosMedidosFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
-    private static final int REQUEST_ENABLE_BT = 1; //Mientras sea un valor mayor a 0, la constante pedirá que se habilite el bluetooth
+    private static final int REQUEST_ENABLE_BT = 1;
+            //Mientras sea un valor mayor a 0, la constante pedirá que se habilite el bluetooth
     public MainActivity mainActivity;
+    int n = 50;
     private Button botonBluetooth;
-    private BroadcastReceiver connectionUpdates;
+    private BroadcastReceiver actualizacionesEnConexion;
     private LineChart grafica;
 
     private void conectarDispositivo() {
@@ -42,8 +44,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment{
 
         if (mainActivity.bluetoothAdapter == null) {
             // TODO: Imprimir que el dispositivo no soporta bluetooth
-        }
-        else {
+        } else {
 
             if (!mainActivity.bluetoothAdapter.isEnabled()) {
                 //Pedir prender el bluetooth
@@ -56,10 +57,9 @@ public class VisualizacionDatosMedidosFragment extends Fragment{
                         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                     }
                 });
-            }
-            else {
+            } else {
                 //Preguntar si ya estamos conectados al dispositivo y el hilo está corriendo
-                if(mainActivity.MyConexionBT != null) {
+                if (mainActivity.MyConexionBT != null) {
                     botonBluetooth.setText("Desconectar");
                     botonBluetooth.setVisibility(View.VISIBLE);
                     botonBluetooth.setOnClickListener(new View.OnClickListener() {
@@ -71,30 +71,33 @@ public class VisualizacionDatosMedidosFragment extends Fragment{
                             botonBluetooth.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                                    Intent enableBtIntent =
+                                            new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                                 }
                             });
                         }
                     });
-                    if(mainActivity.MyConexionBT.isAlive()) {
-                        Toast.makeText(getActivity(), "Fragment detecta hilo abierto", Toast.LENGTH_LONG).show();
+                    if (mainActivity.MyConexionBT.isAlive()) {
+                        Toast.makeText(getActivity(), "Fragment detecta hilo abierto",
+                                Toast.LENGTH_LONG).show();
 
 
                     }
-                }
-                else {
-                    Toast.makeText(getActivity(), "Fragment detecta hilo cerrado", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getActivity(), "Fragment detecta hilo cerrado",
+                            Toast.LENGTH_LONG).show();
                     //Pedir conectarse al dispositivo
                     botonBluetooth.setText(R.string.textoVincularSensor);
                     botonBluetooth.setVisibility(View.VISIBLE);
                     botonBluetooth.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if(!mainActivity.bluetoothAdapter.isEnabled()) {
+                            if (!mainActivity.bluetoothAdapter.isEnabled()) {
                                 conectarDispositivo();
                             } else {
-                                Intent vinculacionDeDispositivoIntent = new Intent(getActivity(), DispositivosVinculados.class);
+                                Intent vinculacionDeDispositivoIntent =
+                                        new Intent(getActivity(), DispositivosVinculados.class);
                                 startActivity(vinculacionDeDispositivoIntent);
                             }
                         }
@@ -115,22 +118,23 @@ public class VisualizacionDatosMedidosFragment extends Fragment{
         set.setCubicIntensity(0.2f);
         return set;
     }
-    int  n = 50;
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        connectionUpdates = new BroadcastReceiver() {
+        actualizacionesEnConexion = new BroadcastReceiver() {
 
             @Override
             public void onReceive(Context arg0, Intent intent) {
                 String mensaje = intent.getStringExtra("MENSAJE");
                 Long tiempo = intent.getLongExtra("TIEMPO", 0);
                 LineData informacion = grafica.getData();
-                int valorECG = (mensaje.charAt(4) -'0') * 1000 + (mensaje.charAt(7)-'0') * 100 + (mensaje.charAt(10) -'0') * 10 + (mensaje.charAt(13) -'0');
+                int valorECG = (mensaje.charAt(4) - '0') * 1000 + (mensaje.charAt(7) - '0') * 100 +
+                        (mensaje.charAt(10) - '0') * 10 + (mensaje.charAt(13) - '0');
                 n++;
-                if(informacion != null) {
+                if (informacion != null) {
                     LineDataSet set = (LineDataSet) informacion.getDataSetByIndex(0);
-                    if(set == null) {
+                    if (set == null) {
                         set = createSet();
                         informacion.addDataSet(set);
                     }
@@ -146,7 +150,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment{
             }
         };
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                connectionUpdates ,
+                actualizacionesEnConexion,
                 new IntentFilter("INTENT_MENSAJE"));
 
     }
@@ -154,7 +158,8 @@ public class VisualizacionDatosMedidosFragment extends Fragment{
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(connectionUpdates);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(
+                actualizacionesEnConexion);
     }
 
     @Override
@@ -175,7 +180,8 @@ public class VisualizacionDatosMedidosFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View root =  inflater.inflate(R.layout.fragment_visualizacion_datos_medidos, container, false);
+        View root =
+                inflater.inflate(R.layout.fragment_visualizacion_datos_medidos, container, false);
         botonBluetooth = root.findViewById(R.id.botonBluetooth);
         grafica = (LineChart) root.findViewById(R.id.graficaECG);
         grafica.getDescription().setEnabled(true);

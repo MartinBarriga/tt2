@@ -31,7 +31,7 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="skipCountdown"
+            android:onClick="saltarCountDown"
             android:text="Enviar alerta ahora" />
 
         <Button
@@ -39,7 +39,7 @@
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="cancelAlert"
+            android:onClick="cancelarAlerta"
             android:text="Cancelar envío de alerta"
             android:textColor="#F44336" />
 

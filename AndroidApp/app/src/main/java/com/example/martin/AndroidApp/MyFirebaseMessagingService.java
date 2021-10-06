@@ -23,8 +23,8 @@ import java.util.Calendar;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    FirebaseFirestore baseDeDatosFirebase;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
+    private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
     private FirebaseAuth mAuth;
 
     @Override
@@ -33,8 +33,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         mAuth = FirebaseAuth.getInstance();
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        baseDeDatosFirebase = FirebaseFirestore.getInstance();
+        FirebaseUser usuarioActual = mAuth.getCurrentUser();
+        mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
 
         Log.d("LOG", "From: " + remoteMessage.getFrom());
 
@@ -45,37 +45,20 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     .format(Calendar.getInstance().getTime());
             long idNotificacion =
                     mManejadorBaseDeDatosLocal
-                            .agregarNotificacion(remoteMessage, currentUser.getUid(), fecha);
+                            .agregarNotificacion(remoteMessage, usuarioActual.getUid(), fecha);
 
-            NotificationInfo notificacion =
-                    new NotificationInfo(idNotificacion, fecha, remoteMessage.getData().get("nombre"),
+            Notificacion notificacion =
+                    new Notificacion(idNotificacion, fecha, remoteMessage.getData().get("nombre"),
                             remoteMessage.getData().get("mensaje"), false,
-                            currentUser.getUid());
-
-            baseDeDatosFirebase.collection("notificacion").add(notificacion)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Log.d("LOG",
-                                    "DocumentSnapshot added with ID: " + documentReference.getId());
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w("LOG", "Error adding document", e);
-                        }
-                    });
+                            usuarioActual.getUid(), false);
 
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.putExtra("nuevaAlerta", true);
             intent.putExtra("nombre", remoteMessage.getData().get("nombre"));
             intent.putExtra("mensaje", remoteMessage.getData().get("mensaje"));
-            String uid = currentUser.getUid();
-            intent.putExtra("userID", uid);
-            String idS = "" + idNotificacion;
-            intent.putExtra("idS", idS);
-            intent.putExtra("id", idNotificacion);
+            String idUsuario = usuarioActual.getUid();
+            intent.putExtra("idUsuario", idUsuario);
+            intent.putExtra("idNotificacion", idNotificacion);
             intent.putExtra("fecha", fecha);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
