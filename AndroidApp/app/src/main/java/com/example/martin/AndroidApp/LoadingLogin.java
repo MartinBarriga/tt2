@@ -2,7 +2,6 @@ package com.example.martin.AndroidApp;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -27,9 +26,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoadingLogin extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    private UserInfo newUser;
+    private Usuario nuevoUsuario;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
-  
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +40,7 @@ public class LoadingLogin extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         mManejadorBaseDeDatosLocal =
-                new ManejadorBaseDeDatosLocal(this, null);
+                new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
         SQLiteDatabase db = mManejadorBaseDeDatosLocal.getWritableDatabase();
         mManejadorBaseDeDatosLocal.onCreate(db);
         db.close();
@@ -87,7 +86,7 @@ public class LoadingLogin extends AppCompatActivity {
                             //¿De qué sirve esto aquí? El current user no es null y ya está en la
                             // BD.
 
-                            /*SQLiteDatabase writingDatabase = mConectionSQLiteHelper
+                            /*SQLiteDatabase escritura = mConectionSQLiteHelper
                             .getWritableDatabase();
                             ContentValues userValues = new ContentValues();
                             userValues.put("Uid", currentUser.getUid());
@@ -106,8 +105,8 @@ public class LoadingLogin extends AppCompatActivity {
                             userValues.put("alergias", "");
                             userValues.put("religion", "");
 
-                            Long idRes = writingDatabase.insert("usuario", null, userValues);
-                            writingDatabase.close();
+                            Long idRes = escritura.insert("usuario", null, userValues);
+                            escritura.close();
                             Toast.makeText(getApplicationContext(), "Usuario agregado.", Toast
                             .LENGTH_LONG).show();*/
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -139,8 +138,9 @@ public class LoadingLogin extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "La dirección ha sido verificada.",
                             Toast.LENGTH_LONG);
                     FirebaseFirestore fdb = FirebaseFirestore.getInstance();
-                    ManejadorBaseDeDatosNube manejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
-                    manejadorBaseDeDatosNube.agregarUsuario(newUser);
+                    ManejadorBaseDeDatosNube manejadorBaseDeDatosNube =
+                            new ManejadorBaseDeDatosNube();
+                    manejadorBaseDeDatosNube.agregarUsuario(nuevoUsuario);
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.putExtra("firstLaunch", true);
                     startActivity(intent);
@@ -152,6 +152,17 @@ public class LoadingLogin extends AppCompatActivity {
     public void reenviarCorreo(View view) {
         FirebaseUser user = mAuth.getCurrentUser();
         user.sendEmailVerification();
+    }
+
+    public Long limpiarNumeroDeTelefono(String telefono) {
+        String telefonoLimpio = "";
+        for(int i = telefono.length()-1; i >= 0; i--) {
+            if(telefonoLimpio.length() == 10) break;
+            if(telefono.charAt(i) >= '0' && telefono.charAt(i) <= '9') {
+                telefonoLimpio = telefono.charAt(i) + telefonoLimpio;
+            }
+        }
+        return Long.valueOf(telefonoLimpio);
     }
 
     public void createAccount(View view) {
@@ -174,36 +185,14 @@ public class LoadingLogin extends AppCompatActivity {
                                 Log.d("LOG", "createUserWithEmail:success");
                                 FirebaseUser user = mAuth.getCurrentUser();
 
-
-                                ContentValues userValues = new ContentValues();
-                                userValues.put("Uid", user.getUid());
-                                userValues.put("nombre", txt.getText().toString());
-                                String tel = phone.getText().toString().replace(" ", "");
-                                userValues.put("telefono",
-                                        Long.valueOf(tel.substring(tel.length() - 10)));
-                                userValues.put("correo", user.getEmail());
-                                userValues.put("edad", 0);
-                                userValues.put("mensaje",
-                                        "Me encuentro en una emergencia. A continuación se " +
-                                                "muestra mi ubicación actual y algunos datos " +
-                                                "personales.");
-                                userValues.put("nss", 0);
-                                userValues.put("medicacion", "");
-                                userValues.put("enfermedades", "");
-                                userValues.put("toxicomanias", "");
-                                userValues.put("tiposangre", "");
-                                userValues.put("alergias", "");
-                                userValues.put("religion", "");
-
-                                mManejadorBaseDeDatosLocal.agregarUsuario(userValues);
-
-                                newUser = new UserInfo(user.getUid(), txt.getText().toString(),
-                                        Long.valueOf(phone.getText().toString()), user.getEmail(),
+                                nuevoUsuario = new Usuario(user.getUid(), txt.getText().toString(),
+                                        limpiarNumeroDeTelefono(phone.getText().toString().replace(" ", "")),
                                         0,
-                                        "Me encuentro en una emergencia. A continuación se " +
-                                                "muestra mi ubicación actual y algunos datos " +
-                                                "personales.",
-                                        Long.valueOf(0), null, null, null, null, null, null);
+                                        Long.valueOf(0), "", "", "", "", "", "", true, "Sin respaldo previo", "Cada dia", -1, -1);
+
+                                mManejadorBaseDeDatosLocal.agregarUsuario(mManejadorBaseDeDatosLocal
+                                        .generarFormatoDeUsuarioParaIntroducirEnBD(nuevoUsuario));
+
                                 Toast.makeText(getApplicationContext(), "Usuario agregado.",
                                         Toast.LENGTH_LONG).show();
 
@@ -251,37 +240,28 @@ public class LoadingLogin extends AppCompatActivity {
                                 FirebaseUser user = mAuth.getCurrentUser();
 
                                 if (!mManejadorBaseDeDatosLocal.existeElUsuario(user.getUid())) {
-                                    ContentValues userValues = new ContentValues();
-                                    userValues.put("Uid", user.getUid());
-                                    userValues.put("nombre", "");
-                                    userValues.put("telefono", "");
-                                    userValues.put("correo", user.getEmail());
-                                    userValues.put("edad", 0);
-                                    userValues.put("mensaje",
-                                            "Me encuentro en una emergencia. A continuación se " +
-                                                    "muestra mi ubicación actual y algunos datos " +
-                                                    "personales.");
-                                    userValues.put("nss", 0);
-                                    userValues.put("medicacion", "");
-                                    userValues.put("enfermedades", "");
-                                    userValues.put("toxicomanias", "");
-                                    userValues.put("tiposangre", "");
-                                    userValues.put("alergias", "");
-                                    userValues.put("religion", "");
-
-                                    mManejadorBaseDeDatosLocal.agregarUsuario(userValues);
-                                    Toast.makeText(getApplicationContext(), "Usuario agregado.",
-                                            Toast.LENGTH_LONG).show();
+                                    ManejadorBaseDeDatosNube manejadorBaseDeDatosNube =
+                                            new ManejadorBaseDeDatosNube();
+                                    manejadorBaseDeDatosNube
+                                            .descargarRespaldo(mManejadorBaseDeDatosLocal);
                                 }
 
                                 if (!user.isEmailVerified()) {
                                     user.sendEmailVerification();
                                     setContentView(R.layout.verify_email);
                                 } else {
-                                    Intent intent =
-                                            new Intent(getApplicationContext(), MainActivity.class);
-                                    intent.putExtra("firstLaunch", false);
-                                    startActivity(intent);
+                                    final Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Intent intent =
+                                                    new Intent(getApplicationContext(),
+                                                            MainActivity.class);
+                                            intent.putExtra("firstLaunch", false);
+                                            startActivity(intent);
+                                        }
+                                    }, 3000);
+
                                 }
                             } else {
                                 // If sign in fails, display a message to the user.

@@ -19,24 +19,25 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
     private static final String NOMRE_BASE_DE_DATOS = "lifeguard";
-    private static final int VERSION_DE_BASE_DE_DATOS = 2;
+    private static final int VERSION_DE_BASE_DE_DATOS = 15;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
-    private static final String NOMBRE_TABLA_CONTACTO = "contact";
+    private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
 
     // Instrucciones para la creación de la base de datos
     private static final String CREAR_TABLA_USUARIO = "CREATE TABLE IF NOT EXISTS " +
-            NOMBRE_TABLA_USUARIO + " (Uid TEXT PRIMARY KEY, nombre TEXT, telefono INTEGER, " +
-            "correo TEXT, edad INTEGER, mensaje TEXT, nss INTEGER, medicacion TEXT, " +
-            "enfermedades TEXT, toxicomanias TEXT, tiposangre TEXT, alergias TEXT, religion TEXT)";
+            NOMBRE_TABLA_USUARIO + " (idUsuario TEXT PRIMARY KEY, nombre TEXT, telefono INTEGER, " +
+            "edad INTEGER, nss INTEGER, medicacion TEXT, " +
+            "enfermedades TEXT, toxicomanias TEXT, tiposangre TEXT, alergias TEXT, religion TEXT," +
+            " enNube INTEGER, fechaUltimoRespaldo TEXT, frecuenciaRespaldo TEXT, " +
+            "frecuenciaCardiacaMinima INTEGER, frecuenciaCardiacaMaxima INTEGER)";
     private static final String CREAR_TABLA_CONTACTO = "CREATE TABLE IF NOT EXISTS " +
-            NOMBRE_TABLA_CONTACTO + " (id INTEGER PRIMARY KEY AUTOINCREMENT, phoneNumber TEXT, " +
-            "name TEXT, isMessageSelected INTEGER, isNotificationSelected INTEGER, isUser " +
-            "INTEGER, " +
-            "userID TEXT)";
+            NOMBRE_TABLA_CONTACTO + " (idContacto INTEGER PRIMARY KEY AUTOINCREMENT, telefono INTEGER, " +
+            "nombre TEXT, recibeSMS INTEGER, recibeNotificaciones INTEGER, esUsuario " +
+            "INTEGER, idUsuario TEXT, enNube INTEGER)";
     private static final String CREAR_TABLA_NOTIFICACION = "CREATE TABLE IF NOT EXISTS " +
-            NOMBRE_TABLA_NOTIFICACION + " (id INTEGER PRIMARY KEY AUTOINCREMENT, fecha TEXT, " +
-            "nombre TEXT, mensaje TEXT, leido TEXT, userID TEXT)";
+            NOMBRE_TABLA_NOTIFICACION + " (idNotificacion INTEGER PRIMARY KEY AUTOINCREMENT, fecha TEXT, " +
+            "nombre TEXT, mensaje TEXT, leido TEXT, idUsuario TEXT, enNube INTEGER)";
 
     public ManejadorBaseDeDatosLocal(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, NOMRE_BASE_DE_DATOS, factory, VERSION_DE_BASE_DE_DATOS);
@@ -64,28 +65,30 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             throws JSONException {
         String nombre = "";
         String mensaje = "";
-        SQLiteDatabase readingDatabase = getReadableDatabase();
-        Cursor informacionUsuario = readingDatabase
-                .rawQuery("SELECT * FROM usuario WHERE Uid = ? ", new String[]{idUsuario});
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor informacionUsuario = lectura
+                .rawQuery("SELECT * FROM usuario WHERE idUsuario = ? ", new String[]{idUsuario});
         while (informacionUsuario.moveToNext()) {
-            mensaje = informacionUsuario.getString(5) + "\n" + localizacion + "\n\nNombre: " +
+            mensaje = "Me encuentro en  una emergencia. A continuacion se muestra mi ubicacion " +
+                    "actual y algunos datos personales" + "\n" + localizacion + "\n\nNombre: " +
                     informacionUsuario.getString(1)
-                    + "\nEdad: " + informacionUsuario.getInt(4) + "\nNúmero de seguridad Social: " +
-                    informacionUsuario.getLong(6)
-                    + "\nMedicación: " + informacionUsuario.getString(7) +
-                    "\nEnfermedades crónicas: " + informacionUsuario.getString(8)
-                    + "\nToxicomanías: " + informacionUsuario.getString(9) + "\nTipo de sangre: " +
-                    informacionUsuario.getString(10)
-                    + "\nAlergias: " + informacionUsuario.getString(11) + "\nReligión: " +
-                    informacionUsuario.getString(12);
+                    + "\nEdad: " + informacionUsuario.getInt(3) + "\nNúmero de seguridad Social: " +
+                    informacionUsuario.getLong(4)
+                    + "\nMedicación: " + informacionUsuario.getString(5) +
+                    "\nEnfermedades crónicas: " + informacionUsuario.getString(6)
+                    + "\nToxicomanías: " + informacionUsuario.getString(7) + "\nTipo de sangre: " +
+                    informacionUsuario.getString(8)
+                    + "\nAlergias: " + informacionUsuario.getString(9) + "\nReligión: " +
+                    informacionUsuario.getString(10);
 
             nombre = informacionUsuario.getString(1);
         }
         Log.d("LOG", "Mensaje: " + mensaje);
 
-        Cursor contactosConNotificacionSeleccionada = readingDatabase
-                .rawQuery("SELECT * FROM contact WHERE userID = ? AND isNotificationSelected = ?",
+        Cursor contactosConNotificacionSeleccionada = lectura
+                .rawQuery("SELECT * FROM contacto WHERE idUsuario = ? AND recibeNotificaciones = ?",
                         new String[]{idUsuario, "1"});
+
         String telefono;
         String condicion = "";
         while (contactosConNotificacionSeleccionada.moveToNext()) {
@@ -104,175 +107,275 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         // "/topics/tunumerodetelefono");
         datosDelUsuarioEnFormatoJson.put("condition", condicion);
         datosDelUsuarioEnFormatoJson.put("data", nombreYMensajeAEnviar);
-
+        lectura.close();
         return datosDelUsuarioEnFormatoJson;
     }
 
     public Pair<String, ArrayList<String>> obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
             String idUsuario, String localizacion) {
         String mensaje = "";
-        SQLiteDatabase readingDatabase = getReadableDatabase();
-        Cursor informacionUsuario = readingDatabase
-                .rawQuery("SELECT * FROM usuario WHERE Uid = ? ", new String[]{idUsuario});
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor informacionUsuario = lectura
+                .rawQuery("SELECT * FROM usuario WHERE idUsuario = ? ", new String[]{idUsuario});
         while (informacionUsuario.moveToNext()) {
-            mensaje = informacionUsuario.getString(5) + "\n" + localizacion + "\n\nNombre: " +
-                    informacionUsuario.getString(1)
-                    + "\nEdad: " + informacionUsuario.getInt(4) + "\nNúmero de seguridad Social: " +
-                    informacionUsuario.getLong(6)
-                    + "\nMedicación: " + informacionUsuario.getString(7) +
-                    "\nEnfermedades crónicas: " + informacionUsuario.getString(8)
-                    + "\nToxicomanías: " + informacionUsuario.getString(9) + "\nTipo de sangre: " +
-                    informacionUsuario.getString(10)
-                    + "\nAlergias: " + informacionUsuario.getString(11) + "\nReligión: " +
-                    informacionUsuario.getString(12);
+            mensaje =
+                    "Me encuentro en  una emergencia. A continuacion se muestra mi ubicacion " +
+                            "actual y algunos datos personales" +
+                            "\n" + localizacion + "\n\nNombre: " +
+                            informacionUsuario.getString(1)
+                            + "\nEdad: " + informacionUsuario.getInt(3) +
+                            "\nNúmero de seguridad Social: " +
+                            informacionUsuario.getLong(4)
+                            + "\nMedicación: " + informacionUsuario.getString(5) +
+                            "\nEnfermedades crónicas: " + informacionUsuario.getString(6)
+                            + "\nToxicomanías: " + informacionUsuario.getString(7) +
+                            "\nTipo de sangre: " +
+                            informacionUsuario.getString(8)
+                            + "\nAlergias: " + informacionUsuario.getString(9) + "\nReligión: " +
+                            informacionUsuario.getString(10);
         }
         Log.d("LOG", "Mensaje: " + mensaje);
 
-        Cursor contactosConMensajeSeleccionado = readingDatabase
-                .rawQuery("SELECT * FROM contact WHERE userID = ? AND isMessageSelected = ?",
+        Cursor contactosConMensajeSeleccionado = lectura
+                .rawQuery("SELECT * FROM contacto WHERE idUsuario = ? AND recibeSMS = ?",
                         new String[]{idUsuario, "1"});
 
         ArrayList<String> telefonos = new ArrayList<String>();
         while (contactosConMensajeSeleccionado.moveToNext()) {
             telefonos.add(contactosConMensajeSeleccionado.getString(1).replaceAll(" ", ""));
         }
+        lectura.close();
         return new Pair<String, ArrayList<String>>(mensaje, telefonos);
     }
 
     public long agregarNotificacion(RemoteMessage notificacion, String idUsuario, String fecha) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
+        SQLiteDatabase escritura = getWritableDatabase();
         ContentValues userValues = new ContentValues();
         userValues.put("fecha", fecha);
         userValues.put("nombre", notificacion.getData().get("nombre"));
         userValues.put("mensaje", notificacion.getData().get("mensaje"));
         userValues.put("leido", 0);
-        userValues.put("userID", idUsuario);
-        long idNotificacion = writingDatabase.insert("notificacion", "id", userValues);
+        userValues.put("idUsuario", idUsuario);
+        userValues.put("enNube", 0);
+        long idNotificacion = escritura.insert("notificacion", "idNotificacion", userValues);
         Log.d("LOG", "Notificación agregada. ID: " + idNotificacion);
-        writingDatabase.close();
+        escritura.close();
         return idNotificacion;
     }
 
-    public ArrayList<ContactsInfo> obtenerContactos(String idUsuario) {
-        SQLiteDatabase readingDatabase = getReadableDatabase();
-        Cursor cursor = readingDatabase
-                .rawQuery("SELECT * FROM contact WHERE userID LIKE '" + idUsuario + "'", null);
-        ArrayList<ContactsInfo> contactos = new ArrayList<ContactsInfo>();
+    public ArrayList<Contacto> obtenerContactos(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM contacto WHERE idUsuario LIKE '" + idUsuario + "'", null);
+        ArrayList<Contacto> contactos = new ArrayList<Contacto>();
 
         while (cursor.moveToNext()) {
             Long id = cursor.getLong(0);
-            String telefono = cursor.getString(1);
+            Long telefono = cursor.getLong(1);
             String nombre = cursor.getString(2);
             Boolean estaSeleccionadoMensaje = false;
             Boolean estaSeleccionadaNotificacion = false;
             Boolean esUsuarioDeLaApp = false;
+            Boolean estaEnLaNube = false;
             if (cursor.getInt(3) == 1) estaSeleccionadoMensaje = true;
             if (cursor.getInt(4) == 1) estaSeleccionadaNotificacion = true;
             if (cursor.getInt(5) == 1) esUsuarioDeLaApp = true;
             String userID = cursor.getString(6);
-            ContactsInfo contacto = new ContactsInfo(id, telefono, nombre, estaSeleccionadoMensaje,
-                    estaSeleccionadaNotificacion, esUsuarioDeLaApp, userID);
+            if (cursor.getInt(7) == 1) estaEnLaNube = true;
+            Contacto contacto = new Contacto(id, telefono, nombre, estaSeleccionadoMensaje,
+                    estaSeleccionadaNotificacion, esUsuarioDeLaApp, userID, estaEnLaNube);
             contactos.add(contacto);
         }
-        readingDatabase.close();
+        lectura.close();
         return contactos;
     }
 
     public Long agregarNuevoContacto(ContentValues contacto) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        Long idContacto = writingDatabase.insert("contact", "id", contacto);
-        writingDatabase.close();
+        SQLiteDatabase escritura = getWritableDatabase();
+        Long idContacto = escritura.insert("contacto", "idContacto", contacto);
+        escritura.close();
         return idContacto;
     }
 
     public void actualizarContacto(String idContacto, ContentValues contacto) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        writingDatabase.update("contact", contacto, "id = ? AND userID = ? ",
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.update("contacto", contacto, "idContacto = ? AND idUsuario = ? ",
                 new String[]{idContacto,
-                        (String) contacto.get("userID")});
-        writingDatabase.close();
+                        (String) contacto.get("idUsuario")});
+        escritura.close();
     }
 
     public void eliminarContacto(String idContacto, ContentValues contacto) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        writingDatabase.delete("contact", "id = ? AND userID = ? ",
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.delete("contacto", "idContacto = ? AND idUsuario = ? ",
                 new String[]{idContacto,
-                        (String) contacto.get("userID")});
-        writingDatabase.close();
+                        (String) contacto.get("idUsuario")});
+        escritura.close();
     }
 
-    public UserInfo obtenerUsuario(String idUsuario) {
-        SQLiteDatabase readingDatabase = getReadableDatabase();
-        Cursor cursor = readingDatabase
-                .rawQuery("SELECT * FROM usuario WHERE Uid LIKE '" + idUsuario + "'", null);
-        cursor.moveToNext();
-        UserInfo usuario =
-                new UserInfo(idUsuario, cursor.getString(1), cursor.getLong(2), cursor.getString(3),
-                        cursor.getInt(4), cursor.getString(5), cursor.getLong(6), cursor.getString(7),
-                        cursor.getString(8), cursor.getString(9), cursor.getString(10),
-                        cursor.getString(11), cursor.getString(12));
-        return usuario;
+    public Usuario obtenerUsuario(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM usuario WHERE idUsuario LIKE '" + idUsuario + "'", null);
+        if (cursor.moveToNext()) {
+            Boolean enNube = cursor.getInt(11) == 1 ? true : false;
+            Usuario usuario =
+                    new Usuario(idUsuario, cursor.getString(1), cursor.getLong(2),
+                            cursor.getInt(3),
+                            cursor.getLong(4), cursor.getString(5),
+                            cursor.getString(6),
+                            cursor.getString(7), cursor.getString(8), cursor.getString(9),
+                            cursor.getString(10), enNube, cursor.getString(12),
+                            cursor.getString(13), cursor.getInt(14), cursor.getInt(15));
+            lectura.close();
+            return usuario;
+        }
+        lectura.close();
+        return null;
     }
 
     public Boolean existeElUsuario(String idUsuario) {
-        SQLiteDatabase readingDatabase = getReadableDatabase();
-        Cursor cursor = readingDatabase
-                .rawQuery("SELECT * FROM usuario WHERE Uid LIKE '" + idUsuario + "'", null);
-        if(cursor.getCount() == 0) return false;
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM usuario WHERE idUsuario LIKE '" + idUsuario + "'", null);
+
+        if (cursor.getCount() == 0) {
+            lectura.close();
+            return false;
+        }
+        lectura.close();
         return true;
     }
 
-    public void actualizarUsuario(String idUsuario, ContentValues usuario) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        writingDatabase.update("usuario", usuario, "Uid LIKE '" + idUsuario + "'", null);
-        writingDatabase.close();
+    public void actualizarUsuario(ContentValues usuario) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.update("usuario", usuario, "idUsuario LIKE '" + usuario.get("idUsuario") + "'", null);
+        escritura.close();
     }
 
     public void agregarUsuario(ContentValues usuario) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        writingDatabase.insert("usuario", null, usuario);
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.insert("usuario", null, usuario);
+        escritura.close();
     }
 
-    public ArrayList<NotificationInfo> obtenerNotificaciones(String idUsuario) {
-        SQLiteDatabase readingDatabase = getReadableDatabase();
-        ArrayList<NotificationInfo> notificaciones = new ArrayList<NotificationInfo>();
-        Cursor cursor = readingDatabase.rawQuery(
-                "SELECT * FROM notificacion WHERE userID LIKE '" + idUsuario +
-                        "' ORDER BY id DESC", null);
+    public ArrayList<Notificacion> obtenerNotificaciones(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<Notificacion> notificaciones = new ArrayList<Notificacion>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM notificacion WHERE idUsuario LIKE '" + idUsuario +
+                        "' ORDER BY idNotificacion DESC", null);
         while (cursor.moveToNext()) {
-            Long id = cursor.getLong(0);
+            Long idNotificacion = cursor.getLong(0);
             String fecha = cursor.getString(1);
             String nombre = cursor.getString(2);
             String mensaje = cursor.getString(3);
-            Boolean leido = false;
-            if (cursor.getInt(4) == 1) leido = true;
-            String userID = cursor.getString(5);
-            notificaciones.add(new NotificationInfo(id, fecha, nombre, mensaje, leido, userID));
+            Boolean leido = cursor.getInt(4) == 1 ? true : false;
+            Boolean enNube = cursor.getInt(6) == 1 ? true : false;
+            notificaciones
+                    .add(new Notificacion(idNotificacion, fecha, nombre, mensaje, leido, idUsuario, enNube));
         }
-        readingDatabase.close();
+        lectura.close();
         return notificaciones;
     }
 
     public void eliminarNotificacion(String idUsuario, String idNotificacion) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        writingDatabase.delete("notificacion", "id = ? AND userID = ? ",
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.delete("notificacion", "idNotificacion = ? AND idUsuario = ? ",
                 new String[]{idNotificacion,
                         idUsuario});
-        writingDatabase.close();
+        escritura.close();
     }
 
-    public void actualizarNotificacion(String idUsuario, String idNotificacion, ContentValues notificacion) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        writingDatabase.update("notificacion", notificacion, "id = ? AND userID = ? ",
-                new String[]{idNotificacion,
+    public void actualizarNotificacion(String idUsuario,
+                                       ContentValues notificacion) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.update("notificacion", notificacion, "idNotificacion = ? AND idUsuario = ? ",
+                new String[]{Long.toString((Long) notificacion.get("idNotificacion")),
                         idUsuario});
-        writingDatabase.close();
+        escritura.close();
     }
 
     public Long agregarNotificacion(ContentValues notificacion) {
-        SQLiteDatabase writingDatabase = getWritableDatabase();
-        Long idNotificacion = writingDatabase.insert("notificacion", "id", notificacion);
-        writingDatabase.close();
+        SQLiteDatabase escritura = getWritableDatabase();
+        Long idNotificacion = escritura.insert("notificacion", "idNotificacion", notificacion);
+        escritura.close();
         return idNotificacion;
+    }
+
+    public ContentValues generarFormatoDeUsuarioParaIntroducirEnBD(Usuario usuario) {
+        ContentValues contentUsuario = new ContentValues();
+        contentUsuario.put("idUsuario", usuario.getIdUsuario());
+        contentUsuario.put("nombre", usuario.getNombre());
+        contentUsuario.put("telefono", usuario.getTelefono());
+        contentUsuario.put("edad", usuario.getEdad());
+        contentUsuario.put("nss", usuario.getNss());
+        contentUsuario.put("medicacion", usuario.getMedicacion());
+        contentUsuario.put("enfermedades", usuario.getEnfermedades());
+        contentUsuario.put("toxicomanias", usuario.getToxicomanias());
+        contentUsuario.put("tiposangre", usuario.getTipoSangre());
+        contentUsuario.put("alergias", usuario.getAlergias());
+        contentUsuario.put("religion", usuario.getReligion());
+        if (usuario.getEnNube()) {
+            contentUsuario.put("enNube", 1);
+        } else {
+            contentUsuario.put("enNube", 0);
+        }
+        contentUsuario.put("fechaUltimoRespaldo", usuario.getFechaUltimoRespaldo());
+        contentUsuario.put("frecuenciaRespaldo", usuario.getFrecuenciaRespaldo());
+        contentUsuario.put("frecuenciaCardiacaMinima", usuario.getFrecuenciaCardiacaMinima());
+        contentUsuario.put("frecuenciaCardiacaMaxima", usuario.getFrecuenciaCardiacaMaxima());
+        return contentUsuario;
+    }
+
+    public ContentValues generarFormatoDeContactoParaIntroducirEnBD(Contacto contacto) {
+        ContentValues contentContacto = new ContentValues();
+        contentContacto.put("idContacto", contacto.getIdContacto());
+        contentContacto.put("telefono", contacto.getTelefono());
+        contentContacto.put("nombre", contacto.getNombre());
+        if (contacto.getRecibeSMS()) {
+            contentContacto.put("recibeSMS", 1);
+        } else {
+            contentContacto.put("recibeSMS", 0);
+        }
+        if (contacto.getRecibeNotificaciones()) {
+            contentContacto.put("recibeNotificaciones", 1);
+        } else {
+            contentContacto.put("recibeNotificaciones", 0);
+        }
+        if (contacto.getEsUsuario()) {
+            contentContacto.put("esUsuario", 1);
+        } else {
+            contentContacto.put("esUsuario", 0);
+        }
+        contentContacto.put("idUsuario", contacto.getIdUsuario());
+        if (contacto.getEnNube()) {
+            contentContacto.put("enNube", 1);
+        } else {
+            contentContacto.put("enNube", 0);
+        }
+        return contentContacto;
+    }
+
+    public ContentValues generarFormatoDeNotificacionParaIntroducirEnBD(
+            Notificacion notificacion) {
+        ContentValues contentNotificacion = new ContentValues();
+        contentNotificacion.put("idNotificacion", notificacion.getIdNotificacion());
+        contentNotificacion.put("fecha", notificacion.getFecha());
+        contentNotificacion.put("nombre", notificacion.getNombre());
+        contentNotificacion.put("mensaje", notificacion.getMensaje());
+
+        if (notificacion.getLeido()) {
+            contentNotificacion.put("leido", 1);
+        } else {
+            contentNotificacion.put("leido", 0);
+        }
+        if (notificacion.getEnNube()) {
+            contentNotificacion.put("enNube", 1);
+        } else {
+            contentNotificacion.put("enNube", 0);
+        }
+        contentNotificacion.put("idUsuario", notificacion.getIdUsuario());
+        return contentNotificacion;
     }
 }

@@ -1,27 +1,29 @@
 package com.example.martin.AndroidApp;
 
-public class NotificationInfo {
-    private Long id;
+public class Notificacion {
+    private Long idNotificacion;
     private String fecha;
     private String nombre;
     private String mensaje;
     private Boolean leido;
-    private String userID;
+    private String idUsuario;
+    private Boolean enNube;
 
-    public NotificationInfo(Long id, String fecha, String nombre, String mensaje, Boolean leido, String userID) {
+    public Notificacion(Long idNotificacion, String fecha, String nombre, String mensaje, Boolean leido, String idUsuario, Boolean enNube) {
         this.fecha = fecha;
         this.nombre = nombre;
         this.mensaje = mensaje;
-        this.userID = userID;
+        this.idUsuario = idUsuario;
         this.leido = leido;
-        this.id = id;
+        this.idNotificacion = idNotificacion;
+        this.enNube = enNube;
     }
 
-    public String getUserID(){
-        return userID;
+    public String getIdUsuario(){
+        return idUsuario;
     }
-    public Long getId() {
-        return id;
+    public Long getIdNotificacion() {
+        return idNotificacion;
     }
 
     public String getFecha() {
@@ -40,8 +42,12 @@ public class NotificationInfo {
         return leido;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Boolean getEnNube() {
+        return enNube;
+    }
+
+    public void setIdNotificacion(Long idNotificacion) {
+        this.idNotificacion = idNotificacion;
     }
 
     public void setFecha(String fecha) {
@@ -59,8 +65,12 @@ public class NotificationInfo {
     public void setLeido(Boolean leido) {
         this.leido = leido;
     }
-    public void setUserID(String userID){
-        this.userID = userID;
+    public void setIdUsuario(String idUsuario){
+        this.idUsuario = idUsuario;
+    }
+
+    public void setEnNube(Boolean enNube) {
+        this.enNube = enNube;
     }
 }
 

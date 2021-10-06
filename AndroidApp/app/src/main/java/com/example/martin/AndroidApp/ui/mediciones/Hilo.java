@@ -1,4 +1,4 @@
-package com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos;
+package com.example.martin.AndroidApp.ui.mediciones;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
@@ -11,18 +11,15 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 //Crea la clase que permite crear el evento de conexion
-public class ConnectedThread extends Thread
-{
+public class Hilo extends Thread {
     private final InputStream streamEntrada;
     private final OutputStream streamSalida;
     private Handler bluetoothIn;
 
-    public ConnectedThread(BluetoothSocket socket, Handler bluetoothIn)
-    {
+    public Hilo(BluetoothSocket socket, Handler bluetoothIn) {
         InputStream streamEntradaAux = null;
         OutputStream streamSalidaAux = null;
-        try
-        {
+        try {
             streamEntradaAux = socket.getInputStream();
             streamSalidaAux = socket.getOutputStream();
         } catch (IOException e) {
@@ -34,8 +31,7 @@ public class ConnectedThread extends Thread
         this.bluetoothIn = bluetoothIn;
     }
 
-    public void run()
-    {
+    public void run() {
         //byte[] byte_in = new byte[1];
         int tamDelMensaje = 9;
         char[] mensajeRecibido = new char[tamDelMensaje];
@@ -47,7 +43,8 @@ public class ConnectedThread extends Thread
                 //char ch = (char) byte_in[0];
                 do {
                     caracterRecibido = (char) streamEntrada.read();
-                } while (caracterRecibido != '+' && caracterRecibido != '-' && caracterRecibido != -1);
+                } while (caracterRecibido != '+' && caracterRecibido != '-' &&
+                        caracterRecibido != -1);
 
                 mensajeRecibido[0] = caracterRecibido;
                 for (int indice = 1; indice < tamDelMensaje; indice++) {
@@ -57,8 +54,9 @@ public class ConnectedThread extends Thread
                     }
                     mensajeRecibido[indice] = caracterRecibido;
                 }
-                if(caracterRecibido != -1) {
-                    bluetoothIn.obtainMessage(MainActivity.handlerState,  Arrays.toString(mensajeRecibido)).sendToTarget();
+                if (caracterRecibido != -1) {
+                    bluetoothIn.obtainMessage(MainActivity.handlerState,
+                            Arrays.toString(mensajeRecibido)).sendToTarget();
                 }
             } catch (IOException e) {
                 break;
@@ -67,15 +65,12 @@ public class ConnectedThread extends Thread
     }
 
     //Envio de trama
-    public void write(String input)
-    {
+    public void write(String input) {
         try {
             streamSalida.write(input.getBytes());
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             //si no es posible enviar datos se cierra la conexión
-             //getActivity().onBackPressed();
+            //getActivity().onBackPressed();
         }
     }
 }

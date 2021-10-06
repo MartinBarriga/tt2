@@ -20,9 +20,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".ui.usuario.Respaldo"
+            android:exported="true" />
+        <activity
             android:name=".ui.usuario.DatosUsuario"
             android:exported="true" />
-        <activity android:name=".ui.VisualizacionDatosMedidos.DispositivosVinculados" />
+        <activity android:name=".ui.mediciones.DispositivosVinculados" />
         <activity android:name=".Countdown" />
         <activity
             android:name=".LoadingLogin"

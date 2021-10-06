@@ -7,13 +7,13 @@
 
     <fragment
         android:id="@+id/navigation_contacts"
-        android:name="com.example.martin.AndroidApp.ui.contacts.ContactsFragment"
+        android:name="com.example.martin.AndroidApp.ui.contactos.ContactosFragment"
         android:label="@string/title_contacts"
         tools:layout="@layout/fragment_contacts" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.example.martin.AndroidApp.ui.dashboard.DashboardFragment"
+        android:name="com.example.martin.AndroidApp.ui.notificaciones.NotificacionesFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
@@ -25,7 +25,7 @@
 
     <fragment
         android:id="@+id/navigation_visualizacion_datos_medidos"
-        android:name="com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos.VisualizacionDatosMedidosFragment"
+        android:name="com.example.martin.AndroidApp.ui.mediciones.VisualizacionDatosMedidosFragment"
         android:label="@string/title_sensor_data_visualization"
         tools:layout="@layout/fragment_visualizacion_datos_medidos" />
 </navigation>

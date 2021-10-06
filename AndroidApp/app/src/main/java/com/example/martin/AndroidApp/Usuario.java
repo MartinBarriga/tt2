@@ -1,12 +1,10 @@
 package com.example.martin.AndroidApp;
 
-public class UserInfo {
-    private String uID;
+public class Usuario {
+    private String idUsuario;
     private String nombre;
     private Long telefono;
-    private String correo;
     private int edad;
-    private String mensaje;
     private Long nss;
     private String medicacion;
     private String enfermedades;
@@ -14,16 +12,21 @@ public class UserInfo {
     private String tipoSangre;
     private String alergias;
     private String religion;
+    private Boolean enNube;
+    private String fechaUltimoRespaldo;
+    private String frecuenciaRespaldo;
+    private int frecuenciaCardiacaMinima;
+    private int frecuenciaCardiacaMaxima;
 
-    public UserInfo(String uID, String nombre, Long telefono, String correo, int edad,
-                    String mensaje, Long nss, String medicacion, String enfermedades,
-                    String toxicomanias, String tipoSangre, String alergias, String religion) {
-        this.uID = uID;
+    public Usuario(String idUsuario, String nombre, Long telefono, int edad,
+                   Long nss, String medicacion, String enfermedades,
+                   String toxicomanias, String tipoSangre, String alergias, String religion,
+                   Boolean enNube, String fechaUltimoRespaldo, String frecuenciaRespaldo,
+                   int frecuenciaCardiacaMinima, int frecuenciaCardiacaMaxima) {
+        this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.telefono = telefono;
-        this.correo = correo;
         this.edad = edad;
-        this.mensaje = mensaje;
         this.nss = nss;
         this.medicacion = medicacion;
         this.enfermedades = enfermedades;
@@ -31,6 +34,11 @@ public class UserInfo {
         this.tipoSangre = tipoSangre;
         this.alergias = alergias;
         this.religion = religion;
+        this.enNube = enNube;
+        this.fechaUltimoRespaldo = fechaUltimoRespaldo;
+        this.frecuenciaRespaldo = frecuenciaRespaldo;
+        this.frecuenciaCardiacaMinima = frecuenciaCardiacaMinima;
+        this.frecuenciaCardiacaMaxima = frecuenciaCardiacaMaxima;
     }
 
     public String getMedicacion() {
@@ -57,12 +65,12 @@ public class UserInfo {
         this.nss = nss;
     }
 
-    public String getuID() {
-        return uID;
+    public String getIdUsuario() {
+        return idUsuario;
     }
 
-    public void setuID(String uID) {
-        this.uID = uID;
+    public void setIdUsuario(String idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getNombre() {
@@ -71,14 +79,6 @@ public class UserInfo {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
     }
 
     public int getEdad() {
@@ -129,11 +129,43 @@ public class UserInfo {
         this.religion = religion;
     }
 
-    public String getMensaje() {
-        return mensaje;
+    public Boolean getEnNube() {
+        return enNube;
     }
 
-    public void setMensaje(String mensaje) {
-        this.mensaje = mensaje;
+    public void setEnNube(Boolean enNube) {
+        this.enNube = enNube;
+    }
+
+    public String getFechaUltimoRespaldo() {
+        return fechaUltimoRespaldo;
+    }
+
+    public void setFechaUltimoRespaldo(String fechaUltimoRespaldo) {
+        this.fechaUltimoRespaldo = fechaUltimoRespaldo;
+    }
+
+    public String getFrecuenciaRespaldo() {
+        return frecuenciaRespaldo;
+    }
+
+    public void setFrecuenciaRespaldo(String frecuenciaRespaldo) {
+        this.frecuenciaRespaldo = frecuenciaRespaldo;
+    }
+
+    public int getFrecuenciaCardiacaMinima() {
+        return frecuenciaCardiacaMinima;
+    }
+
+    public void setFrecuenciaCardiacaMinima(int frecuenciaCardiacaMinima) {
+        this.frecuenciaCardiacaMinima = frecuenciaCardiacaMinima;
+    }
+
+    public int getFrecuenciaCardiacaMaxima() {
+        return frecuenciaCardiacaMaxima;
+    }
+
+    public void setFrecuenciaCardiacaMaxima(int frecuenciaCardiacaMaxima) {
+        this.frecuenciaCardiacaMaxima = frecuenciaCardiacaMaxima;
     }
 }

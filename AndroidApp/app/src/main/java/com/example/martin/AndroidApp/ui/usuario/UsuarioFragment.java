@@ -15,11 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
-import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
-import com.example.martin.AndroidApp.UserInfo;
+import com.example.martin.AndroidApp.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class UsuarioFragment extends Fragment{
@@ -39,7 +38,7 @@ public class UsuarioFragment extends Fragment{
         auth.addAuthStateListener(asl);
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(this.getContext(), null);
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
-        UserInfo usuario = mManejadorBaseDeDatosLocal
+        Usuario usuario = mManejadorBaseDeDatosLocal
                 .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
 
         vista = inflater.inflate(R.layout.fragment_usuario, container, false);
@@ -73,6 +72,8 @@ public class UsuarioFragment extends Fragment{
             @Override
             public void onClick(View view) {
                 System.out.println("PRESIONASTE RESPALDO");
+                Intent intent = new Intent(getContext(), Respaldo.class);
+                startActivity(intent);
             }
         });
 
@@ -97,7 +98,6 @@ public class UsuarioFragment extends Fragment{
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
             if (firebaseAuth.getCurrentUser() == null) {
                 Log.d("LOG", "Current user = null.");
-                Toast.makeText(getContext(), "Ha cerrado su sesión.", Toast.LENGTH_LONG).show();
                 (new Handler()).postDelayed(new Runnable() {
                     public void run() {
                         System.exit(0);

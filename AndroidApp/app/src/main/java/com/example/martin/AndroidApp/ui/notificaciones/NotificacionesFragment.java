@@ -1,4 +1,4 @@
-package com.example.martin.AndroidApp.ui.dashboard;
+package com.example.martin.AndroidApp.ui.notificaciones;
 
 
 import android.Manifest;
@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,9 +30,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
-import com.example.martin.AndroidApp.NotificationInfo;
+import com.example.martin.AndroidApp.Notificacion;
 import com.example.martin.AndroidApp.R;
-import com.example.martin.AndroidApp.UserInfo;
+import com.example.martin.AndroidApp.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -44,23 +43,22 @@ import java.util.ArrayList;
  !!!!!!!!!!!!!!!!!!!!!!!!!!
  Y CAMBIAR LOS STRINGS QUE CONTIENEN LA PALABRA "OBTENIDA/OBTENIDO", NO MOVER EL NULL, EL FALSE Y
   EL USER.GETUID
- mNotificationsManager.addNewNotification(new NotificationInfo(null, "FECHA OBTENIDA", "NOMBRE
+ mNotificationsManager.addNewNotification(new Notificacion(null, "FECHA OBTENIDA", "NOMBRE
  OBTENIDO", "MENSAJE OBTENIDO", false, user.getUid()));
  !!!!!!!!!!!!!!!!!!!!!!!!
  !!!!!!!!!!!!!!!!!!!!!!!!
  */
-public class DashboardFragment extends Fragment
-        implements NotificationRecyclerAdapter.OnNotificationListener {
+public class NotificacionesFragment extends Fragment
+        implements NotificacionesRecyclerAdapter.OnNotificacionListener {
 
     private static final int PERMISSION_SEND_SMS = 123;
     private final int REQUEST_CODE_LOCATION_PERMISSION = 1;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
-    private DashboardViewModel dashboardViewModel;
-    private NotificationsManager mNotificationsManager;
-    private NotificationRecyclerAdapter mNotificationsRecyclerAdapter;
+    private ManejadorNotificaciones mNotificacionesManager;
+    private NotificacionesRecyclerAdapter mNotificacionesRecyclerAdapter;
     private View root;
-    private ArrayList<NotificationInfo> mNotifications;
+    private ArrayList<Notificacion> mNotificaciones;
     ItemTouchHelper.SimpleCallback itemTouchHelperCallback =
             new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
 
@@ -73,22 +71,20 @@ public class DashboardFragment extends Fragment
 
                 @Override
                 public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                    int position = viewHolder.getAdapterPosition();
-                    mNotificationsManager.deleteNotification(position);
-                    mNotifications = mNotificationsManager.getArrayNotifications();
-                    mNotificationsRecyclerAdapter.notifyItemRemoved(position);
+                    int posicion = viewHolder.getAdapterPosition();
+                    mNotificacionesManager.eliminarNotificacion(posicion);
+                    mNotificaciones = mNotificacionesManager.getArrayNotifications();
+                    mNotificacionesRecyclerAdapter.notifyItemRemoved(posicion);
 
                 }
             };
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        dashboardViewModel =
-                ViewModelProviders.of(this).get(DashboardViewModel.class);
         root = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
-        mNotificationsManager = new NotificationsManager(getContext());
+        mNotificacionesManager = new ManejadorNotificaciones(getContext());
         if (ContextCompat
                 .checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED || ContextCompat
@@ -96,13 +92,13 @@ public class DashboardFragment extends Fragment
                 PackageManager.PERMISSION_GRANTED || ContextCompat
                 .checkSelfPermission(this.getContext(), Manifest.permission.READ_PHONE_STATE) !=
                 PackageManager.PERMISSION_GRANTED) {
-            final AlertDialog.Builder newNameDialog = new AlertDialog.Builder(getContext());
-            newNameDialog.setTitle("Permiso para enviar SMS.");
-            newNameDialog.setMessage(
+            final AlertDialog.Builder mensajeDePermiso = new AlertDialog.Builder(getContext());
+            mensajeDePermiso.setTitle("Permiso para enviar SMS.");
+            mensajeDePermiso.setMessage(
                     "Debido a que la función de esta aplicación es enviar mensajes de emergencia," +
                             " a continuación se le pedirá permiso para enviar mensajes desde su " +
                             "celular y acceder a su localización.");
-            newNameDialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            mensajeDePermiso.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     ActivityCompat.requestPermissions(getActivity(),
@@ -113,7 +109,7 @@ public class DashboardFragment extends Fragment
             });
             Log.d("LOG", "no hay permisos de enviar sms");
 
-            newNameDialog.setNegativeButton(getString(R.string.newNameDialogCancelingButton),
+            mensajeDePermiso.setNegativeButton(getString(R.string.newNameDialogCancelingButton),
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -123,18 +119,15 @@ public class DashboardFragment extends Fragment
                             dialog.cancel();
                         }
                     });
-
-
-            final AlertDialog sameNameDialog = newNameDialog.create();
-            sameNameDialog.show();
+            mensajeDePermiso.create().show();
         } else {
             Log.d("LOG", "sí hay permisos de enviar sms");
         }
 
-        mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getContext(), null);
-        UserInfo usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
-
-
+        mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(
+                getActivity().getApplicationContext(), null);
+        Usuario usuario = mManejadorBaseDeDatosLocal
+                .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
         FirebaseMessaging.getInstance().subscribeToTopic(Long.toString(usuario.getTelefono()))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -147,31 +140,30 @@ public class DashboardFragment extends Fragment
                     }
                 });
 
-        Button sendSMS = root.findViewById(R.id.sendSMS);
-        sendSMS.setOnClickListener(new View.OnClickListener() {
+        Button mandarSMSBoton = root.findViewById(R.id.sendSMS);
+        mandarSMSBoton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendSMS(v, getContext());
+                enviarSMS(v, getContext());
             }
         });
 
-        displayNotifications();
-
+        mostrarNotificaciones();
         return root;
     }
 
-    private void displayNotifications() {
-        final RecyclerView notificationsRecyclerView =
+    private void mostrarNotificaciones() {
+        final RecyclerView notificacionesRecyclerView =
                 (RecyclerView) root.findViewById(R.id.notificationsRecyclerView);
-        final LinearLayoutManager notifiactionsLayoutManager =
+        final LinearLayoutManager notifiacacionesLayoutManager =
                 new LinearLayoutManager(getContext());
-        notificationsRecyclerView.setLayoutManager(notifiactionsLayoutManager);
-        mNotifications = mNotificationsManager.getArrayNotifications();
-        mNotificationsRecyclerAdapter =
-                new NotificationRecyclerAdapter(getContext(), mNotifications, this);
+        notificacionesRecyclerView.setLayoutManager(notifiacacionesLayoutManager);
+        mNotificaciones = mNotificacionesManager.getArrayNotifications();
+        mNotificacionesRecyclerAdapter =
+                new NotificacionesRecyclerAdapter(getContext(), mNotificaciones, this);
         new ItemTouchHelper(itemTouchHelperCallback)
-                .attachToRecyclerView(notificationsRecyclerView);
-        notificationsRecyclerView.setAdapter(mNotificationsRecyclerAdapter);
+                .attachToRecyclerView(notificacionesRecyclerView);
+        notificacionesRecyclerView.setAdapter(mNotificacionesRecyclerAdapter);
     }
 
     @Override
@@ -200,32 +192,31 @@ public class DashboardFragment extends Fragment
         }
     }
 
-    public void sendSMS(View view, Context context) {
-
+    public void enviarSMS(View view, Context context) {
         Intent intent = new Intent(getContext(), Countdown.class);
         startActivity(intent);
     }
 
     @Override
-    public void onViewClick(final int position) {
-        final AlertDialog.Builder newNameDialog = new AlertDialog.Builder(getContext());
-        newNameDialog.setTitle("Información del mensaje");
-        final SpannableString s = new SpannableString(mNotifications.get(position).getMensaje());
-        Linkify.addLinks(s, Linkify.WEB_URLS);
-        newNameDialog.setMessage(s);
-        newNameDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+    public void onNotificacionClick(final int position) {
+        final AlertDialog.Builder notificacionDialog = new AlertDialog.Builder(getContext());
+        notificacionDialog.setTitle("Información del mensaje");
+        final SpannableString mensaje = new SpannableString(mNotificaciones.get(position).getMensaje());
+        Linkify.addLinks(mensaje, Linkify.WEB_URLS);
+        notificacionDialog.setMessage(mensaje);
+        notificacionDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        final AlertDialog sameNameDialog = newNameDialog.create();
-        sameNameDialog.show();
-        ((TextView) sameNameDialog.findViewById(android.R.id.message))
+        final AlertDialog notificacionAlertDialog = notificacionDialog.create();
+        notificacionAlertDialog.show();
+        ((TextView) notificacionAlertDialog.findViewById(android.R.id.message))
                 .setMovementMethod(LinkMovementMethod.getInstance());
-        mNotificationsManager.changeLeido(position);
+        mNotificacionesManager.actualizarCampoLeido(position);
         (new Handler()).postDelayed(new Runnable() {
             public void run() {
-                mNotificationsRecyclerAdapter.notifyItemChanged(position);
+                mNotificacionesRecyclerAdapter.notifyItemChanged(position);
             }
         }, 500);
     }

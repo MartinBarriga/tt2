@@ -58,27 +58,27 @@ public class Countdown extends AppCompatActivity {
             public void onFinish() {
                 Toast.makeText(getApplicationContext(), "Enviando alertas...", Toast.LENGTH_LONG)
                         .show();
-                sendNotification();
-                sendSMS(getCurrentFocus(), getApplicationContext());
+                enviarNotificacion();
+                enviarSMS(getCurrentFocus(), getApplicationContext());
             }
         };
         cdt.start();
     }
 
-    public void skipCountdown(View view) {
+    public void saltarCountDown(View view) {
         cdt.cancel();
         Toast.makeText(getApplicationContext(), "Enviando alertas...", Toast.LENGTH_LONG).show();
-        sendNotification();
-        sendSMS(getCurrentFocus(), getApplicationContext());
+        enviarNotificacion();
+        enviarSMS(getCurrentFocus(), getApplicationContext());
     }
 
-    public void cancelAlert(View view) {
+    public void cancelarAlerta(View view) {
         cdt.cancel();
         System.exit(0);
     }
 
-    public void sendNotification() {
-        getLocation();
+    public void enviarNotificacion() {
+        obtenerLocalizacion();
         //timer para que de chance de obtener la localización sin problemas
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -117,9 +117,9 @@ public class Countdown extends AppCompatActivity {
         }, 5000);
     }
 
-    public void sendSMS(View view, Context context) {
+    public void enviarSMS(View view, Context context) {
 
-        getLocation();
+        obtenerLocalizacion();
         //timer para que de chance de obtener la localización sin problemas
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -151,7 +151,7 @@ public class Countdown extends AppCompatActivity {
         }, 5000);
     }
 
-    private void getLocation() {
+    private void obtenerLocalizacion() {
         location = "";
         final LocationRequest locationRequest = new LocationRequest();
         locationRequest.setInterval(10000);

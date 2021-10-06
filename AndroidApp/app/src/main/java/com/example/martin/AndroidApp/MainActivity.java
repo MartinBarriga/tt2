@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -24,8 +23,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos.ConnectedThread;
-import com.example.martin.AndroidApp.ui.VisualizacionDatosMedidos.DispositivosVinculados;
+import com.example.martin.AndroidApp.ui.mediciones.Hilo;
+import com.example.martin.AndroidApp.ui.mediciones.DispositivosVinculados;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static int handlerState = 0;
     public static Handler bluetoothIn;
     public BluetoothAdapter bluetoothAdapter;
-    public ConnectedThread MyConexionBT;
+    public Hilo MyConexionBT;
     NavController navController;
     private BluetoothSocket btSocket = null;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             // Establece la conexión con el socket Bluetooth.
             try {
                 btSocket.connect();
-                MyConexionBT = new ConnectedThread(btSocket, bluetoothIn);
+                MyConexionBT = new Hilo(btSocket, bluetoothIn);
                 MyConexionBT.start();
             } catch (IOException e) {
                 Toast.makeText(getApplicationContext(), "No se pudo conectar", Toast.LENGTH_LONG)
@@ -129,8 +128,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-        //startService(new Intent(this, WearListenerService.class));
-
         Bundle bundle = getIntent().getExtras();
         if (bundle.getBoolean("firstLaunch")) {
             Toast.makeText(getApplicationContext(), "Aquí puede completar o editar sus datos.",
@@ -143,21 +140,20 @@ public class MainActivity extends AppCompatActivity {
             ManejadorBaseDeDatosLocal mConnectionSQLiteHelper =
                     new ManejadorBaseDeDatosLocal(MainActivity.this, null);
             ;
-            SQLiteDatabase writingDatabase = mConnectionSQLiteHelper.getWritableDatabase();
+            SQLiteDatabase escritura = mConnectionSQLiteHelper.getWritableDatabase();
 
             Log.d("LOG",
-                    "Table update: " + "id = " + bundle.getString("idS") + " AND userID LIKE '" +
-                            bundle.getString("userID") + "'");
-            NotificationInfo notificacion =
-                    new NotificationInfo(bundle.getLong("id"), bundle.getString("fecha"),
+                    "Table update: " + "idNotificacion = " + String.valueOf(bundle.getLong("idNotificacion")) + " AND idUsuario LIKE '" +
+                            bundle.getString("idUsuario") + "'");
+            Notificacion notificacion =
+                    new Notificacion(bundle.getLong("idNotificacion"), bundle.getString("fecha"),
                             bundle.getString("nombre"), bundle.getString("mensaje"), true,
-                            bundle.getString("userID"));
+                            bundle.getString("idUsuario"), false);
 
-            mManejadorBaseDeDatosNube.actualizarNotificacion(notificacion);
-
-            int r = writingDatabase.update("notificacion", getContactValue(notificacion),
-                    "id = ? AND userID LIKE '" + bundle.getString("userID") + "'",
-                    new String[]{bundle.getString("idS")});
+            int r = escritura.update("notificacion", mConnectionSQLiteHelper
+                            .generarFormatoDeNotificacionParaIntroducirEnBD(notificacion),
+                    "idNotificacion = ? AND idUsuario LIKE '" + notificacion.getIdUsuario() + "'",
+                    new String[]{String.valueOf(notificacion.getIdNotificacion())});
 
             alertDialog.setTitle("Nueva alerta de " + bundle.getString("nombre"));
             final SpannableString s = new SpannableString(bundle.getString("mensaje"));
@@ -170,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
             alertDialog.show();
-            writingDatabase.close();
+            escritura.close();
             ((TextView) alertDialog.findViewById(android.R.id.message))
                     .setMovementMethod(LinkMovementMethod.getInstance());
         }
@@ -181,20 +177,4 @@ public class MainActivity extends AppCompatActivity {
         //crea un conexion de salida segura para el dispositivo usando el servicio UUID
         return device.createRfcommSocketToServiceRecord(BTMODULEUUID);
     }
-
-    public ContentValues getContactValue(NotificationInfo notification) {
-        ContentValues contactValues = new ContentValues();
-        contactValues.put("fecha", notification.getFecha());
-        contactValues.put("nombre", notification.getNombre());
-        contactValues.put("mensaje", notification.getMensaje());
-
-        if (notification.getLeido()) {
-            contactValues.put("leido", 1);
-        } else {
-            contactValues.put("leido", 0);
-        }
-        contactValues.put("userID", notification.getUserID());
-        return contactValues;
-    }
-
 }
