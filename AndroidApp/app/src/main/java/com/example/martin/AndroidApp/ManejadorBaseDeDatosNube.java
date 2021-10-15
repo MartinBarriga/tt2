@@ -661,11 +661,13 @@ public class ManejadorBaseDeDatosNube {
                                 Log.d("LOG", document.getId() + " => " + document.getData());
                                 Notificacion notificacion =
                                         new Notificacion((Long) document.get("idNotificacion"),
+                                                (String) document.get("idUsuario"),
+                                                (String) document.get("idEmergencia"),
+                                                (String) document.get("titulo"),
+                                                ((Long) document.get("estado")).intValue(),
                                                 (String) document.get("fecha"),
-                                                (String) document.get("nombre"),
-                                                (String) document.get("mensaje"),
                                                 (Boolean) document.get("leido"),
-                                                (String) document.get("idUsuario"), true);
+                                                (Boolean) document.get("esPropia"), true);
                                 manejadorBaseDeDatosLocal
                                         .agregarNotificacion(manejadorBaseDeDatosLocal
                                                 .generarFormatoDeNotificacionParaIntroducirEnBD(

@@ -41,25 +41,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.d("LOG", "Message data payload: " + remoteMessage.getData());
 
-            String fecha = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
-                    .format(Calendar.getInstance().getTime());
             long idNotificacion =
                     mManejadorBaseDeDatosLocal
-                            .agregarNotificacion(remoteMessage, usuarioActual.getUid(), fecha);
-
-            Notificacion notificacion =
-                    new Notificacion(idNotificacion, fecha, remoteMessage.getData().get("nombre"),
-                            remoteMessage.getData().get("mensaje"), false,
-                            usuarioActual.getUid(), false);
+                            .agregarNotificacion(remoteMessage, usuarioActual.getUid());
 
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.putExtra("nuevaAlerta", true);
-            intent.putExtra("nombre", remoteMessage.getData().get("nombre"));
-            intent.putExtra("mensaje", remoteMessage.getData().get("mensaje"));
-            String idUsuario = usuarioActual.getUid();
-            intent.putExtra("idUsuario", idUsuario);
+            intent.putExtra("titulo", remoteMessage.getData().get("titulo"));
+            intent.putExtra("idUsuarioQuEnviaAlerta", remoteMessage.getData().get("idUsuarioQuEnviaAlerta"));
             intent.putExtra("idNotificacion", idNotificacion);
-            intent.putExtra("fecha", fecha);
+            intent.putExtra("fecha", remoteMessage.getData().get("fecha"));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             PendingIntent pendingIntent =
@@ -69,15 +60,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     new NotificationCompat.Builder(this, "Alerta LifeGuard")
                             .setSmallIcon(R.drawable.ic_warning_black_24dp)
                             .setContentTitle(
-                                    "Nueva alerta de " + remoteMessage.getData().get("nombre"))
-                            .setContentText("Has recibido una alerta de " +
-                                    remoteMessage.getData().get("nombre") +
-                                    ". Haz click aquí para ver la notificación y ayudarle.")
+                                    remoteMessage.getData().get("titulo"))
+                            .setContentText("Haz click aquí para ver la notificación y ayudarle.")
                             .setStyle(new NotificationCompat.BigTextStyle()
-                                    .bigText("Has recibido una alerta de " +
-                                            remoteMessage.getData().get("nombre") +
-                                            ". Haz click aquí para ver la notificación y ayudarle" +
-                                            "."))
+                                    .bigText(remoteMessage.getData().get("titulo") +
+                                            "Haz click aquí para ver la notificación y ayudarle."))
                             .setPriority(NotificationCompat.PRIORITY_HIGH)
                             .setVibrate(new long[]{3000, 3000, 3000, 3000, 3000,})
                             .setLights(Color.RED, 2000, 2000)

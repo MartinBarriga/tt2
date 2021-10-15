@@ -43,7 +43,7 @@ public class NotificacionesRecyclerAdapter
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Notificacion notification = mNotificaciones.get(position);
         holder.mFecha.setText(notification.getFecha());
-        holder.mDescripcion.setText("Mensaje de emergencia de " + notification.getNombre());
+        holder.mDescripcion.setText(notification.getTitulo());
         if(!notification.getLeido()){
             holder.mLeido.setColorFilter(ContextCompat.getColor(mContexto, R.color.leidoColorTrue));
         }
