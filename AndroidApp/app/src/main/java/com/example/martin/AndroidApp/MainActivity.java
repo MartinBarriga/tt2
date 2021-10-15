@@ -139,24 +139,30 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             ManejadorBaseDeDatosLocal mConnectionSQLiteHelper =
                     new ManejadorBaseDeDatosLocal(MainActivity.this, null);
-            ;
+
             SQLiteDatabase escritura = mConnectionSQLiteHelper.getWritableDatabase();
 
             Log.d("LOG",
-                    "Table update: " + "idNotificacion = " + String.valueOf(bundle.getLong("idNotificacion")) + " AND idUsuario LIKE '" +
-                            bundle.getString("idUsuario") + "'");
+                    "Table update: " + "idNotificacion = " +
+                            String.valueOf(bundle.getLong("idNotificacion")) +
+                            " AND idUsuario LIKE '" +
+                            mManejadorBaseDeDatosNube.obtenerIdUsuario() + "'");
+            Boolean esPropia = mManejadorBaseDeDatosNube.obtenerIdUsuario()
+                    .matches(bundle.getString("idUsuarioQuEnviaAlerta")) ? true : false;
             Notificacion notificacion =
-                    new Notificacion(bundle.getLong("idNotificacion"), bundle.getString("fecha"),
-                            bundle.getString("nombre"), bundle.getString("mensaje"), true,
-                            bundle.getString("idUsuario"), false);
+                    new Notificacion(bundle.getLong("idNotificacion"),
+                            mManejadorBaseDeDatosNube.obtenerIdUsuario(), "",
+                            bundle.getString("titulo"), 0, bundle.getString("fecha"), true,
+                            esPropia,
+                            false);
 
             int r = escritura.update("notificacion", mConnectionSQLiteHelper
                             .generarFormatoDeNotificacionParaIntroducirEnBD(notificacion),
                     "idNotificacion = ? AND idUsuario LIKE '" + notificacion.getIdUsuario() + "'",
                     new String[]{String.valueOf(notificacion.getIdNotificacion())});
 
-            alertDialog.setTitle("Nueva alerta de " + bundle.getString("nombre"));
-            final SpannableString s = new SpannableString(bundle.getString("mensaje"));
+            alertDialog.setTitle(notificacion.getTitulo());
+            final SpannableString s = new SpannableString(notificacion.getTitulo());
             Linkify.addLinks(s, Linkify.WEB_URLS);
             alertDialog.setMessage(s);
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",

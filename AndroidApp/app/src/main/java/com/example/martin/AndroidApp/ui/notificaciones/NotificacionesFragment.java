@@ -201,7 +201,7 @@ public class NotificacionesFragment extends Fragment
     public void onNotificacionClick(final int position) {
         final AlertDialog.Builder notificacionDialog = new AlertDialog.Builder(getContext());
         notificacionDialog.setTitle("Información del mensaje");
-        final SpannableString mensaje = new SpannableString(mNotificaciones.get(position).getMensaje());
+        final SpannableString mensaje = new SpannableString(mNotificaciones.get(position).getTitulo());
         Linkify.addLinks(mensaje, Linkify.WEB_URLS);
         notificacionDialog.setMessage(mensaje);
         notificacionDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
