@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -23,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class ManejadorBaseDeDatosNube {
     Boolean[] existeNumeroDeContacto = {false};
@@ -580,112 +582,136 @@ public class ManejadorBaseDeDatosNube {
     }
 
     private void descargarUsuario(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        BaseDeDatos.collection("usuario").whereEqualTo("idUsuario", obtenerIdUsuario()).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        DocumentSnapshot document =
-                                queryDocumentSnapshots.getDocuments().get(0);
-                        Log.d("LOG", document.getId() + " => " + document.getData());
-                        com.example.martin.AndroidApp.Usuario usuario =
-                                new Usuario((String) document.get("idUsuario"),
-                                        (String) document.get("nombre"),
-                                        (Long) document.get("telefono"),
-                                        ((Long) document.get("edad")).intValue(),
-                                        (Long) document.get("nss"),
-                                        (String) document.get("medicacion"),
-                                        (String) document.get("enfermedades"),
-                                        (String) document.get("toxicomanias"),
-                                        (String) document.get("tipoSangre"),
-                                        (String) document.get("alergias"),
-                                        (String) document.get("religion"), true,
-                                        (String) document.get("fechaUltimoRespaldo"),
-                                        (String) document.get("frecuenciaRespaldo"),
-                                        ((Long) document.get("frecuenciaCardiacaMinima"))
-                                                .intValue(),
-                                        ((Long) document.get("frecuenciaCardiacaMaxima"))
-                                                .intValue());
-                        manejadorBaseDeDatosLocal.agregarUsuario(manejadorBaseDeDatosLocal
-                                .generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
+        try {
+            String UID = obtenerIdUsuario();
+            Tasks.await(BaseDeDatos.collection("usuario").whereEqualTo("idUsuario", UID).get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            Log.d("LOG", "UID: "+UID);
+                            DocumentSnapshot document =
+                                    queryDocumentSnapshots.getDocuments().get(0);
+                            Log.d("LOG", document.getId() + " => " + document.getData());
+                            com.example.martin.AndroidApp.Usuario usuario =
+                                    new Usuario((String) document.get("idUsuario"),
+                                            (String) document.get("nombre"),
+                                            (Long) document.get("telefono"),
+                                            ((Long) document.get("edad")).intValue(),
+                                            (Long) document.get("nss"),
+                                            (String) document.get("medicacion"),
+                                            (String) document.get("enfermedades"),
+                                            (String) document.get("toxicomanias"),
+                                            (String) document.get("tipoSangre"),
+                                            (String) document.get("alergias"),
+                                            (String) document.get("religion"), true,
+                                            (String) document.get("fechaUltimoRespaldo"),
+                                            (String) document.get("frecuenciaRespaldo"),
+                                            ((Long) document.get("frecuenciaCardiacaMinima"))
+                                                    .intValue(),
+                                            ((Long) document.get("frecuenciaCardiacaMaxima"))
+                                                    .intValue());
+                            manejadorBaseDeDatosLocal.agregarUsuario(manejadorBaseDeDatosLocal
+                                    .generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
 
 
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("LOG", "Error adding document", e);
-                    }
-                });
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w("LOG", "Error adding document", e);
+                        }
+                    }));
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void descargarContactos(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        BaseDeDatos.collection("contacto")
-                .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-                                Contacto contacto =
-                                        new Contacto((Long) document.get("idContacto"),
-                                                (Long) document.get("telefono"),
-                                                (String) document.get("nombre"),
-                                                (Boolean) document.get("recibeSMS"),
-                                                (Boolean) document.get("recibeNotificaciones"),
-                                                (Boolean) document.get("esUsuario"),
-                                                (String) document.get("idUsuario"),
-                                                (Boolean) document.get("enNube"));
-                                manejadorBaseDeDatosLocal
-                                        .agregarNuevoContacto(manejadorBaseDeDatosLocal
-                                                .generarFormatoDeContactoParaIntroducirEnBD(
-                                                        contacto));
+        try {
+            Tasks.await(BaseDeDatos.collection("contacto")
+                    .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d("LOG", document.getId() + " => " + document.getData());
+                                    Contacto contacto =
+                                            new Contacto((Long) document.get("idContacto"),
+                                                    (Long) document.get("telefono"),
+                                                    (String) document.get("nombre"),
+                                                    (Boolean) document.get("recibeSMS"),
+                                                    (Boolean) document.get("recibeNotificaciones"),
+                                                    (Boolean) document.get("esUsuario"),
+                                                    (String) document.get("idUsuario"),
+                                                    (Boolean) document.get("enNube"));
+                                    manejadorBaseDeDatosLocal
+                                            .agregarNuevoContacto(manejadorBaseDeDatosLocal
+                                                    .generarFormatoDeContactoParaIntroducirEnBD(
+                                                            contacto));
 
+                                }
+                            } else {
+                                Log.d("LOG", "Error getting documents: ", task.getException());
                             }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
                         }
-                    }
-                });
+                    }));
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void descargarNotificaciones(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        BaseDeDatos.collection("notificacion")
-                .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("LOG", document.getId() + " => " + document.getData());
-                                Notificacion notificacion =
-                                        new Notificacion((Long) document.get("idNotificacion"),
-                                                (String) document.get("idUsuario"),
-                                                (String) document.get("idEmergencia"),
-                                                (String) document.get("titulo"),
-                                                ((Long) document.get("estado")).intValue(),
-                                                (String) document.get("fecha"),
-                                                (Boolean) document.get("leido"),
-                                                (Boolean) document.get("esPropia"), true);
-                                manejadorBaseDeDatosLocal
-                                        .agregarNotificacion(manejadorBaseDeDatosLocal
-                                                .generarFormatoDeNotificacionParaIntroducirEnBD(
-                                                        notificacion));
+        try {
+            Tasks.await(BaseDeDatos.collection("notificacion")
+                    .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d("LOG", document.getId() + " => " + document.getData());
+                                    Notificacion notificacion =
+                                            new Notificacion((Long) document.get("idNotificacion"),
+                                                    (String) document.get("idUsuario"),
+                                                    (String) document.get("idEmergencia"),
+                                                    (String) document.get("titulo"),
+                                                    ((Long) document.get("estado")).intValue(),
+                                                    (String) document.get("fecha"),
+                                                    (Boolean) document.get("leido"),
+                                                    (Boolean) document.get("esPropia"), true);
+                                    manejadorBaseDeDatosLocal
+                                            .agregarNotificacion(manejadorBaseDeDatosLocal
+                                                    .generarFormatoDeNotificacionParaIntroducirEnBD(
+                                                            notificacion));
 
+                                }
+                            } else {
+                                Log.d("LOG", "Error getting documents: ", task.getException());
                             }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
                         }
-                    }
-                });
+                    }));
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void descargarRespaldo(
             ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        descargarUsuario(manejadorBaseDeDatosLocal);
-        descargarContactos(manejadorBaseDeDatosLocal);
-        descargarNotificaciones(manejadorBaseDeDatosLocal);
+        HiloParaDescargarRespaldo hiloParaDescargarRespaldo = new HiloParaDescargarRespaldo(manejadorBaseDeDatosLocal);
+        hiloParaDescargarRespaldo.start();
+        try {
+            hiloParaDescargarRespaldo.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private ContentValues generarFormatoDeContactoParaActualizarBD(Contacto contacto) {
@@ -725,101 +751,138 @@ public class ManejadorBaseDeDatosNube {
 
     private Set<Long> obtenerIdsContactos() {
         Set<Long> idsContactos = new HashSet<Long>();
-        BaseDeDatos.collection("contacto")
-                .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                idsContactos.add((Long) document.get("idContacto"));
+        try {
+            Tasks.await(BaseDeDatos.collection("contacto")
+                    .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    idsContactos.add((Long) document.get("idContacto"));
+                                }
+                            } else {
+                                Log.d("LOG", "Error getting documents: ", task.getException());
                             }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
                         }
-                    }
-                });
+                    }));
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return idsContactos;
     }
 
     private Set<Long> obtenerIdsNotificaciones() {
         Set<Long> idsNotificaciones = new HashSet<Long>();
-        BaseDeDatos.collection("notificacion")
-                .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                idsNotificaciones.add((Long) document.get("idNotificacion"));
+        try {
+            Tasks.await(BaseDeDatos.collection("notificacion")
+                    .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    idsNotificaciones.add((Long) document.get("idNotificacion"));
+                                }
+                            } else {
+                                Log.d("LOG", "Error getting documents: ", task.getException());
                             }
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
                         }
-                    }
-                });
+                    }));
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return idsNotificaciones;
     }
 
     public void realizarRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        Usuario usuario = manejadorBaseDeDatosLocal.obtenerUsuario(obtenerIdUsuario());
-        String fechaUltimoRespaldo = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(
-                Calendar.getInstance().getTime());
-        usuario.setEnNube(true);
-        usuario.setFechaUltimoRespaldo(fechaUltimoRespaldo);
-        actualizarUsuario(usuario, manejadorBaseDeDatosLocal);
+        HiloParaHacerRespaldo hiloParaHacerRespaldo = new HiloParaHacerRespaldo(manejadorBaseDeDatosLocal);
+        hiloParaHacerRespaldo.start();
+    }
+
+    class HiloParaHacerRespaldo extends Thread{
+        ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
+        HiloParaHacerRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal){
+            this.manejadorBaseDeDatosLocal = manejadorBaseDeDatosLocal;
+        }
+
+        public void run(){
+            Usuario usuario = manejadorBaseDeDatosLocal.obtenerUsuario(obtenerIdUsuario());
+            String fechaUltimoRespaldo = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(
+                    Calendar.getInstance().getTime());
+            usuario.setEnNube(true);
+            usuario.setFechaUltimoRespaldo(fechaUltimoRespaldo);
+            actualizarUsuario(usuario, manejadorBaseDeDatosLocal);
 
 
-        //Realizar recorrido por cada registro de cada tabla en la nube y meter cada id de cada
-        // registro en un set de id's
-        Set<Long> idsContactosEnNube = obtenerIdsContactos();
-        Set<Long> idsNotificacionesEnNube = obtenerIdsNotificaciones();
+            //Realizar recorrido por cada registro de cada tabla en la nube y meter cada id de cada
+            // registro en un set de id's
+            Set<Long> idsContactosEnNube = obtenerIdsContactos();
+            Set<Long> idsNotificacionesEnNube = obtenerIdsNotificaciones();
 
-        //Realizar recorrido por cada registro de cada tabla de nuestra BD Local y eliminamos el
-        // id del set
-        for (Contacto contacto :
-                manejadorBaseDeDatosLocal.obtenerContactos(obtenerIdUsuario())) {
-            if (!contacto.getEnNube()) {
-                contacto.setEnNube(true);
-                //Si el registro existe en la Nube, realizamos un update para ese registro
-                if (idsContactosEnNube.contains(contacto.getIdContacto())) {
-                    actualizarContacto(contacto, manejadorBaseDeDatosLocal);
-                } else {
-                    // Si el registro no existe en la nube entonces lo agregamos
-                    agregarContacto(contacto, manejadorBaseDeDatosLocal);
+            //Realizar recorrido por cada registro de cada tabla de nuestra BD Local y eliminamos el
+            // id del set
+            for (Contacto contacto :
+                    manejadorBaseDeDatosLocal.obtenerContactos(obtenerIdUsuario())) {
+                if (!contacto.getEnNube()) {
+                    contacto.setEnNube(true);
+                    //Si el registro existe en la Nube, realizamos un update para ese registro
+                    if (idsContactosEnNube.contains(contacto.getIdContacto())) {
+                        actualizarContacto(contacto, manejadorBaseDeDatosLocal);
+                    } else {
+                        // Si el registro no existe en la nube entonces lo agregamos
+                        agregarContacto(contacto, manejadorBaseDeDatosLocal);
+                    }
                 }
+                //Eliminamos el id del set
+                idsContactosEnNube.remove(contacto.getIdContacto());
             }
-            //Eliminamos el id del set
-            idsContactosEnNube.remove(contacto.getIdContacto());
-        }
-        //Todoo aquel id que haya quedado dentro del set significara que la bd local no lo
-        //contenía, por lo que se eliminara ese registro de la bd de la nube
-        for (Long idContactoEnNubeRestante : idsContactosEnNube) {
-            eliminarContacto(idContactoEnNubeRestante);
-        }
+            //Todoo aquel id que haya quedado dentro del set significara que la bd local no lo
+            //contenía, por lo que se eliminara ese registro de la bd de la nube
+            for (Long idContactoEnNubeRestante : idsContactosEnNube) {
+                eliminarContacto(idContactoEnNubeRestante);
+            }
 
-        //Realizar recorrido por cada registro de cada tabla de nuestra BD Local y eliminamos el
-        // id del set
-        for (Notificacion notificacion :
-                manejadorBaseDeDatosLocal.obtenerNotificaciones(obtenerIdUsuario())) {
-            if (!notificacion.getEnNube()) {
-                notificacion.setEnNube(true);
-                //Si el registro existe en la Nube, realizamos un update para ese registro
-                if (idsNotificacionesEnNube.contains(notificacion.getIdNotificacion())) {
-                    actualizarNotificacion(notificacion, manejadorBaseDeDatosLocal);
-                } else {
-                    // Si el registro no existe en la nube entonces lo agregamos
-                    agregarNotificacion(notificacion, manejadorBaseDeDatosLocal);
+            //Realizar recorrido por cada registro de cada tabla de nuestra BD Local y eliminamos el
+            // id del set
+            for (Notificacion notificacion :
+                    manejadorBaseDeDatosLocal.obtenerNotificaciones(obtenerIdUsuario())) {
+                if (!notificacion.getEnNube()) {
+                    notificacion.setEnNube(true);
+                    //Si el registro existe en la Nube, realizamos un update para ese registro
+                    if (idsNotificacionesEnNube.contains(notificacion.getIdNotificacion())) {
+                        actualizarNotificacion(notificacion, manejadorBaseDeDatosLocal);
+                    } else {
+                        // Si el registro no existe en la nube entonces lo agregamos
+                        agregarNotificacion(notificacion, manejadorBaseDeDatosLocal);
+                    }
                 }
+                //Eliminamos el id del set
+                idsNotificacionesEnNube.remove(notificacion.getIdNotificacion());
             }
-            //Eliminamos el id del set
-            idsNotificacionesEnNube.remove(notificacion.getIdNotificacion());
+            //Todoo aquel id que haya quedado dentro del set significara que la bd local no lo
+            //contenía, por lo que se eliminara ese registro de la bd de la nube
+            for (Long idNotificacionEnNubeRestante : idsNotificacionesEnNube) {
+                eliminarNotificacion(idNotificacionEnNubeRestante);
+            }
+
         }
-        //Todoo aquel id que haya quedado dentro del set significara que la bd local no lo
-        //contenía, por lo que se eliminara ese registro de la bd de la nube
-        for (Long idNotificacionEnNubeRestante : idsNotificacionesEnNube) {
-            eliminarNotificacion(idNotificacionEnNubeRestante);
+    }
+
+    class HiloParaDescargarRespaldo extends Thread{
+        ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
+        HiloParaDescargarRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal){
+            this.manejadorBaseDeDatosLocal = manejadorBaseDeDatosLocal;
         }
 
+        public void run(){
+            descargarUsuario(manejadorBaseDeDatosLocal);
+            descargarContactos(manejadorBaseDeDatosLocal);
+            descargarNotificaciones(manejadorBaseDeDatosLocal);
+        }
     }
 }
