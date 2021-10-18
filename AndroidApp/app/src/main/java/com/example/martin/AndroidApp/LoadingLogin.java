@@ -250,18 +250,9 @@ public class LoadingLogin extends AppCompatActivity {
                                     user.sendEmailVerification();
                                     setContentView(R.layout.verify_email);
                                 } else {
-                                    final Handler handler = new Handler();
-                                    handler.postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Intent intent =
-                                                    new Intent(getApplicationContext(),
-                                                            MainActivity.class);
-                                            intent.putExtra("firstLaunch", false);
-                                            startActivity(intent);
-                                        }
-                                    }, 3000);
-
+                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                    intent.putExtra("firstLaunch", false);
+                                    startActivity(intent);
                                 }
                             } else {
                                 // If sign in fails, display a message to the user.
