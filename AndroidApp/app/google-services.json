@@ -1,33 +1,42 @@
 {
   "project_info": {
-    "project_number": "948425774486",
-    "project_id": "tt-emergencias",
-    "storage_bucket": "tt-emergencias.appspot.com"
+    "project_number": "244678237835",
+    "firebase_url": "https://lifeguard-a4172.firebaseio.com",
+    "project_id": "lifeguard-a4172",
+    "storage_bucket": "lifeguard-a4172.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:948425774486:android:a07b27fe7ee165f512b9b7",
+        "mobilesdk_app_id": "1:244678237835:android:605403758293aec36bbe8e",
         "android_client_info": {
           "package_name": "com.example.martin.lifeguard"
         }
       },
       "oauth_client": [
         {
-          "client_id": "948425774486-v5caqhhuhunsudtkca0rc5p11mis4i4n.apps.googleusercontent.com",
+          "client_id": "244678237835-odkiq41lqskd10okv0thau2tr1hae52m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.martin.lifeguard",
+            "certificate_hash": "4ee5c49ed85a527db0a1f114fcec49d6031a977a"
+          }
+        },
+        {
+          "client_id": "244678237835-m01h6k88t287hob4j54v7h6pkvvgmkap.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDjfyeFUf4tP-VeJoCqLAeDHRKlu0uQMpo"
+          "current_key": "AIzaSyD92wNjwXmSBl4fvbS5yLIK-hc8FJRafU8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "948425774486-v5caqhhuhunsudtkca0rc5p11mis4i4n.apps.googleusercontent.com",
+              "client_id": "244678237835-m01h6k88t287hob4j54v7h6pkvvgmkap.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
