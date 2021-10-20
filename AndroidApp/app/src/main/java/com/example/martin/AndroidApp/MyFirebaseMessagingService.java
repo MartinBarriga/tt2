@@ -43,14 +43,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             long idNotificacion =
                     mManejadorBaseDeDatosLocal
-                            .agregarNotificacion(remoteMessage, usuarioActual.getUid());
+                            .agregarNotificacion(remoteMessage, usuarioActual.getUid(), 0);
 
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.putExtra("nuevaAlerta", true);
             intent.putExtra("titulo", remoteMessage.getData().get("titulo"));
-            intent.putExtra("idUsuarioQuEnviaAlerta", remoteMessage.getData().get("idUsuarioQuEnviaAlerta"));
+            intent.putExtra("idEmergencia", remoteMessage.getData().get("idEmergencia"));
             intent.putExtra("idNotificacion", idNotificacion);
             intent.putExtra("fecha", remoteMessage.getData().get("fecha"));
+            intent.putExtra("esPropia", false);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             PendingIntent pendingIntent =

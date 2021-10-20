@@ -29,7 +29,9 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,8 +60,14 @@ public class Countdown extends AppCompatActivity {
             public void onFinish() {
                 Toast.makeText(getApplicationContext(), "Enviando alertas...", Toast.LENGTH_LONG)
                         .show();
-                enviarNotificacion();
-                enviarSMS(getCurrentFocus(), getApplicationContext());
+
+                String fecha = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(
+                        Calendar.getInstance().getTime());
+                String idUsuario = mManejadorBaseDeDatosNube.obtenerIdUsuario();
+                String idEmergencia = (idUsuario+" "+fecha).replace(" ", "_");
+
+                enviarNotificacion(idEmergencia, idUsuario, fecha);
+                enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia);
             }
         };
         cdt.start();
@@ -68,8 +76,14 @@ public class Countdown extends AppCompatActivity {
     public void saltarCountDown(View view) {
         cdt.cancel();
         Toast.makeText(getApplicationContext(), "Enviando alertas...", Toast.LENGTH_LONG).show();
-        enviarNotificacion();
-        enviarSMS(getCurrentFocus(), getApplicationContext());
+
+        String fecha = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(
+                Calendar.getInstance().getTime());
+        String idUsuario = mManejadorBaseDeDatosNube.obtenerIdUsuario();
+        String idEmergencia = (idUsuario+" "+fecha).replace(" ", "_");
+
+        enviarNotificacion(idEmergencia, idUsuario, fecha);
+        enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia);
     }
 
     public void cancelarAlerta(View view) {
@@ -77,7 +91,7 @@ public class Countdown extends AppCompatActivity {
         System.exit(0);
     }
 
-    public void enviarNotificacion() {
+    public void enviarNotificacion(String idEmergencia, String idUsuario, String fecha) {
         obtenerLocalizacion();
         //timer para que de chance de obtener la localización sin problemas
         Handler handler = new Handler();
@@ -85,9 +99,10 @@ public class Countdown extends AppCompatActivity {
             @Override
             public void run() {
                 try {
+                    mManejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, location);
                     JSONObject datosDelUsuario = mManejadorBaseDeDatosLocal
                             .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
-                                    mManejadorBaseDeDatosNube.obtenerIdUsuario(), location);
+                                   idUsuario , idEmergencia, fecha);
                     RequestQueue myrequest = Volley.newRequestQueue(getApplicationContext());
                     String URL = "https://fcm.googleapis.com/fcm/send";
 
@@ -100,9 +115,9 @@ public class Countdown extends AppCompatActivity {
 
                                     header.put("content-type", "application/json");
                                     header.put("authorization",
-                                            "key=AAAAOPf1nos" +
-                                                    ":APA91bHaLkuq7MtUFj7DOqr5Mwg9PTMAaydunHq" +
-                                                    "-p6394Z6q3uE_vdtKbtkPkD2ee1Q8BBfZpmIsVNYpBpy52oR6sfAOaREegqb4CGRt04Wr-MDf7WEK8hFiYMYwD0k5F4fDH8Ld5pQ_");
+                                            "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOxNJAL" +
+                                                    "9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Yed2KRvprMhwZ" +
+                                                    "UUuBQY4tvlZ8txWE1ir5XTWfi2");
                                     return header;
                                 }
                             };
@@ -117,7 +132,7 @@ public class Countdown extends AppCompatActivity {
         }, 5000);
     }
 
-    public void enviarSMS(View view, Context context) {
+    public void enviarSMS(View view, Context context, String idEmergencia) {
 
         obtenerLocalizacion();
         //timer para que de chance de obtener la localización sin problemas
@@ -125,26 +140,29 @@ public class Countdown extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Pair<String, ArrayList<String>> mensajeYNumerosDeTelefonos =
+                ArrayList<Pair<String, String>> mensajesYNumerosDeTelefonos =
                         mManejadorBaseDeDatosLocal
                                 .obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
                                         mManejadorBaseDeDatosNube.obtenerIdUsuario(),
-                                        location);
-                for (String telefono : mensajeYNumerosDeTelefonos.second) {
+                                        location, idEmergencia);
+                for (Pair<String, String> mensajeYTelefono : mensajesYNumerosDeTelefonos) {
                     SmsManager sms = SmsManager.getDefault();
                     ArrayList<String> mensajeEnPartes = null;
                     try {
-                        mensajeEnPartes = sms.divideMessage(mensajeYNumerosDeTelefonos.first);
+                        mensajeEnPartes = sms.divideMessage(mensajeYTelefono.first);
                     } catch (Exception e) {
                         Log.d("LOG", "Excepcion:" + e);
                     }
-                    sms.sendMultipartTextMessage(telefono, null, mensajeEnPartes, null, null);
-                    (new Handler()).postDelayed(new Runnable() {
-                        public void run() {
-                            System.exit(0);
-                        }
-                    }, 5000);
-                    Log.d("LOG", "Se envió un mensaje a: " + telefono);
+                    for (String msj : mensajeEnPartes ) {
+                        Log.d("LOG", "Mensaje: " + msj);
+                    }
+                    sms.sendMultipartTextMessage(mensajeYTelefono.second, null, mensajeEnPartes, null, null);
+//                    (new Handler()).postDelayed(new Runnable() {
+//                        public void run() {
+//                            System.exit(0);
+//                        }
+//                    }, 5000);
+                    Log.d("LOG", "Se envió un mensaje a: " + mensajeYTelefono.second);
                 }
 
             }
@@ -184,13 +202,10 @@ public class Countdown extends AppCompatActivity {
                             double longitude =
                                     locationResult.getLocations().get(latestLocationIndex)
                                             .getLongitude();
-                            location =
-                                    "\nMi ubicación es: https://www.google" +
-                                            ".com/maps/search/?api=1&query=" +
-                                            Double.toString(latitude) + "," +
-                                            Double.toString(longitude);
+                            location =Double.toString(longitude) + "," +Double.toString(latitude);
                         }
                     }
                 }, Looper.getMainLooper());
     }
+
 }

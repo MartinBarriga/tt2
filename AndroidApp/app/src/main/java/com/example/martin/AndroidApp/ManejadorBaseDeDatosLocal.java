@@ -91,17 +91,16 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     }
 
     public JSONObject obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(String idUsuario,
-                                                                                   String localizacion)
+                                                                                   String idEmergencia,
+                                                                                   String fecha)
             throws JSONException {
         String titulo = "";
-        String fecha = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(
-                Calendar.getInstance().getTime());
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor informacionUsuario = lectura
                 .rawQuery("SELECT * FROM " + NOMBRE_TABLA_USUARIO + " WHERE idUsuario = ? ",
                         new String[]{idUsuario});
         while (informacionUsuario.moveToNext()) {
-            titulo = informacionUsuario.getString(1) + "tiene una emergencia";
+            titulo = informacionUsuario.getString(1) + " tiene una emergencia";
         }
 
         Cursor contactosConNotificacionSeleccionada = lectura
@@ -120,67 +119,52 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         JSONObject informacionBaseDeNotificacionAEnviar = new JSONObject();
         informacionBaseDeNotificacionAEnviar.put("titulo", titulo);
         informacionBaseDeNotificacionAEnviar.put("fecha", fecha);
-        informacionBaseDeNotificacionAEnviar.put("idUsuarioQuEnviaAlerta", idUsuario);
+        informacionBaseDeNotificacionAEnviar.put("idEmergencia", idEmergencia);
 
         JSONObject datosDelUsuarioEnFormatoJson = new JSONObject();
         //Para enviarte una notificación a ti mismo cambia la siguiente línea por json.put("to",
         // "/topics/tunumerodetelefono");
-        datosDelUsuarioEnFormatoJson.put("condition", condicion);
+//        datosDelUsuarioEnFormatoJson.put("condition", condicion);
+        datosDelUsuarioEnFormatoJson.put("to","/topics/7531012041");
         datosDelUsuarioEnFormatoJson.put("data", informacionBaseDeNotificacionAEnviar);
         lectura.close();
         return datosDelUsuarioEnFormatoJson;
     }
 
-    public Pair<String, ArrayList<String>> obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
-            String idUsuario, String localizacion) {
-        String mensaje = "";
+    public ArrayList<Pair<String, String>> obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
+            String idUsuario, String localizacion, String idEmergencia) {
         SQLiteDatabase lectura = getReadableDatabase();
-        Cursor informacionUsuario = lectura
-                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_USUARIO + " WHERE idUsuario = ? ",
-                        new String[]{idUsuario});
-        while (informacionUsuario.moveToNext()) {
-            mensaje =
-                    "Me encuentro en  una emergencia. A continuacion se muestra mi ubicacion " +
-                            "actual y algunos datos personales" +
-                            "\n" + localizacion + "\n\nNombre: " +
-                            informacionUsuario.getString(1)
-                            + "\nEdad: " + informacionUsuario.getInt(3) +
-                            "\nNúmero de seguridad Social: " +
-                            informacionUsuario.getLong(4)
-                            + "\nMedicación: " + informacionUsuario.getString(5) +
-                            "\nEnfermedades crónicas: " + informacionUsuario.getString(6)
-                            + "\nToxicomanías: " + informacionUsuario.getString(7) +
-                            "\nTipo de sangre: " +
-                            informacionUsuario.getString(8)
-                            + "\nAlergias: " + informacionUsuario.getString(9) + "\nReligión: " +
-                            informacionUsuario.getString(10);
-        }
-        Log.d("LOG", "Mensaje: " + mensaje);
 
         Cursor contactosConMensajeSeleccionado = lectura
                 .rawQuery("SELECT * FROM contacto WHERE idUsuario = ? AND recibeSMS = ?",
                         new String[]{idUsuario, "1"});
 
-        ArrayList<String> telefonos = new ArrayList<String>();
+        ArrayList<Pair<String, String>> mensajesYNumeros = new ArrayList<Pair<String, String>>();
         while (contactosConMensajeSeleccionado.moveToNext()) {
-            telefonos.add(contactosConMensajeSeleccionado.getString(1).replaceAll(" ", ""));
+            String telefono = contactosConMensajeSeleccionado.getString(1).replaceAll(" ", "");
+            String nombre = contactosConMensajeSeleccionado.getString(2).replaceAll(" ", "_")+"-"+contactosConMensajeSeleccionado.getInt(0);
+            String mensaje =
+                    "https://seguimiento-de-alerta.firebaseapp.com/?" +
+                    "id="+idEmergencia+"&nombre="+nombre+"&ubicacion=" + localizacion +"\n\n" +
+                    "Me encuentro en una emergencia. Puedes hacer el seguimiento de esta emergencia" +
+                    " en el enlace de arriba.";
+            Log.d("LOG", "Mensaje: " + mensaje);
+            mensajesYNumeros.add(new Pair<String, String>(mensaje, telefono));
         }
         lectura.close();
-        return new Pair<String, ArrayList<String>>(mensaje, telefonos);
+        return mensajesYNumeros;
     }
 
-    public long agregarNotificacion(RemoteMessage notificacion, String idUsuario) {
+    public long agregarNotificacion(RemoteMessage notificacion, String idUsuario, int esPropia) {
         SQLiteDatabase escritura = getWritableDatabase();
         ContentValues userValues = new ContentValues();
-        int esPropia =
-                idUsuario.matches(notificacion.getData().get("idUsuarioQuEnviaAlerta")) ? 1 : 0;
         userValues.put("idUsuario", idUsuario);
-        userValues.put("idEmergencia", "");
+        userValues.put("idEmergencia", notificacion.getData().get("idEmergencia"));
         userValues.put("titulo", notificacion.getData().get("titulo"));
         userValues.put("estado", 0);
         userValues.put("fecha", notificacion.getData().get("fecha"));
         userValues.put("leido", 0);
-        userValues.put("esPropia", 0);
+        userValues.put("esPropia", esPropia);
         userValues.put("enNube", 0);
         long idNotificacion = escritura.insert("notificacion", "idNotificacion", userValues);
         Log.d("LOG", "Notificación agregada. ID: " + idNotificacion);

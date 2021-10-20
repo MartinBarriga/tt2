@@ -49,6 +49,16 @@ public class ManejadorNotificaciones {
         }
     }
 
+    public void actualizarEstado(final int posicion, int estado) {
+        mNotificaciones.get(posicion).setEstado(estado);
+        mNotificaciones.get(posicion).setEnNube(false);
+        mManejadorBaseDeDatosLocal
+                .actualizarNotificacion(mManejadorBaseDeDatosNube.obtenerIdUsuario(),
+                        mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(
+                                mNotificaciones.get(posicion)));
+
+    }
+
     public ArrayList<Notificacion> getArrayNotifications() {
         return mNotificaciones;
     }
