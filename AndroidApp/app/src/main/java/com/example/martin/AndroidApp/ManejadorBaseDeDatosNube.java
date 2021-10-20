@@ -2,11 +2,15 @@ package com.example.martin.AndroidApp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.example.martin.AndroidApp.ui.notificaciones.ManejadorNotificaciones;
+import com.example.martin.AndroidApp.ui.notificaciones.NotificacionesFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -22,7 +26,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -804,6 +810,72 @@ public class ManejadorBaseDeDatosNube {
         hiloParaHacerRespaldo.start();
     }
 
+    public void crearEmergencia(String idEmergencia, String fecha, String localizacion){
+        Map<String, Object> datosIniciales = new HashMap<>();
+        datosIniciales.put("inicio", fecha);
+        datosIniciales.put("terminada", false);
+
+        BaseDeDatos.collection("emergencias").document(idEmergencia).set(datosIniciales)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("LOG", "EMERGENCIA CREADA");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("LOG", "Error al crear emergencia", e);
+                    }
+                });
+        String[] longitudYLatitud = localizacion.split(",");
+        Map<String, Object> mLocalizacion = new HashMap<>();
+        mLocalizacion.put("usuario", "Emergencia");
+        mLocalizacion.put("longitud", longitudYLatitud[0]);
+        mLocalizacion.put("latitud", longitudYLatitud[1]);
+        BaseDeDatos.collection("emergencias").document(idEmergencia)
+                .collection("localizacion").document(idEmergencia).set(mLocalizacion)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("LOG", "Localizacion agregada");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("LOG", "Error al agregar localizacion", e);
+                    }
+                });
+    }
+
+    public boolean revisarSiUnaEmergenciaFueTerminada(String idEmergencia){
+        try {
+            return (boolean) Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()){
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                if (documentSnapshot.exists()) {
+                                    Log.d("LOG", "Emergencia terminada: "+
+                                            (boolean) documentSnapshot.get("terminada"));
+                                } else {
+                                    Log.d("LOG", "No se encontró el documento");
+                                }
+                            }
+                            Log.d("LOG", "Task complete");
+                        }
+                        })).get("terminada");
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     class HiloParaHacerRespaldo extends Thread{
         ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
         HiloParaHacerRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal){
@@ -885,4 +957,5 @@ public class ManejadorBaseDeDatosNube {
             descargarNotificaciones(manejadorBaseDeDatosLocal);
         }
     }
+
 }

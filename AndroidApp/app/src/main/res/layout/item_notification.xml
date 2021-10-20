@@ -20,8 +20,8 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/fechaNotificacion"
-                android:layout_width="wrap_content"
+                android:id="@+id/tituloNotificacion"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textAlignment="textStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
@@ -31,18 +31,15 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/descripcionNotificacion"
+                android:id="@+id/estadoNotificacion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:singleLine="true"
-                android:textAlignment="textStart"
+                android:textAlignment="viewStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="#000000"
-                app:layout_constraintEnd_toEndOf="@+id/fechaNotificacion"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fechaNotificacion" />
+                app:layout_constraintTop_toBottomOf="@id/tituloNotificacion" />
 
             <ImageView
                 android:id="@+id/leidoNotificacion"
@@ -52,6 +49,16 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_new_releases_black_24dp" />
+
+            <TextView
+                android:id="@+id/fechaNotificacion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/estadoNotificacion"
+                app:layout_constraintTop_toBottomOf="@+id/tituloNotificacion" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

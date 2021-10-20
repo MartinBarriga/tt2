@@ -9,4 +9,6 @@
     <color name="leidoColorFalse">#00FFFFFF</color>
     <color name="messageColorTrue">#FFC107</color>
     <color name="messageColorFalse">#00FFFFFF</color>
+    <color name="notificationStateGreen">#48b750</color>
+    <color name="notificationStateRed">#a62a2a</color>
 </resources>

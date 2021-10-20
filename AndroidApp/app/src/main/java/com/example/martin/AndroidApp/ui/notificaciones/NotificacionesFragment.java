@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -32,6 +33,7 @@ import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.Notificacion;
 import com.example.martin.AndroidApp.R;
+import com.example.martin.AndroidApp.SeguimientoDeAlerta;
 import com.example.martin.AndroidApp.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -199,25 +201,69 @@ public class NotificacionesFragment extends Fragment
 
     @Override
     public void onNotificacionClick(final int position) {
-        final AlertDialog.Builder notificacionDialog = new AlertDialog.Builder(getContext());
-        notificacionDialog.setTitle("Información del mensaje");
-        final SpannableString mensaje = new SpannableString(mNotificaciones.get(position).getTitulo());
-        Linkify.addLinks(mensaje, Linkify.WEB_URLS);
-        notificacionDialog.setMessage(mensaje);
-        notificacionDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+        String idEmergencia = mNotificaciones.get(position).getIdEmergencia();
+        if (mNotificaciones.get(position).getEstado()==0){
+            HiloParaRevisarSiLaEmergenciaFueTerminada hiloParaRevisarSiLaEmergenciaFueTerminada =
+                    new HiloParaRevisarSiLaEmergenciaFueTerminada(idEmergencia, mNotificacionesManager, position);
+            hiloParaRevisarSiLaEmergenciaFueTerminada.start();
+            try {
+                hiloParaRevisarSiLaEmergenciaFueTerminada.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
-        final AlertDialog notificacionAlertDialog = notificacionDialog.create();
-        notificacionAlertDialog.show();
-        ((TextView) notificacionAlertDialog.findViewById(android.R.id.message))
-                .setMovementMethod(LinkMovementMethod.getInstance());
+            (new Handler()).postDelayed(new Runnable() {
+                public void run() {
+                    mNotificacionesRecyclerAdapter.notifyItemChanged(position);
+                }
+            }, 200);
+            if (mNotificaciones.get(position).getEstado()==0){
+                Usuario usuario = mManejadorBaseDeDatosLocal
+                        .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
+                String nombre = usuario.getNombre().replace(" ","_");
+                String enlace = "https://seguimiento-de-alerta.firebaseapp.com/?id="+idEmergencia+"&nombre="+nombre;
+                Intent intent = new Intent(getContext(), SeguimientoDeAlerta.class);
+                intent.putExtra("enlace", enlace);
+                startActivity(intent);
+            }
+        }
+        if (mNotificaciones.get(position).getEstado()==1){
+            //Abrir Activity del resumen
+            Toast.makeText(getContext(), "La emergencia fue terminada",
+                    Toast.LENGTH_LONG).show();
+            Log.d("LOG", "Se muestra resumen de la emergencia.");
+        }else if (mNotificaciones.get(position).getEstado()==2){
+            //Abrir Activity del resumen de una emergencia propia que sí envió alertas
+        }else if (mNotificaciones.get(position).getEstado()==3){
+            //Abrir lo correspondiente a una emergencia cancelada manualmente
+        }else if (mNotificaciones.get(position).getEstado()==4){
+            //Abrir activity de las mediciones de una emergencia que no envió alertas
+        }
         mNotificacionesManager.actualizarCampoLeido(position);
         (new Handler()).postDelayed(new Runnable() {
             public void run() {
                 mNotificacionesRecyclerAdapter.notifyItemChanged(position);
             }
         }, 500);
+    }
+
+    class HiloParaRevisarSiLaEmergenciaFueTerminada extends Thread{
+        ManejadorBaseDeDatosNube manejadorBaseDeDatosNube;
+        String idEmergencia;
+        int posicion;
+        ManejadorNotificaciones manejadorNotificaciones;
+        HiloParaRevisarSiLaEmergenciaFueTerminada(String idEmergencia, ManejadorNotificaciones manejadorNotificaciones, int posicion){
+            this.idEmergencia = idEmergencia;
+            this.manejadorNotificaciones = manejadorNotificaciones;
+            this.posicion = posicion;
+            this.manejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
+        }
+
+        public void run(){
+            boolean terminada = manejadorBaseDeDatosNube.revisarSiUnaEmergenciaFueTerminada(idEmergencia);
+            if (terminada){
+                Log.d("LOG", "Emergencia terminada. Actualizando estado.");
+                manejadorNotificaciones.actualizarEstado(posicion, 1);
+            }
+        }
     }
 }

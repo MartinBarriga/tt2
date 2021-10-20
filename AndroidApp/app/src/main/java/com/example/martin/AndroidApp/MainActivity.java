@@ -136,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
         }
         if (bundle.getBoolean("nuevaAlerta")) {
             Toast.makeText(getApplicationContext(), "Nueva alerta", Toast.LENGTH_LONG).show();
-            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             ManejadorBaseDeDatosLocal mConnectionSQLiteHelper =
                     new ManejadorBaseDeDatosLocal(MainActivity.this, null);
 
@@ -147,11 +146,10 @@ public class MainActivity extends AppCompatActivity {
                             String.valueOf(bundle.getLong("idNotificacion")) +
                             " AND idUsuario LIKE '" +
                             mManejadorBaseDeDatosNube.obtenerIdUsuario() + "'");
-            Boolean esPropia = mManejadorBaseDeDatosNube.obtenerIdUsuario()
-                    .matches(bundle.getString("idUsuarioQuEnviaAlerta")) ? true : false;
+            Boolean esPropia = bundle.getBoolean("esPropia");
             Notificacion notificacion =
                     new Notificacion(bundle.getLong("idNotificacion"),
-                            mManejadorBaseDeDatosNube.obtenerIdUsuario(), "",
+                            mManejadorBaseDeDatosNube.obtenerIdUsuario(), bundle.getString("idEmergencia"),
                             bundle.getString("titulo"), 0, bundle.getString("fecha"), true,
                             esPropia,
                             false);
@@ -161,20 +159,7 @@ public class MainActivity extends AppCompatActivity {
                     "idNotificacion = ? AND idUsuario LIKE '" + notificacion.getIdUsuario() + "'",
                     new String[]{String.valueOf(notificacion.getIdNotificacion())});
 
-            alertDialog.setTitle(notificacion.getTitulo());
-            final SpannableString s = new SpannableString(notificacion.getTitulo());
-            Linkify.addLinks(s, Linkify.WEB_URLS);
-            alertDialog.setMessage(s);
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
             escritura.close();
-            ((TextView) alertDialog.findViewById(android.R.id.message))
-                    .setMovementMethod(LinkMovementMethod.getInstance());
         }
 
     }
