@@ -25,6 +25,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.martin.AndroidApp.ui.mediciones.Hilo;
 import com.example.martin.AndroidApp.ui.mediciones.DispositivosVinculados;
+import com.example.martin.AndroidApp.ui.usuario.Respaldo;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
@@ -136,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (bundle.getBoolean("nuevaAlerta")) {
             Toast.makeText(getApplicationContext(), "Nueva alerta", Toast.LENGTH_LONG).show();
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             ManejadorBaseDeDatosLocal mConnectionSQLiteHelper =
                     new ManejadorBaseDeDatosLocal(MainActivity.this, null);
 
@@ -158,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
                             .generarFormatoDeNotificacionParaIntroducirEnBD(notificacion),
                     "idNotificacion = ? AND idUsuario LIKE '" + notificacion.getIdUsuario() + "'",
                     new String[]{String.valueOf(notificacion.getIdNotificacion())});
-
             escritura.close();
         }
 

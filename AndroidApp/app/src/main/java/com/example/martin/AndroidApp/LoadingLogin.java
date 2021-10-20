@@ -46,11 +46,11 @@ public class LoadingLogin extends AppCompatActivity {
         db.close();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Alerta de LifeGuard";
+            CharSequence name = "Alerta";
             String description = "Alertas generadas al recibir un mensaje de emergencia.";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel =
-                    new NotificationChannel("Alerta LifeGuard", name, importance);
+                    new NotificationChannel("Alerta", name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this

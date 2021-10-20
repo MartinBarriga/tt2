@@ -58,7 +58,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder builder =
-                    new NotificationCompat.Builder(this, "Alerta LifeGuard")
+                    new NotificationCompat.Builder(this, "Alerta")
                             .setSmallIcon(R.drawable.ic_warning_black_24dp)
                             .setContentTitle(
                                     remoteMessage.getData().get("titulo"))
