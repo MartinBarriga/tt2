@@ -120,7 +120,7 @@ public class Respaldo extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        fechaUltimoRespaldo.set(Calendar.HOUR_OF_DAY, 0);
+        fechaUltimoRespaldo.set(Calendar.HOUR_OF_DAY, 23);
         fechaUltimoRespaldo.set(Calendar.MINUTE, 0);
         fechaUltimoRespaldo.set(Calendar.SECOND, 0);
         fechaUltimoRespaldo.set(Calendar.MILLISECOND, 0);
