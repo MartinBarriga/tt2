@@ -124,8 +124,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         JSONObject datosDelUsuarioEnFormatoJson = new JSONObject();
         //Para enviarte una notificación a ti mismo cambia la siguiente línea por json.put("to",
         // "/topics/tunumerodetelefono");
-//        datosDelUsuarioEnFormatoJson.put("condition", condicion);
-        datosDelUsuarioEnFormatoJson.put("to","/topics/7531012041");
+        datosDelUsuarioEnFormatoJson.put("condition", condicion);
         datosDelUsuarioEnFormatoJson.put("data", informacionBaseDeNotificacionAEnviar);
         lectura.close();
         return datosDelUsuarioEnFormatoJson;

@@ -29,7 +29,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.martin.AndroidApp.Countdown;
-import com.example.martin.AndroidApp.MainActivity;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.Notificacion;
