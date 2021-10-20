@@ -2,7 +2,10 @@ package com.example.martin.AndroidApp.ui.usuario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,12 +21,18 @@ import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
 import com.example.martin.AndroidApp.Usuario;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Set;
 
 public class Respaldo extends AppCompatActivity {
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
     private Usuario usuario;
+    private AlarmManager alarma;
+    private Intent intent;
+    private PendingIntent intentPendiente;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +73,8 @@ public class Respaldo extends AppCompatActivity {
                                 mManejadorBaseDeDatosLocal
                                         .generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
                         Log.i("Frecuencia Seleccionada : ", frecuenciaRespaldo);
+                        System.out.println("Frecuencia Seleccionada: " + frecuenciaRespaldo);
+                        programarRespaldo();
                     }
 
                     @Override
@@ -77,6 +88,7 @@ public class Respaldo extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mManejadorBaseDeDatosNube.realizarRespaldo(mManejadorBaseDeDatosLocal);
+
             }
         });
 
@@ -86,5 +98,60 @@ public class Respaldo extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void programarRespaldo() {
+        int equivalenciaEnMilisegundosEnUnDia = 24 * 60 * 60 * 1000;
+        int frecuenciaRespaldoEnMillis;
+        Usuario usuario = mManejadorBaseDeDatosLocal
+                .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
+        String frecuenciaRespaldo = usuario.getFrecuenciaRespaldo();
+        String fechaUltimoRespaldoString = usuario.getFechaUltimoRespaldo();
+        Calendar fechaUltimoRespaldo = Calendar.getInstance();
+        if (!fechaUltimoRespaldoString.matches("Sin respaldo previo")) {
+            fechaUltimoRespaldoString =
+                    fechaUltimoRespaldoString.substring(0, fechaUltimoRespaldoString.indexOf(" "));
+            SimpleDateFormat formatoParaFechas = new SimpleDateFormat("yyyy/MM/dd");
+
+            fechaUltimoRespaldo = Calendar.getInstance();
+            try {
+                fechaUltimoRespaldo.setTime(formatoParaFechas.parse(fechaUltimoRespaldoString));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        fechaUltimoRespaldo.set(Calendar.HOUR_OF_DAY, 23);
+        fechaUltimoRespaldo.set(Calendar.MINUTE, 0);
+        fechaUltimoRespaldo.set(Calendar.SECOND, 0);
+        fechaUltimoRespaldo.set(Calendar.MILLISECOND, 0);
+
+        switch (frecuenciaRespaldo) {
+            case "Cada 2 dias":
+                frecuenciaRespaldoEnMillis = equivalenciaEnMilisegundosEnUnDia * 2;
+                break;
+            case "Cada 5 dias":
+                frecuenciaRespaldoEnMillis = equivalenciaEnMilisegundosEnUnDia * 5;
+                break;
+            case "Cada 7 dias":
+                frecuenciaRespaldoEnMillis = equivalenciaEnMilisegundosEnUnDia * 7;
+                break;
+            default:
+                frecuenciaRespaldoEnMillis = equivalenciaEnMilisegundosEnUnDia;
+                break;
+        }
+
+
+        alarma = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        intent = new Intent(getApplicationContext(), RespaldoAutomatico.class);
+        intentPendiente = PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
+        //alarma.setExact(AlarmManager.RTC_WAKEUP, calendario.getTimeInMillis(), intentPendiente);
+        //alarma.setRepeating(AlarmManager.RTC_WAKEUP, calendario.getTimeInMillis(), 10*1000,
+        // intentPendiente);
+        if (alarma != null) {
+            alarma.cancel(intentPendiente);
+        }
+        alarma.setExact(AlarmManager.RTC_WAKEUP,
+                fechaUltimoRespaldo.getTimeInMillis() + frecuenciaRespaldoEnMillis,
+                intentPendiente);
     }
 }
