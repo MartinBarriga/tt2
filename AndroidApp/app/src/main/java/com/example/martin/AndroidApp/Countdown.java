@@ -65,6 +65,7 @@ public class Countdown extends AppCompatActivity {
                         Calendar.getInstance().getTime());
                 String idUsuario = mManejadorBaseDeDatosNube.obtenerIdUsuario();
                 String idEmergencia = (idUsuario+" "+fecha).replace(" ", "_");
+                agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
 
                 enviarNotificacion(idEmergencia, idUsuario, fecha);
                 enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia);
@@ -81,7 +82,7 @@ public class Countdown extends AppCompatActivity {
                 Calendar.getInstance().getTime());
         String idUsuario = mManejadorBaseDeDatosNube.obtenerIdUsuario();
         String idEmergencia = (idUsuario+" "+fecha).replace(" ", "_");
-
+        agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
         enviarNotificacion(idEmergencia, idUsuario, fecha);
         enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia);
     }
@@ -89,6 +90,11 @@ public class Countdown extends AppCompatActivity {
     public void cancelarAlerta(View view) {
         cdt.cancel();
         System.exit(0);
+    }
+
+    public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha){
+        Notificacion notificacion = new Notificacion(null,idUsuario,idEmergencia,"Te encuentras en una emergencia", 0, fecha, false, true, false);
+        mManejadorBaseDeDatosLocal.agregarNotificacion(mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(notificacion));
     }
 
     public void enviarNotificacion(String idEmergencia, String idUsuario, String fecha) {
@@ -157,13 +163,13 @@ public class Countdown extends AppCompatActivity {
                         Log.d("LOG", "Mensaje: " + msj);
                     }
                     sms.sendMultipartTextMessage(mensajeYTelefono.second, null, mensajeEnPartes, null, null);
-//                    (new Handler()).postDelayed(new Runnable() {
-//                        public void run() {
-//                            System.exit(0);
-//                        }
-//                    }, 5000);
                     Log.d("LOG", "Se envió un mensaje a: " + mensajeYTelefono.second);
                 }
+                (new Handler()).postDelayed(new Runnable() {
+                    public void run() {
+                        System.exit(0);
+                    }
+                }, 5000);
 
             }
         }, 5000);

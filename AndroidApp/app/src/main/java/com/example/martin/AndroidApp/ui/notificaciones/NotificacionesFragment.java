@@ -217,10 +217,15 @@ public class NotificacionesFragment extends Fragment
                 }
             }, 200);
             if (mNotificaciones.get(position).getEstado()==0){
-                Usuario usuario = mManejadorBaseDeDatosLocal
-                        .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
-                String nombre = usuario.getNombre().replace(" ","_");
-                String enlace = "https://seguimiento-de-alerta.firebaseapp.com/?id="+idEmergencia+"&nombre="+nombre;
+                String nombre;
+                if (mNotificaciones.get(position).getEsPropia()) {
+                    nombre = "Emergencia";
+                } else {
+                    Usuario usuario = mManejadorBaseDeDatosLocal
+                            .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
+                    nombre = usuario.getNombre().replace(" ", "_");
+                }
+                String enlace = "https://seguimiento-de-alerta.firebaseapp.com/?id=" + idEmergencia + "&nombre=" + nombre;
                 Intent intent = new Intent(getContext(), SeguimientoDeAlerta.class);
                 intent.putExtra("enlace", enlace);
                 startActivity(intent);
