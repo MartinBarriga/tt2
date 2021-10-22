@@ -105,7 +105,7 @@ public class Countdown extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    mManejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, location);
+                    mManejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, location, mManejadorBaseDeDatosLocal.obtenerCantidadDeContactos(idUsuario));
                     JSONObject datosDelUsuario = mManejadorBaseDeDatosLocal
                             .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
                                    idUsuario , idEmergencia, fecha);
