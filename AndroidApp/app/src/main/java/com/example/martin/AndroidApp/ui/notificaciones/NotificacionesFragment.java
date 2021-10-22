@@ -235,7 +235,10 @@ public class NotificacionesFragment extends Fragment
             //Abrir Activity del resumen
             Toast.makeText(getContext(), "La emergencia fue terminada",
                     Toast.LENGTH_LONG).show();
-            Log.d("LOG", "Se muestra resumen de la emergencia.");
+            Intent intent = new Intent(getContext(), ResumenDeEmergencia.class);
+            intent.putExtra("idNotificacion", mNotificaciones.get(position).getIdNotificacion());
+            intent.putExtra("idEmergencia", mNotificaciones.get(position).getIdEmergencia());
+            startActivity(intent);
         }else if (mNotificaciones.get(position).getEstado()==2){
             //Abrir Activity del resumen de una emergencia propia que sí envió alertas
         }else if (mNotificaciones.get(position).getEstado()==3){

@@ -21,7 +21,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
     private static final String NOMRE_BASE_DE_DATOS = "lifeguard";
-    private static final int VERSION_DE_BASE_DE_DATOS = 19;
+    private static final int VERSION_DE_BASE_DE_DATOS = 22;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
     private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
@@ -50,9 +50,9 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     private static final String CREAR_TABLA_RESUMEN = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_RESUMEN +
             " (idResumen INTEGER PRIMARY KEY AUTOINCREMENT, idNotificacion INTEGER NOT NULL " +
-            "REFERENCES " + NOMBRE_TABLA_NOTIFICACION + " (idNotificacion), comentario TEXT, " +
-            "descenlace TEXT, detalles TEXT, duracion TEXT, cantidadDePersonasEnviado INTEGER, " +
-            "seguidores INTEGER, enNube INTEGER)";
+            "REFERENCES " + NOMBRE_TABLA_NOTIFICACION + " (idNotificacion) ON UPDATE CASCADE ON DELETE CASCADE, " +
+            "nombre TEXT, comentario TEXT, " + "desenlace TEXT, detalles TEXT, duracion TEXT, " +
+            "cantidadDePersonasEnviado INTEGER, " + "seguidores INTEGER, enNube INTEGER)";
     private static final String CREAR_TABLA_MEDICION = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_MEDICION +
             " (idMedicion INTEGER PRIMARY KEY AUTOINCREMENT, idUsuario TEXT NOT NULL REFERENCES " +
@@ -60,8 +60,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     private static final String CREAR_TABLA_DATO = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_DATO +
             " (idDato INTEGER PRIMARY KEY AUTOINCREMENT, idMedicion INTEGER NOT NULL REFERENCES " +
-            NOMBRE_TABLA_MEDICION +
-            " (idMedicion), frecuenciaCardiaca INTEGER, ecg INTEGER, hora TEXT, enNube INTEGER)";
+            NOMBRE_TABLA_MEDICION + " (idMedicion) ON UPDATE CASCADE ON DELETE CASCADE, frecuenciaCardiaca " +
+            "INTEGER, ecg INTEGER, hora TEXT, enNube INTEGER)";
 
     public ManejadorBaseDeDatosLocal(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, NOMRE_BASE_DE_DATOS, factory, VERSION_DE_BASE_DE_DATOS);
@@ -198,6 +198,15 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return contactos;
     }
 
+    public int obtenerCantidadDeContactos(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM contacto WHERE idUsuario LIKE '" + idUsuario + "'", null);
+        int cantidad = cursor.getCount();
+        lectura.close();
+        return cantidad;
+    }
+
     public Long agregarNuevoContacto(ContentValues contacto) {
         SQLiteDatabase escritura = getWritableDatabase();
         Long idContacto = escritura.insert(NOMBRE_TABLA_CONTACTO, "idContacto", contacto);
@@ -321,6 +330,46 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return idNotificacion;
     }
 
+    public Boolean existeElResumen(Long idNotificacion) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN "+ NOMBRE_TABLA_NOTIFICACION +
+                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion
+                        , null);
+
+        if (cursor.getCount() == 0) {
+            lectura.close();
+            return false;
+        }
+        lectura.close();
+        return true;
+    }
+
+    public Resumen obtenerResumen(Long idNotificacion) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN "+ NOMBRE_TABLA_NOTIFICACION +
+                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion
+                        , null);
+        if (cursor.moveToNext()) {
+            Boolean enNube = cursor.getInt(9) == 1;
+            Resumen resumen = new Resumen(cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getString(3),
+                    cursor.getString(4),cursor.getString(5),cursor.getString(6),cursor.getInt(7),
+                    cursor.getInt(8),enNube);lectura.close();
+            return resumen;
+        }
+        lectura.close();
+        return null;
+    }
+
+    public Long agregarResumen(ContentValues resumen) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        Long idResumen =
+                escritura.insert(NOMBRE_TABLA_RESUMEN, "idResumen", resumen);
+        escritura.close();
+        return idResumen;
+    }
+
     public ContentValues generarFormatoDeUsuarioParaIntroducirEnBD(Usuario usuario) {
         ContentValues contentUsuario = new ContentValues();
         contentUsuario.put("idUsuario", usuario.getIdUsuario());
@@ -401,5 +450,21 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         }
         contentNotificacion.put("estado", notificacion.getEstado());
         return contentNotificacion;
+    }
+
+    public ContentValues generarFormatoDeResumenParaIntroducirEnBD(Resumen resumen){
+        ContentValues contentResumen = new ContentValues();
+        contentResumen.put("idResumen", resumen.getIdResumen());
+        contentResumen.put("idNotificacion", resumen.getIdNotificacion());
+        contentResumen.put("nombre", resumen.getNombre());
+        contentResumen.put("comentario", resumen.getComentario());
+        contentResumen.put("desenlace", resumen.getDesenlace());
+        contentResumen.put("detalles", resumen.getDetalles());
+        contentResumen.put("duracion", resumen.getDuracion());
+        contentResumen.put("cantidadDePersonasEnviado", resumen.getCantidadDePersonasEnviado());
+        contentResumen.put("seguidores", resumen.getSeguidores());
+        contentResumen.put("enNube", resumen.isEnNube() ? 1: 0);
+
+        return contentResumen;
     }
 }

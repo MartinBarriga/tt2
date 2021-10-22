@@ -587,6 +587,33 @@ public class ManejadorBaseDeDatosNube {
                 });
     }
 
+    public String obtenerNombreDeUsuario(String idUsuario){
+        try {
+            return (String) Tasks.await(BaseDeDatos.collection("usuario").whereEqualTo("idUsuario", idUsuario).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()){
+                                DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                                if (documentSnapshot.exists()) {
+                                    Log.d("LOG", "Usuario encontrado: "+
+                                            (String) documentSnapshot.get("nombre"));
+                                } else {
+                                    Log.d("LOG", "No se encontró el usuario");
+                                }
+                            }
+                            Log.d("LOG", "Task complete");
+                        }
+                    })).getDocuments().get(0).get("nombre");
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private void descargarUsuario(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
         try {
             String UID = obtenerIdUsuario();
@@ -709,6 +736,46 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
+    public void descargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, String idEmergencia,
+                                  Long idNotificacion, String nombre) {
+        try {
+            DocumentSnapshot document = Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia).get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot document) {
+                            }
+                    }));
+            Log.d("LOG", "Descargando resumen: "+idEmergencia);
+            Log.d("LOG", document.getId() + " => " + document.getData());
+            String detalles;
+            if (!((String)document.get("hospitalTrasladado")).matches("")){
+                detalles = (String) document.get("hospitalTrasladado");
+            } else {
+                detalles = (String) document.get("nombreFamiliar");
+            }
+            com.example.martin.AndroidApp.Resumen resumen =
+                    new Resumen(null, idNotificacion,
+                            nombre,
+                            (String) document.get("comentariosAdicionales"),
+                            (String) document.get("Desenlace"),
+                            detalles,
+//                          (String) document.get("duracion"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
+                            "8 minutos 12 segundos (prueba)",
+                            ((Long)document.get("cantidadDePersonasEnviado")).intValue(),
+//                          (int) document.get("seguidores"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
+                            0,
+                            false);
+
+            manejadorBaseDeDatosLocal.agregarResumen(manejadorBaseDeDatosLocal
+                    .generarFormatoDeResumenParaIntroducirEnBD(resumen));
+
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void descargarRespaldo(
             ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
         HiloParaDescargarRespaldo hiloParaDescargarRespaldo = new HiloParaDescargarRespaldo(manejadorBaseDeDatosLocal);
@@ -810,10 +877,11 @@ public class ManejadorBaseDeDatosNube {
         hiloParaHacerRespaldo.start();
     }
 
-    public void crearEmergencia(String idEmergencia, String fecha, String localizacion){
+    public void crearEmergencia(String idEmergencia, String fecha, String localizacion, int cantidadDePersonasEnviado){
         Map<String, Object> datosIniciales = new HashMap<>();
         datosIniciales.put("inicio", fecha);
         datosIniciales.put("terminada", false);
+        datosIniciales.put("cantidadDePersonasEnviado", cantidadDePersonasEnviado);
 
         BaseDeDatos.collection("emergencias").document(idEmergencia).set(datosIniciales)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -873,6 +941,17 @@ public class ManejadorBaseDeDatosNube {
         } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public void iniciarDescargaDeResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, String idEmergencia,
+                                         Long idNotificacion){
+        HiloParaDescargarResumen hiloParaDescargarResumen = new HiloParaDescargarResumen(manejadorBaseDeDatosLocal,idEmergencia,idNotificacion);
+        hiloParaDescargarResumen.start();
+        try {
+            hiloParaDescargarResumen.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -955,6 +1034,31 @@ public class ManejadorBaseDeDatosNube {
             descargarUsuario(manejadorBaseDeDatosLocal);
             descargarContactos(manejadorBaseDeDatosLocal);
             descargarNotificaciones(manejadorBaseDeDatosLocal);
+        }
+    }
+
+    class HiloParaDescargarResumen extends Thread{
+        private ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
+        private String idEmergencia;
+        private Long idNotificacion;
+
+        HiloParaDescargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, String idEmergencia,
+                                 Long idNotificacion){
+            this.manejadorBaseDeDatosLocal = manejadorBaseDeDatosLocal;
+            this.idEmergencia = idEmergencia;
+            this.idNotificacion = idNotificacion;
+        }
+
+        public void run(){
+            String idUsuarioEmergencia = idEmergencia.substring(0,idEmergencia.length()-20);
+            String nombre = obtenerNombreDeUsuario(idUsuarioEmergencia);
+            descargarResumen(manejadorBaseDeDatosLocal, idEmergencia, idNotificacion, nombre);
+            Looper.prepare();
+            (new Handler()).postDelayed(new Runnable() {
+                public void run() {
+                    System.exit(0);
+                }
+            }, 200);
         }
     }
 
