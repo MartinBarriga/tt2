@@ -52,7 +52,7 @@ public class NotificacionesRecyclerAdapter
             case 1: holder.mEstado.setText("Terminada");
                     holder.mEstado.setTextColor(ContextCompat.getColor(mContexto, R.color.notificationStateRed));
                     break;
-            case 2: holder.mEstado.setText("Alertas enviadas");
+            case 2: holder.mEstado.setText("Terminada. Alertas enviadas");
                     holder.mEstado.setTextColor(ContextCompat.getColor(mContexto, R.color.notificationStateRed));
                     break;
             case 3: holder.mEstado.setText("Cancelado manualmente");
