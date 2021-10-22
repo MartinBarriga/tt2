@@ -9,8 +9,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.example.martin.AndroidApp.ui.notificaciones.ManejadorNotificaciones;
-import com.example.martin.AndroidApp.ui.notificaciones.NotificacionesFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -587,9 +585,11 @@ public class ManejadorBaseDeDatosNube {
                 });
     }
 
-    public String obtenerNombreDeUsuario(String idUsuario){
+    public String obtenerNombreDeUsuarioConIdDeEmergencia(String idEmergencia){
         try {
-            return (String) Tasks.await(BaseDeDatos.collection("usuario").whereEqualTo("idUsuario", idUsuario).get()
+            String idUsuario = idEmergencia.substring(0,idEmergencia.length()-20);
+            return (String) Tasks.await(BaseDeDatos.collection("usuario").whereEqualTo("idUsuario",
+                    idUsuario).get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -1050,8 +1050,7 @@ public class ManejadorBaseDeDatosNube {
         }
 
         public void run(){
-            String idUsuarioEmergencia = idEmergencia.substring(0,idEmergencia.length()-20);
-            String nombre = obtenerNombreDeUsuario(idUsuarioEmergencia);
+            String nombre = obtenerNombreDeUsuarioConIdDeEmergencia(idEmergencia);
             descargarResumen(manejadorBaseDeDatosLocal, idEmergencia, idNotificacion, nombre);
             Looper.prepare();
             (new Handler()).postDelayed(new Runnable() {

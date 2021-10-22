@@ -50,13 +50,30 @@ public class ManejadorNotificaciones {
     }
 
     public void actualizarEstado(final int posicion, int estado) {
-        mNotificaciones.get(posicion).setEstado(estado);
+        if (mNotificaciones.get(posicion).getEsPropia() && estado==1)
+            mNotificaciones.get(posicion).setEstado(2);
+         else
+            mNotificaciones.get(posicion).setEstado(estado);
         mNotificaciones.get(posicion).setEnNube(false);
         mManejadorBaseDeDatosLocal
                 .actualizarNotificacion(mManejadorBaseDeDatosNube.obtenerIdUsuario(),
                         mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(
                                 mNotificaciones.get(posicion)));
 
+    }
+
+    public void actualizarTitulo(final int posicion) {
+        if (mNotificaciones.get(posicion).getEsPropia())
+            mNotificaciones.get(posicion).setNombre("Se detectó una anomalía en tus mediciones");
+        else{
+            mNotificaciones.get(posicion).setNombre(mManejadorBaseDeDatosNube.obtenerNombreDeUsuarioConIdDeEmergencia(
+                    mNotificaciones.get(posicion).getIdEmergencia())+" tuvo una emergencia");
+        }
+        mNotificaciones.get(posicion).setEnNube(false);
+        mManejadorBaseDeDatosLocal
+                .actualizarNotificacion(mManejadorBaseDeDatosNube.obtenerIdUsuario(),
+                        mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(
+                                mNotificaciones.get(posicion)));
     }
 
     public ArrayList<Notificacion> getArrayNotifications() {

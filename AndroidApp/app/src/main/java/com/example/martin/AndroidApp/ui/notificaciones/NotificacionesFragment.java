@@ -233,8 +233,6 @@ public class NotificacionesFragment extends Fragment
         }
         if (mNotificaciones.get(position).getEstado()==1){
             //Abrir Activity del resumen
-            Toast.makeText(getContext(), "La emergencia fue terminada",
-                    Toast.LENGTH_LONG).show();
             Intent intent = new Intent(getContext(), ResumenDeEmergencia.class);
             intent.putExtra("idNotificacion", mNotificaciones.get(position).getIdNotificacion());
             intent.putExtra("idEmergencia", mNotificaciones.get(position).getIdEmergencia());
@@ -271,7 +269,9 @@ public class NotificacionesFragment extends Fragment
             if (terminada){
                 Log.d("LOG", "Emergencia terminada. Actualizando estado.");
                 manejadorNotificaciones.actualizarEstado(posicion, 1);
+                manejadorNotificaciones.actualizarTitulo(posicion);
             }
         }
+
     }
 }

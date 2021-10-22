@@ -330,12 +330,12 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return idNotificacion;
     }
 
-    public Boolean existeElResumen(Long idNotificacion) {
+    public Boolean existeElResumen(Long idNotificacion, String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
                 .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN "+ NOMBRE_TABLA_NOTIFICACION +
-                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion
-                        , null);
+                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion +
+                        " AND "+ NOMBRE_TABLA_NOTIFICACION+".idUsuario LIKE '" + idUsuario +"'", null);
 
         if (cursor.getCount() == 0) {
             lectura.close();
@@ -345,12 +345,12 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return true;
     }
 
-    public Resumen obtenerResumen(Long idNotificacion) {
+    public Resumen obtenerResumen(Long idNotificacion, String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
                 .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN "+ NOMBRE_TABLA_NOTIFICACION +
-                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion
-                        , null);
+                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion +
+                        " AND "+ NOMBRE_TABLA_NOTIFICACION+".idUsuario LIKE '" + idUsuario +"'" , null);
         if (cursor.moveToNext()) {
             Boolean enNube = cursor.getInt(9) == 1;
             Resumen resumen = new Resumen(cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getString(3),
