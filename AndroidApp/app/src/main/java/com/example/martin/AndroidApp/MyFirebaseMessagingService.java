@@ -1,8 +1,14 @@
 package com.example.martin.AndroidApp;
 
+import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Vibrator;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -56,19 +62,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             PendingIntent pendingIntent =
                     PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             NotificationCompat.Builder builder =
                     new NotificationCompat.Builder(this, "Alerta")
                             .setSmallIcon(R.drawable.ic_warning_black_24dp)
                             .setContentTitle(
                                     remoteMessage.getData().get("titulo"))
                             .setContentText("Haz click aquí para ver la notificación y ayudarle.")
-                            .setStyle(new NotificationCompat.BigTextStyle()
-                                    .bigText(remoteMessage.getData().get("titulo") +
-                                            "Haz click aquí para ver la notificación y ayudarle."))
+                            .setStyle(new NotificationCompat.BigTextStyle())
                             .setPriority(NotificationCompat.PRIORITY_HIGH)
-                            .setVibrate(new long[]{3000, 3000, 3000, 3000, 3000,})
-                            .setLights(Color.RED, 2000, 2000)
+                            .setDefaults(Notification.DEFAULT_SOUND)
+                            .setSound(alarmSound, AudioManager.STREAM_NOTIFICATION)
                             .setContentIntent(pendingIntent)
                             .setAutoCancel(true);
 

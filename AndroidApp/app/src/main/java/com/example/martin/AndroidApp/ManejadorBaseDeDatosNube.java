@@ -877,44 +877,78 @@ public class ManejadorBaseDeDatosNube {
         hiloParaHacerRespaldo.start();
     }
 
-    public void crearEmergencia(String idEmergencia, String fecha, String localizacion, int cantidadDePersonasEnviado){
+    public boolean crearEmergencia(String idEmergencia, String fecha, String localizacion, int cantidadDePersonasEnviado){
         Map<String, Object> datosIniciales = new HashMap<>();
         datosIniciales.put("inicio", fecha);
         datosIniciales.put("terminada", false);
         datosIniciales.put("cantidadDePersonasEnviado", cantidadDePersonasEnviado);
 
-        BaseDeDatos.collection("emergencias").document(idEmergencia).set(datosIniciales)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("LOG", "EMERGENCIA CREADA");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("LOG", "Error al crear emergencia", e);
-                    }
-                });
+        try {
+            Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia).set(datosIniciales)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("LOG", "EMERGENCIA CREADA");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w("LOG", "Error al crear emergencia", e);
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Void>(){
+                        @Override
+                        public void onComplete(Task<Void> task){
+                        }
+                    }));
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         String[] longitudYLatitud = localizacion.split(",");
         Map<String, Object> mLocalizacion = new HashMap<>();
         mLocalizacion.put("usuario", "Emergencia");
         mLocalizacion.put("longitud", longitudYLatitud[0]);
         mLocalizacion.put("latitud", longitudYLatitud[1]);
-        BaseDeDatos.collection("emergencias").document(idEmergencia)
-                .collection("localizacion").document(idEmergencia).set(mLocalizacion)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("LOG", "Localizacion agregada");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("LOG", "Error al agregar localizacion", e);
-                    }
-                });
+        try {
+            Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia)
+                    .collection("localizacion").document(idEmergencia).set(mLocalizacion)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("LOG", "Localizacion agregada");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w("LOG", "Error al agregar localizacion", e);
+                        }
+                    }));
+            return Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia)
+                    .collection("localizacion").document(idEmergencia).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()){
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                if (documentSnapshot.exists()) {
+                                    Log.d("LOG", "Emergencia creada y localización agregada");
+                                } else {
+                                    Log.d("LOG", "No se encontró el documento");
+                                }
+                            }
+                            Log.d("LOG", "Task complete");
+                        }
+                    })).exists();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean revisarSiUnaEmergenciaFueTerminada(String idEmergencia){

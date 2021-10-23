@@ -151,6 +151,12 @@ public class NotificacionesFragment extends Fragment
         });
 
         mostrarNotificaciones();
+
+        Bundle bundle = getArguments();
+        if (bundle!=null)
+            if (bundle.getBoolean("nuevaAlerta")){
+                onNotificacionClick(mNotificacionesManager.obtenerPosicionDeUnaNotificacion(bundle.getLong("idNotificacion")));
+            }
         return root;
     }
 

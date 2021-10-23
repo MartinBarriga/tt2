@@ -64,9 +64,9 @@ public class ManejadorNotificaciones {
 
     public void actualizarTitulo(final int posicion) {
         if (mNotificaciones.get(posicion).getEsPropia())
-            mNotificaciones.get(posicion).setNombre("Se detectó una anomalía en tus mediciones");
+            mNotificaciones.get(posicion).setTitulo("Se detectó una anomalía en tus mediciones");
         else{
-            mNotificaciones.get(posicion).setNombre(mManejadorBaseDeDatosNube.obtenerNombreDeUsuarioConIdDeEmergencia(
+            mNotificaciones.get(posicion).setTitulo(mManejadorBaseDeDatosNube.obtenerNombreDeUsuarioConIdDeEmergencia(
                     mNotificaciones.get(posicion).getIdEmergencia())+" tuvo una emergencia");
         }
         mNotificaciones.get(posicion).setEnNube(false);
@@ -74,6 +74,14 @@ public class ManejadorNotificaciones {
                 .actualizarNotificacion(mManejadorBaseDeDatosNube.obtenerIdUsuario(),
                         mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(
                                 mNotificaciones.get(posicion)));
+    }
+
+    public int obtenerPosicionDeUnaNotificacion(long idNotificacion){
+        for (int i = 0; i < mNotificaciones.size(); i++){
+            if (mNotificaciones.get(i).getIdNotificacion() == idNotificacion)
+                return i;
+        }
+        return -1;
     }
 
     public ArrayList<Notificacion> getArrayNotifications() {

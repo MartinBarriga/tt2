@@ -1,8 +1,14 @@
 package com.example.martin.AndroidApp;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -16,6 +22,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -65,10 +73,21 @@ public class Countdown extends AppCompatActivity {
                         Calendar.getInstance().getTime());
                 String idUsuario = mManejadorBaseDeDatosNube.obtenerIdUsuario();
                 String idEmergencia = (idUsuario+" "+fecha).replace(" ", "_");
-                agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
-
-                enviarNotificacion(idEmergencia, idUsuario, fecha);
-                enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia);
+                obtenerLocalizacion();
+                //timer para que de chance de obtener la localización sin problemas
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        HiloParaEnviarEmergencias hiloParaEnviarEmergencias = new HiloParaEnviarEmergencias(idEmergencia, idUsuario, fecha, location, mManejadorBaseDeDatosLocal, mManejadorBaseDeDatosNube);
+                        hiloParaEnviarEmergencias.start();
+                        try {
+                            hiloParaEnviarEmergencias.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, 5000);
             }
         };
         cdt.start();
@@ -82,9 +101,21 @@ public class Countdown extends AppCompatActivity {
                 Calendar.getInstance().getTime());
         String idUsuario = mManejadorBaseDeDatosNube.obtenerIdUsuario();
         String idEmergencia = (idUsuario+" "+fecha).replace(" ", "_");
-        agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
-        enviarNotificacion(idEmergencia, idUsuario, fecha);
-        enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia);
+        obtenerLocalizacion();
+        //timer para que de chance de obtener la localización sin problemas
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                HiloParaEnviarEmergencias hiloParaEnviarEmergencias = new HiloParaEnviarEmergencias(idEmergencia, idUsuario, fecha, location, mManejadorBaseDeDatosLocal, mManejadorBaseDeDatosNube);
+                hiloParaEnviarEmergencias.start();
+                try {
+                    hiloParaEnviarEmergencias.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 5000);
     }
 
     public void cancelarAlerta(View view) {
@@ -94,85 +125,97 @@ public class Countdown extends AppCompatActivity {
 
     public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha){
         Notificacion notificacion = new Notificacion(null,idUsuario,idEmergencia,"Te encuentras en una emergencia", 0, fecha, false, true, false);
-        mManejadorBaseDeDatosLocal.agregarNotificacion(mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(notificacion));
+        notificacion.setIdNotificacion(mManejadorBaseDeDatosLocal.agregarNotificacion(mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(notificacion)));
+        notificarAlUsuario(notificacion);
     }
 
-    public void enviarNotificacion(String idEmergencia, String idUsuario, String fecha) {
-        obtenerLocalizacion();
-        //timer para que de chance de obtener la localización sin problemas
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mManejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, location, mManejadorBaseDeDatosLocal.obtenerCantidadDeContactos(idUsuario));
-                    JSONObject datosDelUsuario = mManejadorBaseDeDatosLocal
-                            .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
-                                   idUsuario , idEmergencia, fecha);
-                    RequestQueue myrequest = Volley.newRequestQueue(getApplicationContext());
-                    String URL = "https://fcm.googleapis.com/fcm/send";
+    public void enviarNotificacion(String idEmergencia, String idUsuario, String fecha,
+                                   String localizacion, ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, ManejadorBaseDeDatosNube manejadorBaseDeDatosNube) {
+        try {
+            if(manejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, localizacion,
+                    manejadorBaseDeDatosLocal.obtenerCantidadDeContactos(idUsuario)))
+                Log.d("LOG", "Ya se peude notificar.");
+            JSONObject datosDelUsuario = manejadorBaseDeDatosLocal
+                    .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
+                           idUsuario , idEmergencia, fecha);
+            RequestQueue myrequest = Volley.newRequestQueue(getApplicationContext());
+            String URL = "https://fcm.googleapis.com/fcm/send";
 
-                    JsonObjectRequest request =
-                            new JsonObjectRequest(Request.Method.POST, URL, datosDelUsuario, null,
-                                    null) {
-                                @Override
-                                public Map<String, String> getHeaders() {
-                                    Map<String, String> header = new HashMap<>();
+            JsonObjectRequest request =
+                    new JsonObjectRequest(Request.Method.POST, URL, datosDelUsuario, null,
+                            null) {
+                        @Override
+                        public Map<String, String> getHeaders() {
+                            Map<String, String> header = new HashMap<>();
 
-                                    header.put("content-type", "application/json");
-                                    header.put("authorization",
-                                            "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOxNJAL" +
-                                                    "9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Yed2KRvprMhwZ" +
-                                                    "UUuBQY4tvlZ8txWE1ir5XTWfi2");
-                                    return header;
-                                }
-                            };
+                            header.put("content-type", "application/json");
+                            header.put("authorization",
+                                    "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOxNJAL" +
+                                            "9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Yed2KRvprMhwZ" +
+                                            "UUuBQY4tvlZ8txWE1ir5XTWfi2");
+                            return header;
+                        }
+                    };
 
-                    myrequest.add(request);
+            myrequest.add(request);
 
-                    Log.d("LOG", "Request añadida.");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, 5000);
+            Log.d("LOG", "Request añadida.");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void enviarSMS(View view, Context context, String idEmergencia) {
-
-        obtenerLocalizacion();
-        //timer para que de chance de obtener la localización sin problemas
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ArrayList<Pair<String, String>> mensajesYNumerosDeTelefonos =
-                        mManejadorBaseDeDatosLocal
-                                .obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
-                                        mManejadorBaseDeDatosNube.obtenerIdUsuario(),
-                                        location, idEmergencia);
-                for (Pair<String, String> mensajeYTelefono : mensajesYNumerosDeTelefonos) {
-                    SmsManager sms = SmsManager.getDefault();
-                    ArrayList<String> mensajeEnPartes = null;
-                    try {
-                        mensajeEnPartes = sms.divideMessage(mensajeYTelefono.first);
-                    } catch (Exception e) {
-                        Log.d("LOG", "Excepcion:" + e);
-                    }
-                    for (String msj : mensajeEnPartes ) {
-                        Log.d("LOG", "Mensaje: " + msj);
-                    }
-                    sms.sendMultipartTextMessage(mensajeYTelefono.second, null, mensajeEnPartes, null, null);
-                    Log.d("LOG", "Se envió un mensaje a: " + mensajeYTelefono.second);
-                }
-                (new Handler()).postDelayed(new Runnable() {
-                    public void run() {
-                        System.exit(0);
-                    }
-                }, 5000);
-
+    public void enviarSMS(View view, Context context, String idEmergencia, String localizacion, ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, ManejadorBaseDeDatosNube manejadorBaseDeDatosNube) {
+        ArrayList<Pair<String, String>> mensajesYNumerosDeTelefonos =
+                manejadorBaseDeDatosLocal
+                        .obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
+                                manejadorBaseDeDatosNube.obtenerIdUsuario(),
+                                localizacion, idEmergencia);
+        for (Pair<String, String> mensajeYTelefono : mensajesYNumerosDeTelefonos) {
+            SmsManager sms = SmsManager.getDefault();
+            ArrayList<String> mensajeEnPartes = null;
+            try {
+                mensajeEnPartes = sms.divideMessage(mensajeYTelefono.first);
+            } catch (Exception e) {
+                Log.d("LOG", "Excepcion:" + e);
             }
-        }, 5000);
+            for (String msj : mensajeEnPartes ) {
+                Log.d("LOG", "Mensaje: " + msj);
+            }
+            sms.sendMultipartTextMessage(mensajeYTelefono.second, null, mensajeEnPartes, null, null);
+            Log.d("LOG", "Se envió un mensaje a: " + mensajeYTelefono.second);
+        }
+
+    }
+
+    public void notificarAlUsuario(Notificacion notificacion){
+
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("nuevaAlerta", true);
+        intent.putExtra("titulo", notificacion.getTitulo());
+        intent.putExtra("idEmergencia", notificacion.getIdEmergencia());
+        intent.putExtra("idNotificacion", notificacion.getIdNotificacion());
+        intent.putExtra("fecha", notificacion.getFecha());
+        intent.putExtra("esPropia", true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this, "Alerta")
+                        .setSmallIcon(R.drawable.ic_warning_black_24dp)
+                        .setContentTitle(notificacion.getTitulo())
+                        .setContentText("Haz click aquí para ver el seguimiento de tu emergencia.")
+                        .setStyle(new NotificationCompat.BigTextStyle())
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setDefaults(Notification.DEFAULT_SOUND)
+                        .setSound(alarmSound, AudioManager.STREAM_NOTIFICATION)
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(1, builder.build());
     }
 
     private void obtenerLocalizacion() {
@@ -214,4 +257,31 @@ public class Countdown extends AppCompatActivity {
                 }, Looper.getMainLooper());
     }
 
+    class HiloParaEnviarEmergencias extends Thread{
+        private String idEmergencia;
+        private String idUsuario;
+        private String fecha;
+        private String localizacion;
+        private ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
+        private ManejadorBaseDeDatosNube manejadorBaseDeDatosNube;
+
+        HiloParaEnviarEmergencias(String idEmergencia, String idUsuario, String fecha, String localizacion,
+                                  ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
+                                  ManejadorBaseDeDatosNube manejadorBaseDeDatosNube){
+            this.idEmergencia = idEmergencia;
+            this.idUsuario = idUsuario;
+            this.fecha = fecha;
+            this.localizacion = localizacion;
+            this.manejadorBaseDeDatosLocal = manejadorBaseDeDatosLocal;
+            this.manejadorBaseDeDatosNube = manejadorBaseDeDatosNube;
+        }
+
+        @Override
+        public void run() {
+            enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion, manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
+            enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia, localizacion, manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
+            agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
+            System.exit(0);
+        }
+    }
 }

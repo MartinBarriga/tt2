@@ -68,7 +68,7 @@ public class Notificacion {
         this.enNube = enNube;
     }
 
-    public void setNombre(String titulo) {
+    public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
 
