@@ -161,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
                     "idNotificacion = ? AND idUsuario LIKE '" + notificacion.getIdUsuario() + "'",
                     new String[]{String.valueOf(notificacion.getIdNotificacion())});
             escritura.close();
+            navController.navigate(R.id.navigation_dashboard, bundle);
         }
 
     }
