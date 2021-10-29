@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
@@ -62,7 +64,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             NOMBRE_TABLA_DATO +
             " (idDato INTEGER PRIMARY KEY AUTOINCREMENT, idMedicion INTEGER NOT NULL REFERENCES " +
             NOMBRE_TABLA_MEDICION + " (idMedicion) ON UPDATE CASCADE ON DELETE CASCADE, frecuenciaCardiaca " +
-            "INTEGER, ecg INTEGER, hora TEXT, enNube INTEGER)";
+            "INTEGER, ecg INTEGER, spo2 INTEGER, hora TEXT, enNube INTEGER)";
 
     public ManejadorBaseDeDatosLocal(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, NOMRE_BASE_DE_DATOS, factory, VERSION_DE_BASE_DE_DATOS);
@@ -500,5 +502,71 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         contentResumen.put("enNube", resumen.isEnNube() ? 1: 0);
 
         return contentResumen;
+    }
+
+    private Long agregarMedicion(ContentValues medicion) {
+
+        SQLiteDatabase escritura = getWritableDatabase();
+        Long idMedicion = escritura.insert(NOMBRE_TABLA_MEDICION, "idMedicion", medicion);
+        escritura.close();
+        return idMedicion;
+    }
+
+    private Boolean existeMedicionConMismaFecha(Medicion medicion) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_MEDICION + " WHERE idUsuario LIKE '" +
+                        medicion.getIdUsuario() + "' AND fecha LIKE '" + medicion.getFecha()  + "'", null);
+
+        if (cursor.getCount() == 0) {
+            lectura.close();
+            return false;
+        }
+        lectura.close();
+        return true;
+    }
+
+    private ContentValues generarFormatoDeMedicionParaIntroducirEnBD(Medicion medicion) {
+        ContentValues contentMedicion = new ContentValues();
+        contentMedicion.put("idMedicion", medicion.getIdMedicion());
+        contentMedicion.put("idUsuario", medicion.getIdUsuario());
+        contentMedicion.put("fecha", medicion.getFecha());
+        contentMedicion.put("enNube", medicion.getEnNube() ? 1: 0);
+        return contentMedicion;
+    }
+
+    private ContentValues generarFormadoDeDatoParaIntroducirEnBD(Dato dato) {
+        ContentValues contentDato = new ContentValues();
+        contentDato.put("idDato", dato.getIdDato());
+        contentDato.put("idMedicion", dato.getIdMedicion());
+        contentDato.put("frecuenciaCardiaca", dato.getFrecuenciaCardiaca());
+        contentDato.put("ecg", dato.getEcg());
+        contentDato.put("spo2", dato.getSpo2());
+        contentDato.put("hora", dato.getHora());
+        contentDato.put("enNube", dato.getEnNube() ? 1: 0);
+        return contentDato;
+    }
+
+    private Long agregarDato(ContentValues dato) {
+
+        SQLiteDatabase escritura = getWritableDatabase();
+        Long IdDato = escritura.insert(NOMBRE_TABLA_DATO, "idDato", dato);
+        escritura.close();
+        return IdDato;
+    }
+
+    public void agregarDatosAMedicion(int ecg, int frecuenciaCardiaca, int spo2, Long tiempo, String idUsuario) {
+        SimpleDateFormat formatoParaFechas = new SimpleDateFormat("yyyy/MM/dd");
+        String fecha = formatoParaFechas.format(new Date(tiempo));
+        Medicion medicion = new Medicion(null, idUsuario, fecha, false);
+        if(!existeMedicionConMismaFecha(medicion)) {
+            Long idMedicion = agregarMedicion(generarFormatoDeMedicionParaIntroducirEnBD(medicion));
+            medicion.setIdMedicion(idMedicion);
+        }
+        SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
+        String hora = formatoParaHoras.format(new Date(tiempo));
+        Dato dato = new Dato(null, medicion.getIdMedicion(), frecuenciaCardiaca, ecg, spo2, hora,false);
+        Long idDato = agregarDato(generarFormadoDeDatoParaIntroducirEnBD(dato));
+        dato.setIdDato(idDato);
     }
 }

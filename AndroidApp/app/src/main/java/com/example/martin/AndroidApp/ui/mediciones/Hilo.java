@@ -33,7 +33,7 @@ public class Hilo extends Thread {
 
     public void run() {
         //byte[] byte_in = new byte[1];
-        int tamDelMensaje = 9;
+        int tamDelMensaje = 11;
         char[] mensajeRecibido = new char[tamDelMensaje];
         char caracterRecibido;
         // Se mantiene en modo escucha para determinar el ingreso de datos

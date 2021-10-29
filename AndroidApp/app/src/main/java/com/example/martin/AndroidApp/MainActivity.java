@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                     values++;*/
 
                     Long tiempo = System.nanoTime();
-                    System.out.println("Mensaje: " + mensaje + " " + tiempo);
                     Intent intentMensaje = new Intent("INTENT_MENSAJE");
                     intentMensaje.putExtra("MENSAJE", mensaje);
                     intentMensaje.putExtra("TIEMPO", tiempo);

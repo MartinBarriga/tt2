@@ -27,10 +27,9 @@ SoftwareSerial blue(2, 3);   //Crea conexion al bluetooth - PIN 2 a TX y PIN 3 a
 int pinLOMasAD8232 = 10;
 int pinLOMenosAD8232 = 11;
 int pinOutputAD8232 = A0;
-int unsigned long lastMillis = 0;
+uint32_t tsLastReport = 0;
  
 PulseOximeter pox;
-uint32_t tsLastReport = 0;
 void setup()
 {
     blue.begin(9600); // inicialmente la comunicacion serial a 9600 Baudios (velocidad de fabrica)
@@ -63,35 +62,47 @@ void setup()
  
 void loop()
 {
-  char mensaje[10] = "+00000000";
-  //digitalWrite(13, !digitalRead(13)); // cuando termina de configurar el Bluetooth queda el LED 13 parpadeando
-  //delay(300);
-  //blue.write(72);
-  //El indice 0 indica si se presionó el botón de envío manual.
-  //TODO: En caso de ser mensaje de alerta manual se debe de escribir un ! en el primer indice. 
-  if(digitalRead(pinLOMasAD8232) == 1 || digitalRead(pinLOMenosAD8232) == 1) { //En caso de que no se detecte señal por parte del sensor ECG, escribir un - en el indice 0.
-   mensaje[0] = '-';
-   //blue.write(-1);
-   //Serial.println(-1);
-  }
-  else { //En caso contrario debemos de meter el número arrojado por el ECG en el mensaje, en los indices 1 al 4 (El entero más grande que puede arrojar analogRead es 1024).
-   //blue.write(analogRead(pinOutputAD8232));
-   int valorECG = analogRead(pinOutputAD8232);
-   int indice = 4;
-   while(valorECG > 0) {
-    mensaje[indice] = (valorECG%10) + '0';
-    valorECG = valorECG/10;
-    indice--;
-   }
-   //Serial.println(analogRead(pinOutputAD8232));
-  }
-  // Se mete el número arrojado por el ECG en el mensaje, en los indices 6 al 9 (El entero más grande que puede arrojar analogRead es 1024).
-  int valorOximetro = pox.getSpO2();
-  int indice = 8;
-  while(valorOximetro > 0) {
-    mensaje[indice] = valorOximetro%10 + '0';
-    valorOximetro = valorOximetro/10;
-    indice--;
-   }
-  blue.write(mensaje);
+  pox.update();
+  //if (millis() - tsLastReport > REPORTING_PERIOD_MS) {
+    char mensaje[12] = "+0000000000";
+    //digitalWrite(13, !digitalRead(13)); // cuando termina de configurar el Bluetooth queda el LED 13 parpadeando
+    //delay(300);
+    //blue.write(72);
+    //El indice 0 indica si se presionó el botón de envío manual.
+    //TODO: En caso de ser mensaje de alerta manual se debe de escribir un ! en el primer indice. 
+    if(digitalRead(pinLOMasAD8232) == 1 || digitalRead(pinLOMenosAD8232) == 1) { //En caso de que no se detecte señal por parte del sensor ECG, escribir un - en el indice 0.
+     mensaje[0] = '-';
+     //blue.write(-1);
+     //Serial.println(-1);
+    }
+    else { //En caso contrario debemos de meter el número arrojado por el ECG en el mensaje, en los indices 1 al 4 (El entero más grande que puede arrojar analogRead es 1024).
+     //blue.write(analogRead(pinOutputAD8232));
+     int valorECG = analogRead(pinOutputAD8232);
+     int indice = 4;
+     while(valorECG > 0) {
+      mensaje[indice] = (valorECG%10) + '0';
+      valorECG = valorECG/10;
+      indice--;
+     }
+     //Serial.println(analogRead(pinOutputAD8232));
+    }
+    // Se mete el número arrojado por el SPO2 en el mensaje, en los indices 5 al 7 (El entero más grande que puede arrojar es de 3 digitos).
+    int valorOximetro = pox.getSpO2();
+    int indice = 7;
+    while(valorOximetro > 0) {
+      mensaje[indice] = valorOximetro%10 + '0';
+      valorOximetro = valorOximetro/10;
+      indice--;
+     }
+     // Se mete el número arrojado por el SPO2 en el mensaje, en los indices 10 al 8 (El entero más grande que puede arrojar es de 3 digitos).
+     int valorRitmoCardiaco = (int) floor(pox.getHeartRate() + 0.5);
+     int index = 10;
+     while(valorRitmoCardiaco > 0) {
+       mensaje[index] = valorRitmoCardiaco%10 + '0';
+       valorRitmoCardiaco = valorRitmoCardiaco/10;
+       index--;
+     }
+    blue.write(mensaje);
+    tsLastReport = millis();
+  //}
 }
