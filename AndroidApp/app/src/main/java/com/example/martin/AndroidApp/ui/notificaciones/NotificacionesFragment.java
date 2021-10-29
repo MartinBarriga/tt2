@@ -231,7 +231,12 @@ public class NotificacionesFragment extends Fragment
                             .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
                     nombre = usuario.getNombre().replace(" ", "_");
                 }
-                String enlace = "https://seguimiento-de-alerta.firebaseapp.com/?id=" + idEmergencia + "&nombre=" + nombre;
+                String parametroUbicacion = "";
+                Bundle bundle = getArguments();
+                if (bundle!=null)
+                    parametroUbicacion = "&ubicacion="+bundle.getString("localizacion");
+                String enlace = "https://seguimiento-de-alerta.firebaseapp.com/?id=" + idEmergencia
+                        + "&nombre=" + nombre + parametroUbicacion;
                 Intent intent = new Intent(getContext(), SeguimientoDeAlerta.class);
                 intent.putExtra("enlace", enlace);
                 startActivity(intent);

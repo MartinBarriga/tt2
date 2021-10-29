@@ -127,10 +127,10 @@ public class Countdown extends AppCompatActivity {
         System.exit(0);
     }
 
-    public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha){
+    public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha, String localizacion){
         Notificacion notificacion = new Notificacion(null,idUsuario,idEmergencia,"Te encuentras en una emergencia", 0, fecha, false, true, false);
         notificacion.setIdNotificacion(mManejadorBaseDeDatosLocal.agregarNotificacion(mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(notificacion)));
-        notificarAlUsuario(notificacion);
+        notificarAlUsuario(notificacion, localizacion);
     }
 
     public void enviarNotificacion(String idEmergencia, String idUsuario, String fecha,
@@ -139,7 +139,7 @@ public class Countdown extends AppCompatActivity {
             if(manejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, localizacion,
                     manejadorBaseDeDatosLocal.obtenerCantidadDeContactos(idUsuario)))
                 Log.d("LOG", "Ya se peude notificar.");
-            agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
+            agregarNotificacionPropia(idUsuario,idEmergencia,fecha, localizacion);
             JSONObject datosDelUsuario = manejadorBaseDeDatosLocal
                     .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
                            idUsuario , idEmergencia, fecha, localizacion);
@@ -238,7 +238,7 @@ public class Countdown extends AppCompatActivity {
 
     }
 
-    public void notificarAlUsuario(Notificacion notificacion){
+    public void notificarAlUsuario(Notificacion notificacion, String localizacion){
 
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra("nuevaAlerta", true);
@@ -247,6 +247,7 @@ public class Countdown extends AppCompatActivity {
         intent.putExtra("idNotificacion", notificacion.getIdNotificacion());
         intent.putExtra("fecha", notificacion.getFecha());
         intent.putExtra("esPropia", true);
+        intent.putExtra("localizacion", localizacion);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         PendingIntent pendingIntent =
