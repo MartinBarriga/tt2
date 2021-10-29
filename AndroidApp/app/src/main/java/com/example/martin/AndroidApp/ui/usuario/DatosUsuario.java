@@ -148,7 +148,8 @@ public class DatosUsuario extends AppCompatActivity {
                         medicacion, enfermedades, toxicomanias, tipoSangre, alergias, religion,
                         false, usuarioViejo.getFechaUltimoRespaldo(),
                         usuarioViejo.getFrecuenciaRespaldo(), frecuenciaCardiacaMinima,
-                        frecuenciaCardiacaMaxima);
+                        frecuenciaCardiacaMaxima, usuarioViejo.getEnviaAlertasAUsuariosCercanos(),
+                        usuarioViejo.getRecibeAlertasDeUsuariosCercanos());
 
         mManejadorBaseDeDatosLocal
                 .actualizarUsuario(mManejadorBaseDeDatosLocal

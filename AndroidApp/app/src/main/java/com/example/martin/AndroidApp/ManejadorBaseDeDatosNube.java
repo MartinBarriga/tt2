@@ -556,6 +556,36 @@ public class ManejadorBaseDeDatosNube {
                                                 Log.w("LOG", "Error updating document", e);
                                             }
                                         });
+                                user.update("enviaAlertasAUsuariosCercanos",
+                                        usuario.get("enviaAlertasAUsuariosCercanos"))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d("LOG",
+                                                        "DocumentSnapshot successfully updated!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w("LOG", "Error updating document", e);
+                                            }
+                                        });
+                                user.update("recibeAlertasDeUsuariosCercanos",
+                                        usuario.get("recibeAlertasDeUsuariosCercanos"))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d("LOG",
+                                                        "DocumentSnapshot successfully updated!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w("LOG", "Error updating document", e);
+                                            }
+                                        });
                                 manejadorBaseDeDatosLocal.actualizarUsuario(
                                         manejadorBaseDeDatosLocal
                                                 .generarFormatoDeUsuarioParaIntroducirEnBD(
@@ -642,7 +672,9 @@ public class ManejadorBaseDeDatosNube {
                                             ((Long) document.get("frecuenciaCardiacaMinima"))
                                                     .intValue(),
                                             ((Long) document.get("frecuenciaCardiacaMaxima"))
-                                                    .intValue());
+                                                    .intValue(),
+                                            (boolean) document.get("enviaAlertasAUsuariosCercanos"),
+                                            (boolean) document.get("recibeAlertasDeUsuariosCercanos"));
                             manejadorBaseDeDatosLocal.agregarUsuario(manejadorBaseDeDatosLocal
                                     .generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
 
@@ -819,6 +851,8 @@ public class ManejadorBaseDeDatosNube {
         contentUsuario.put("frecuenciaRespaldo", usuario.getFrecuenciaRespaldo());
         contentUsuario.put("frecuenciaCardiacaMinima", usuario.getFrecuenciaCardiacaMinima());
         contentUsuario.put("frecuenciaCardiacaMaxima", usuario.getFrecuenciaCardiacaMaxima());
+        contentUsuario.put("enviaAlertasAUsuariosCercanos", usuario.getEnviaAlertasAUsuariosCercanos());
+        contentUsuario.put("recibeAlertasDeUsuariosCercanos", usuario.getRecibeAlertasDeUsuariosCercanos());
         return contentUsuario;
     }
 

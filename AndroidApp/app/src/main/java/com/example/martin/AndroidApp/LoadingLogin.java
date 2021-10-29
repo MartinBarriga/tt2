@@ -199,9 +199,14 @@ public class LoadingLogin extends AppCompatActivity {
                                 FirebaseUser user = mAuth.getCurrentUser();
 
                                 nuevoUsuario = new Usuario(user.getUid(), txt.getText().toString(),
-                                        limpiarNumeroDeTelefono(phone.getText().toString().replace(" ", "")),
+                                        limpiarNumeroDeTelefono(phone.getText().toString()
+                                                .replace(" ", "")),
                                         0,
-                                        Long.valueOf(0), "", "", "", "", "", "", true, "Sin respaldo previo", "Cada dia", -1, -1);
+                                        Long.valueOf(0), "", "", "",
+                                        "", "", "", true,
+                                        "Sin respaldo previo", "Cada dia",
+                                        -1, -1,
+                                        false, false);
 
                                 mManejadorBaseDeDatosLocal.agregarUsuario(mManejadorBaseDeDatosLocal
                                         .generarFormatoDeUsuarioParaIntroducirEnBD(nuevoUsuario));
