@@ -21,7 +21,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
     private static final String NOMRE_BASE_DE_DATOS = "lifeguard";
-    private static final int VERSION_DE_BASE_DE_DATOS = 22;
+    private static final int VERSION_DE_BASE_DE_DATOS = 23;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
     private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
@@ -35,7 +35,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             "edad INTEGER, nss INTEGER, medicacion TEXT, " +
             "enfermedades TEXT, toxicomanias TEXT, tiposangre TEXT, alergias TEXT, religion TEXT," +
             " enNube INTEGER, fechaUltimoRespaldo TEXT, frecuenciaRespaldo TEXT, " +
-            "frecuenciaCardiacaMinima INTEGER, frecuenciaCardiacaMaxima INTEGER)";
+            "frecuenciaCardiacaMinima INTEGER, frecuenciaCardiacaMaxima INTEGER, " +
+            "enviaAlertasAUsuariosCercanos INTEGER, recibeAlertasDeUsuariosCercanos INTEGER)";
     private static final String CREAR_TABLA_CONTACTO = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_CONTACTO +
             " (idContacto INTEGER PRIMARY KEY AUTOINCREMENT, telefono INTEGER, " +
@@ -92,7 +93,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     public JSONObject obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(String idUsuario,
                                                                                    String idEmergencia,
-                                                                                   String fecha)
+                                                                                   String fecha, String localizacion)
             throws JSONException {
         String titulo = "";
         SQLiteDatabase lectura = getReadableDatabase();
@@ -114,12 +115,14 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             telefono = contactosConNotificacionSeleccionada.getString(1).replaceAll(" ", "");
             condicion += "'" + telefono + "' in topics";
         }
+
         Log.d("LOG", "Condition: " + condicion);
 
         JSONObject informacionBaseDeNotificacionAEnviar = new JSONObject();
         informacionBaseDeNotificacionAEnviar.put("titulo", titulo);
         informacionBaseDeNotificacionAEnviar.put("fecha", fecha);
         informacionBaseDeNotificacionAEnviar.put("idEmergencia", idEmergencia);
+        informacionBaseDeNotificacionAEnviar.put("localizacion", localizacion);
 
         JSONObject datosDelUsuarioEnFormatoJson = new JSONObject();
         //Para enviarte una notificación a ti mismo cambia la siguiente línea por json.put("to",
@@ -155,11 +158,15 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     }
 
     public long agregarNotificacion(RemoteMessage notificacion, String idUsuario, int esPropia) {
+        String titulo = "";
+
         SQLiteDatabase escritura = getWritableDatabase();
         ContentValues userValues = new ContentValues();
         userValues.put("idUsuario", idUsuario);
         userValues.put("idEmergencia", notificacion.getData().get("idEmergencia"));
-        userValues.put("titulo", notificacion.getData().get("titulo"));
+        titulo = notificacion.getFrom().matches("/topics/UsuariosCercanos") ?
+                "Un usuario cercano tiene una emergencia" : notificacion.getData().get("titulo");
+        userValues.put("titulo", titulo);
         userValues.put("estado", 0);
         userValues.put("fecha", notificacion.getData().get("fecha"));
         userValues.put("leido", 0);
@@ -236,7 +243,9 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
                 .rawQuery("SELECT * FROM " + NOMBRE_TABLA_USUARIO + " WHERE idUsuario LIKE '" +
                         idUsuario + "'", null);
         if (cursor.moveToNext()) {
-            Boolean enNube = cursor.getInt(11) == 1 ? true : false;
+            Boolean enNube = cursor.getInt(11) == 1;
+            Boolean enviaAlertasAUsuariosCercanos = cursor.getInt(16) == 1;
+            Boolean recibeAlertasDeUsuariosCercanos = cursor.getInt(17) == 1;
             Usuario usuario =
                     new Usuario(idUsuario, cursor.getString(1), cursor.getLong(2),
                             cursor.getInt(3),
@@ -244,7 +253,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
                             cursor.getString(6),
                             cursor.getString(7), cursor.getString(8), cursor.getString(9),
                             cursor.getString(10), enNube, cursor.getString(12),
-                            cursor.getString(13), cursor.getInt(14), cursor.getInt(15));
+                            cursor.getString(13), cursor.getInt(14), cursor.getInt(15),
+                            enviaAlertasAUsuariosCercanos, recibeAlertasDeUsuariosCercanos);
             lectura.close();
             return usuario;
         }
@@ -330,6 +340,20 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return idNotificacion;
     }
 
+    public Boolean existeLaEmergencia(String idEmergencia, String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursor = lectura
+                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_NOTIFICACION + " WHERE idEmergencia LIKE '"
+                        + idEmergencia +"' AND idUsuario LIKE '" + idUsuario + "'", null);
+
+        if (cursor.getCount() == 0) {
+            lectura.close();
+            return false;
+        }
+        lectura.close();
+        return true;
+    }
+
     public Boolean existeElResumen(Long idNotificacion, String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
@@ -392,6 +416,16 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         contentUsuario.put("frecuenciaRespaldo", usuario.getFrecuenciaRespaldo());
         contentUsuario.put("frecuenciaCardiacaMinima", usuario.getFrecuenciaCardiacaMinima());
         contentUsuario.put("frecuenciaCardiacaMaxima", usuario.getFrecuenciaCardiacaMaxima());
+        if (usuario.getEnviaAlertasAUsuariosCercanos()) {
+            contentUsuario.put("enviaAlertasAUsuariosCercanos", 1);
+        } else {
+            contentUsuario.put("enviaAlertasAUsuariosCercanos", 0);
+        }
+        if (usuario.getRecibeAlertasDeUsuariosCercanos()) {
+            contentUsuario.put("recibeAlertasDeUsuariosCercanos", 1);
+        } else {
+            contentUsuario.put("recibeAlertasDeUsuariosCercanos", 0);
+        }
         return contentUsuario;
     }
 

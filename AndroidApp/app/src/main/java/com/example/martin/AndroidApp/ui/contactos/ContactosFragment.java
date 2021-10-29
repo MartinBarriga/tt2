@@ -17,7 +17,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,9 +31,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.martin.AndroidApp.Contacto;
+import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
+import com.example.martin.AndroidApp.Usuario;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 
@@ -43,13 +50,63 @@ public class ContactosFragment extends Fragment implements  ContactosRecyclerAda
     private View root;
     private ArrayList<Contacto> mContactos;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
+    private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_contacts, container, false);
         mManejadorContactos = new ManejadorContactos(getContext());
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
+        mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(this.getContext(), null);
         mostrarContactos();
+
+        Usuario usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
+        Switch enviarAlertasAUsuariosCercanos = (Switch) root.findViewById(R.id.EnviarAlertasAUsuariosCercanosSwitch);
+        enviarAlertasAUsuariosCercanos.setChecked(usuario.getEnviaAlertasAUsuariosCercanos());
+
+        Switch recibirAlertasDeUsuariosCercanos = (Switch) root.findViewById(R.id.recibirAlertasDeUsuariosCercanosSwitch);
+        recibirAlertasDeUsuariosCercanos.setChecked(usuario.getRecibeAlertasDeUsuariosCercanos());
+
+        enviarAlertasAUsuariosCercanos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Usuario usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
+                usuario.setEnviaAlertasAUsuariosCercanos(isChecked);
+                mManejadorBaseDeDatosLocal.actualizarUsuario(mManejadorBaseDeDatosLocal.generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
+            }
+        });
+
+        recibirAlertasDeUsuariosCercanos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Usuario usuario = mManejadorBaseDeDatosLocal.obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
+                usuario.setRecibeAlertasDeUsuariosCercanos(isChecked);
+                mManejadorBaseDeDatosLocal.actualizarUsuario(mManejadorBaseDeDatosLocal.generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
+                if (isChecked)
+                    FirebaseMessaging.getInstance().subscribeToTopic("UsuariosCercanos")
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    String msg = "Suscrito a usuarios cercanos";
+                                    if (!task.isSuccessful()) {
+                                        msg = "No se pudo suscribir a usuarios cercanos";
+                                    }
+                                    Log.d("LOG", msg);
+                                }
+                            });
+                else
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic("UsuariosCercanos")
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    String msg = "Desuscrito a usuarios cercanos";
+                                    if (!task.isSuccessful()) {
+                                        msg = "No se pudo desuscribir a usuarios cercanos";
+                                    }
+                                    Log.d("LOG", msg);
+                                }
+                            });
+            }
+        });
+
         return root;
     }
 

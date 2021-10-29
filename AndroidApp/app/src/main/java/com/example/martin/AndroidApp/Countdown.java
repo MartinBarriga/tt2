@@ -27,6 +27,8 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.LocationCallback;
@@ -83,6 +85,7 @@ public class Countdown extends AppCompatActivity {
                         hiloParaEnviarEmergencias.start();
                         try {
                             hiloParaEnviarEmergencias.join();
+                            finish();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -111,6 +114,7 @@ public class Countdown extends AppCompatActivity {
                 hiloParaEnviarEmergencias.start();
                 try {
                     hiloParaEnviarEmergencias.join();
+                    finish();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -135,15 +139,27 @@ public class Countdown extends AppCompatActivity {
             if(manejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, localizacion,
                     manejadorBaseDeDatosLocal.obtenerCantidadDeContactos(idUsuario)))
                 Log.d("LOG", "Ya se peude notificar.");
+            agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
             JSONObject datosDelUsuario = manejadorBaseDeDatosLocal
                     .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
-                           idUsuario , idEmergencia, fecha);
+                           idUsuario , idEmergencia, fecha, localizacion);
             RequestQueue myrequest = Volley.newRequestQueue(getApplicationContext());
             String URL = "https://fcm.googleapis.com/fcm/send";
 
             JsonObjectRequest request =
-                    new JsonObjectRequest(Request.Method.POST, URL, datosDelUsuario, null,
-                            null) {
+                    new JsonObjectRequest(Request.Method.POST, URL, datosDelUsuario,
+                            new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            // Display the first 500 characters of the response string.
+                            Log.d("LOG", "Response is: "+ response.toString());
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d("LOG", "That didn't work!");
+                        }
+                    }) {
                         @Override
                         public Map<String, String> getHeaders() {
                             Map<String, String> header = new HashMap<>();
@@ -159,7 +175,41 @@ public class Countdown extends AppCompatActivity {
 
             myrequest.add(request);
 
-            Log.d("LOG", "Request añadida.");
+
+            Usuario usuario = manejadorBaseDeDatosLocal.obtenerUsuario(idUsuario);
+            if (usuario.getEnviaAlertasAUsuariosCercanos()){
+                datosDelUsuario.remove( "condition" );
+                datosDelUsuario.put( "to" , "/topics/UsuariosCercanos" );
+
+                JsonObjectRequest requestUsuariosCercanos =
+                        new JsonObjectRequest(Request.Method.POST, URL, datosDelUsuario,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        // Display the first 500 characters of the response string.
+                                        Log.d("LOG", "Response is: "+ response.toString());
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d("LOG", "That didn't work!");
+                            }
+                        }) {
+                            @Override
+                            public Map<String, String> getHeaders() {
+                                Map<String, String> header = new HashMap<>();
+
+                                header.put("content-type", "application/json");
+                                header.put("authorization",
+                                        "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOxNJAL" +
+                                                "9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Yed2KRvprMhwZ" +
+                                                "UUuBQY4tvlZ8txWE1ir5XTWfi2");
+                                return header;
+                            }
+                        };
+
+                myrequest.add(requestUsuariosCercanos);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -280,8 +330,6 @@ public class Countdown extends AppCompatActivity {
         public void run() {
             enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion, manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
             enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia, localizacion, manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
-            agregarNotificacionPropia(idUsuario,idEmergencia,fecha);
-            System.exit(0);
         }
     }
 }

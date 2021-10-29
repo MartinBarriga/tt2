@@ -7,18 +7,48 @@
     tools:context=".ui.contactos.ContactosFragment">
 
 
+    <Switch
+        android:id="@+id/EnviarAlertasAUsuariosCercanosSwitch"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:minHeight="48dp"
+        android:switchMinWidth="16dp"
+        android:switchTextAppearance="@style/TextAppearance.AppCompat.Large"
+        android:text="Enviar aletas a usuarios cercanos"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/recibirAlertasDeUsuariosCercanosSwitch"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:minHeight="48dp"
+        android:switchMinWidth="16dp"
+        android:switchTextAppearance="@style/TextAppearance.AppCompat.Large"
+        android:text="Recibir alertas de usuarios cercanos"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/EnviarAlertasAUsuariosCercanosSwitch" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contactsRecyclerView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@+id/recibirAlertasDeUsuariosCercanosSwitch"
         tools:listitem="@layout/item_contact">
 
 

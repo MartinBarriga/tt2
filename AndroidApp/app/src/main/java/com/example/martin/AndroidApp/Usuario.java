@@ -17,12 +17,14 @@ public class Usuario {
     private String frecuenciaRespaldo;
     private int frecuenciaCardiacaMinima;
     private int frecuenciaCardiacaMaxima;
+    private Boolean enviaAlertasAUsuariosCercanos;
+    private Boolean recibeAlertasDeUsuariosCercanos;
 
-    public Usuario(String idUsuario, String nombre, Long telefono, int edad,
-                   Long nss, String medicacion, String enfermedades,
-                   String toxicomanias, String tipoSangre, String alergias, String religion,
-                   Boolean enNube, String fechaUltimoRespaldo, String frecuenciaRespaldo,
-                   int frecuenciaCardiacaMinima, int frecuenciaCardiacaMaxima) {
+    public Usuario(String idUsuario, String nombre, Long telefono, int edad, Long nss, String medicacion,
+                   String enfermedades, String toxicomanias, String tipoSangre, String alergias,
+                   String religion, Boolean enNube, String fechaUltimoRespaldo, String frecuenciaRespaldo,
+                   int frecuenciaCardiacaMinima, int frecuenciaCardiacaMaxima,
+                   Boolean enviaAlertasAUsuariosCercanos, Boolean recibeAlertasDeUsuariosCercanos) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.telefono = telefono;
@@ -39,6 +41,8 @@ public class Usuario {
         this.frecuenciaRespaldo = frecuenciaRespaldo;
         this.frecuenciaCardiacaMinima = frecuenciaCardiacaMinima;
         this.frecuenciaCardiacaMaxima = frecuenciaCardiacaMaxima;
+        this.enviaAlertasAUsuariosCercanos = enviaAlertasAUsuariosCercanos;
+        this.recibeAlertasDeUsuariosCercanos = recibeAlertasDeUsuariosCercanos;
     }
 
     public String getMedicacion() {
@@ -167,5 +171,21 @@ public class Usuario {
 
     public void setFrecuenciaCardiacaMaxima(int frecuenciaCardiacaMaxima) {
         this.frecuenciaCardiacaMaxima = frecuenciaCardiacaMaxima;
+    }
+
+    public Boolean getEnviaAlertasAUsuariosCercanos() {
+        return enviaAlertasAUsuariosCercanos;
+    }
+
+    public void setEnviaAlertasAUsuariosCercanos(Boolean enviaAlertasAUsuariosCercanos) {
+        this.enviaAlertasAUsuariosCercanos = enviaAlertasAUsuariosCercanos;
+    }
+
+    public Boolean getRecibeAlertasDeUsuariosCercanos() {
+        return recibeAlertasDeUsuariosCercanos;
+    }
+
+    public void setRecibeAlertasDeUsuariosCercanos(Boolean recibeAlertasDeUsuariosCercanos) {
+        this.recibeAlertasDeUsuariosCercanos = recibeAlertasDeUsuariosCercanos;
     }
 }
