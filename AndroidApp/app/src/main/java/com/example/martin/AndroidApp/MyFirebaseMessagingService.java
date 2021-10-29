@@ -62,6 +62,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 intent.putExtra("idNotificacion", idNotificacion);
                 intent.putExtra("fecha", remoteMessage.getData().get("fecha"));
                 intent.putExtra("esPropia", false);
+                intent.putExtra("localizacion", remoteMessage.getData().get("localizacion"));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                 PendingIntent pendingIntent =
@@ -116,6 +117,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             localizacionDeEmergencia.setLatitude(latitud);
                             float distancia = miLocalizacion.distanceTo(localizacionDeEmergencia);
 
+                            Log.d("LOG", "La distancia es: " + distancia);
                             if (distancia < 2000.0){
                                 if (!mManejadorBaseDeDatosLocal.existeLaEmergencia(
                                         remoteMessage.getData().get("idEmergencia") , usuarioActual.getUid())) {
