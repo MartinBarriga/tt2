@@ -11,6 +11,8 @@
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/drawable/ic_baseline_backup_24.xml" value="0.346875" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/drawable/ic_baseline_medical_services_24.xml" value="0.346875" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_datos_usuario.xml" value="0.33" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_dispositivos_vinculados.xml" value="0.3307291666666667" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_historial_de_mediciones.xml" value="0.5" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_main.xml" value="0.31979166666666664" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_respaldo.xml" value="0.44427083333333334" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/dispositivos.xml" value="0.31979166666666664" />
@@ -20,14 +22,14 @@
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_form.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_navigation_usuario.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_usuario.xml" value="0.33" />
-        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_visualizacion_datos_medidos.xml" value="0.3307291666666667" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_visualizacion_datos_medidos.xml" value="0.67" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/item_contact.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/item_notification.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/menu/bottom_nav_menu.xml" value="0.3307291666666667" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
