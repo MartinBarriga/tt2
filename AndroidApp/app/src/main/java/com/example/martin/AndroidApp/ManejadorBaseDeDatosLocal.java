@@ -14,6 +14,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,7 +24,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
     private static final String NOMRE_BASE_DE_DATOS = "lifeguard";
-    private static final int VERSION_DE_BASE_DE_DATOS = 23;
+    private static final int VERSION_DE_BASE_DE_DATOS = 24;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
     private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
@@ -53,7 +54,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     private static final String CREAR_TABLA_RESUMEN = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_RESUMEN +
             " (idResumen INTEGER PRIMARY KEY AUTOINCREMENT, idNotificacion INTEGER NOT NULL " +
-            "REFERENCES " + NOMBRE_TABLA_NOTIFICACION + " (idNotificacion) ON UPDATE CASCADE ON DELETE CASCADE, " +
+            "REFERENCES " + NOMBRE_TABLA_NOTIFICACION +
+            " (idNotificacion) ON UPDATE CASCADE ON DELETE CASCADE, " +
             "nombre TEXT, comentario TEXT, " + "desenlace TEXT, detalles TEXT, duracion TEXT, " +
             "cantidadDePersonasEnviado INTEGER, " + "seguidores INTEGER, enNube INTEGER)";
     private static final String CREAR_TABLA_MEDICION = "CREATE TABLE IF NOT EXISTS " +
@@ -63,7 +65,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     private static final String CREAR_TABLA_DATO = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_DATO +
             " (idDato INTEGER PRIMARY KEY AUTOINCREMENT, idMedicion INTEGER NOT NULL REFERENCES " +
-            NOMBRE_TABLA_MEDICION + " (idMedicion) ON UPDATE CASCADE ON DELETE CASCADE, frecuenciaCardiaca " +
+            NOMBRE_TABLA_MEDICION +
+            " (idMedicion) ON UPDATE CASCADE ON DELETE CASCADE, frecuenciaCardiaca " +
             "INTEGER, ecg INTEGER, spo2 INTEGER, hora TEXT, enNube INTEGER)";
 
     public ManejadorBaseDeDatosLocal(Context context, SQLiteDatabase.CursorFactory factory) {
@@ -95,7 +98,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     public JSONObject obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(String idUsuario,
                                                                                    String idEmergencia,
-                                                                                   String fecha, String localizacion)
+                                                                                   String fecha,
+                                                                                   String localizacion)
             throws JSONException {
         String titulo = "";
         SQLiteDatabase lectura = getReadableDatabase();
@@ -146,12 +150,16 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         ArrayList<Pair<String, String>> mensajesYNumeros = new ArrayList<Pair<String, String>>();
         while (contactosConMensajeSeleccionado.moveToNext()) {
             String telefono = contactosConMensajeSeleccionado.getString(1).replaceAll(" ", "");
-            String nombre = contactosConMensajeSeleccionado.getString(2).replaceAll(" ", "_")+"-"+contactosConMensajeSeleccionado.getInt(0);
+            String nombre =
+                    contactosConMensajeSeleccionado.getString(2).replaceAll(" ", "_") + "-" +
+                            contactosConMensajeSeleccionado.getInt(0);
             String mensaje =
                     "https://seguimiento-de-alerta.firebaseapp.com/?" +
-                    "id="+idEmergencia+"&nombre="+nombre+"&ubicacion=" + localizacion +"\n\n" +
-                    "Me encuentro en una emergencia. Puedes hacer el seguimiento de esta emergencia" +
-                    " en el enlace de arriba.";
+                            "id=" + idEmergencia + "&nombre=" + nombre + "&ubicacion=" +
+                            localizacion + "\n\n" +
+                            "Me encuentro en una emergencia. Puedes hacer el seguimiento de esta " +
+                            "emergencia" +
+                            " en el enlace de arriba.";
             Log.d("LOG", "Mensaje: " + mensaje);
             mensajesYNumeros.add(new Pair<String, String>(mensaje, telefono));
         }
@@ -345,8 +353,9 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     public Boolean existeLaEmergencia(String idEmergencia, String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
-                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_NOTIFICACION + " WHERE idEmergencia LIKE '"
-                        + idEmergencia +"' AND idUsuario LIKE '" + idUsuario + "'", null);
+                .rawQuery(
+                        "SELECT * FROM " + NOMBRE_TABLA_NOTIFICACION + " WHERE idEmergencia LIKE '"
+                                + idEmergencia + "' AND idUsuario LIKE '" + idUsuario + "'", null);
 
         if (cursor.getCount() == 0) {
             lectura.close();
@@ -359,9 +368,12 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     public Boolean existeElResumen(Long idNotificacion, String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
-                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN "+ NOMBRE_TABLA_NOTIFICACION +
-                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion +
-                        " AND "+ NOMBRE_TABLA_NOTIFICACION+".idUsuario LIKE '" + idUsuario +"'", null);
+                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN " +
+                                NOMBRE_TABLA_NOTIFICACION +
+                                " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION +
+                                ".idNotificacion = " + idNotificacion +
+                                " AND " + NOMBRE_TABLA_NOTIFICACION + ".idUsuario LIKE '" + idUsuario + "'",
+                        null);
 
         if (cursor.getCount() == 0) {
             lectura.close();
@@ -374,14 +386,19 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     public Resumen obtenerResumen(Long idNotificacion, String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
-                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN "+ NOMBRE_TABLA_NOTIFICACION +
-                        " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION+".idNotificacion = " + idNotificacion +
-                        " AND "+ NOMBRE_TABLA_NOTIFICACION+".idUsuario LIKE '" + idUsuario +"'" , null);
+                .rawQuery("SELECT * FROM " + NOMBRE_TABLA_RESUMEN + " INNER JOIN " +
+                                NOMBRE_TABLA_NOTIFICACION +
+                                " USING(idNotificacion) WHERE " + NOMBRE_TABLA_NOTIFICACION +
+                                ".idNotificacion = " + idNotificacion +
+                                " AND " + NOMBRE_TABLA_NOTIFICACION + ".idUsuario LIKE '" + idUsuario + "'",
+                        null);
         if (cursor.moveToNext()) {
             Boolean enNube = cursor.getInt(9) == 1;
-            Resumen resumen = new Resumen(cursor.getLong(0), cursor.getLong(1), cursor.getString(2), cursor.getString(3),
-                    cursor.getString(4),cursor.getString(5),cursor.getString(6),cursor.getInt(7),
-                    cursor.getInt(8),enNube);lectura.close();
+            Resumen resumen = new Resumen(cursor.getLong(0), cursor.getLong(1), cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getInt(7),
+                    cursor.getInt(8), enNube);
+            lectura.close();
             return resumen;
         }
         lectura.close();
@@ -488,7 +505,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return contentNotificacion;
     }
 
-    public ContentValues generarFormatoDeResumenParaIntroducirEnBD(Resumen resumen){
+    public ContentValues generarFormatoDeResumenParaIntroducirEnBD(Resumen resumen) {
         ContentValues contentResumen = new ContentValues();
         contentResumen.put("idResumen", resumen.getIdResumen());
         contentResumen.put("idNotificacion", resumen.getIdNotificacion());
@@ -499,7 +516,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         contentResumen.put("duracion", resumen.getDuracion());
         contentResumen.put("cantidadDePersonasEnviado", resumen.getCantidadDePersonasEnviado());
         contentResumen.put("seguidores", resumen.getSeguidores());
-        contentResumen.put("enNube", resumen.isEnNube() ? 1: 0);
+        contentResumen.put("enNube", resumen.isEnNube() ? 1 : 0);
 
         return contentResumen;
     }
@@ -516,12 +533,15 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
                 .rawQuery("SELECT * FROM " + NOMBRE_TABLA_MEDICION + " WHERE idUsuario LIKE '" +
-                        medicion.getIdUsuario() + "' AND fecha LIKE '" + medicion.getFecha()  + "'", null);
+                                medicion.getIdUsuario() + "' AND fecha LIKE '" + medicion.getFecha() + "'",
+                        null);
 
         if (cursor.getCount() == 0) {
             lectura.close();
             return false;
         }
+        cursor.moveToNext();
+        medicion.setIdMedicion(cursor.getLong(0));
         lectura.close();
         return true;
     }
@@ -531,7 +551,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         contentMedicion.put("idMedicion", medicion.getIdMedicion());
         contentMedicion.put("idUsuario", medicion.getIdUsuario());
         contentMedicion.put("fecha", medicion.getFecha());
-        contentMedicion.put("enNube", medicion.getEnNube() ? 1: 0);
+        contentMedicion.put("enNube", medicion.getEnNube() ? 1 : 0);
         return contentMedicion;
     }
 
@@ -543,7 +563,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         contentDato.put("ecg", dato.getEcg());
         contentDato.put("spo2", dato.getSpo2());
         contentDato.put("hora", dato.getHora());
-        contentDato.put("enNube", dato.getEnNube() ? 1: 0);
+        contentDato.put("enNube", dato.getEnNube() ? 1 : 0);
         return contentDato;
     }
 
@@ -555,18 +575,79 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return IdDato;
     }
 
-    public void agregarDatosAMedicion(int ecg, int frecuenciaCardiaca, int spo2, Long tiempo, String idUsuario) {
+    public void agregarDatosAMedicion(int ecg, int frecuenciaCardiaca, int spo2, Long tiempo,
+                                      String idUsuario) {
         SimpleDateFormat formatoParaFechas = new SimpleDateFormat("yyyy/MM/dd");
         String fecha = formatoParaFechas.format(new Date(tiempo));
         Medicion medicion = new Medicion(null, idUsuario, fecha, false);
-        if(!existeMedicionConMismaFecha(medicion)) {
+        if (!existeMedicionConMismaFecha(medicion)) {
             Long idMedicion = agregarMedicion(generarFormatoDeMedicionParaIntroducirEnBD(medicion));
             medicion.setIdMedicion(idMedicion);
         }
         SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
         String hora = formatoParaHoras.format(new Date(tiempo));
-        Dato dato = new Dato(null, medicion.getIdMedicion(), frecuenciaCardiaca, ecg, spo2, hora,false);
+        Dato dato = new Dato(null, medicion.getIdMedicion(), frecuenciaCardiaca, ecg, spo2, hora,
+                false);
         Long idDato = agregarDato(generarFormadoDeDatoParaIntroducirEnBD(dato));
         dato.setIdDato(idDato);
     }
+
+    private Boolean elDatoEstaDentroDeLasHorasSolicitadas(String horaDato,
+                                                          String horaInicioSeleccionada,
+                                                          String horaFinSeleccionada) {
+        Date horaDatoTipoDate = new Date();
+        Date horaInicioSeleccionadaTipoDate = new Date();
+        Date horaFinSeleccionadaTipoDate = new Date();
+        try {
+            horaDatoTipoDate =
+                    new SimpleDateFormat("HH:mm:ss.SSS").parse(horaDato);
+            horaInicioSeleccionadaTipoDate =
+                    new SimpleDateFormat("HH:mm:ss.SSS").parse(horaInicioSeleccionada);
+            horaFinSeleccionadaTipoDate =
+                    new SimpleDateFormat("HH:mm:ss.SSS").parse(horaFinSeleccionada);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if (horaDatoTipoDate.after(horaInicioSeleccionadaTipoDate) &&
+                horaDatoTipoDate.before(horaFinSeleccionadaTipoDate)) {
+            return true;
+        }
+        return false;
+    }
+
+    public ArrayList<Dato> obtenerDatosMedidosDeUnRangoEspecificado(String idUsuario,
+                                                                    String fechaSeleccionada,
+                                                                    String horaInicioSeleccionada,
+                                                                    String horaFinSeleccionada,
+                                                                    Context contexto) {
+        ArrayList<Dato> datosMedidos = new ArrayList<>();
+        SQLiteDatabase lectura = getReadableDatabase();
+        Cursor cursorMedicion = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_MEDICION + "  WHERE idUsuario LIKE '" +
+                        idUsuario +
+                        "' AND fecha LIKE '" + fechaSeleccionada + "'", null);
+
+        if (cursorMedicion.getCount() > 0) {
+            cursorMedicion.moveToNext();
+            Long idMedicion = cursorMedicion.getLong(0);
+            Cursor cursorDato =
+                    lectura.rawQuery("SELECT * FROM " + NOMBRE_TABLA_DATO + " WHERE idMedicion = ?",
+                            new String[]{Long.toString(idMedicion)});
+
+            while (cursorDato.moveToNext()) {
+                Dato dato =
+                        new Dato(cursorDato.getLong(0), cursorDato.getLong(1), cursorDato.getInt(2),
+                                cursorDato.getInt(3), cursorDato.getInt(4), cursorDato.getString(5),
+                                cursorDato.getInt(5) == 1 ? true : false);
+                if (elDatoEstaDentroDeLasHorasSolicitadas(dato.getHora(), horaInicioSeleccionada,
+                        horaFinSeleccionada)) {
+                    datosMedidos.add(dato);
+                }
+            }
+        }
+        lectura.close();
+        return datosMedidos;
+    }
+
 }

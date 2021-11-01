@@ -24,6 +24,7 @@ import com.example.martin.AndroidApp.MainActivity;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
+import com.example.martin.AndroidApp.ui.usuario.Respaldo;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -191,7 +192,10 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                                     "Frecuencia Cardiaca: " + Integer.toString(valorCardiaco) +
                                             " ppm");
                     textViewValorSpo2.setText("Spo2: " + Integer.toString(valorSpo2) + "%");
-                    manejadorBaseDeDatosLocal.agregarDatosAMedicion(valorECG, valorCardiaco, valorSpo2, System.currentTimeMillis(), manejadorBaseDeDatosNube.obtenerIdUsuario());
+                    manejadorBaseDeDatosLocal
+                            .agregarDatosAMedicion(valorECG, valorCardiaco, valorSpo2,
+                                    System.currentTimeMillis(),
+                                    manejadorBaseDeDatosNube.obtenerIdUsuario());
 
                     LineData informacionECG = graficaECG.getData();
                     if (informacionECG != null) {
@@ -329,6 +333,14 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                 Toast.makeText(getContext(), "PRESIONASTE SPO2", Toast.LENGTH_SHORT).show();
             }
         });
+        verHistorialMediciones.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), HistorialDeMediciones.class);
+                intent.putExtra("idUsuario",manejadorBaseDeDatosNube.obtenerIdUsuario());
+                startActivity(intent);
+            }
+        });
 
         graficaECG = (LineChart) root.findViewById(R.id.graficaECG);
         graficaECG.getDescription().setEnabled(true);
@@ -377,7 +389,8 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
         graficaFrecuenciaCardiacaSpo2.invalidate();
 
         mostrarGraficaECG();
-        manejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getActivity().getApplicationContext(), null);
+        manejadorBaseDeDatosLocal =
+                new ManejadorBaseDeDatosLocal(getActivity().getApplicationContext(), null);
         manejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
         mainActivity = (MainActivity) getActivity();
 
