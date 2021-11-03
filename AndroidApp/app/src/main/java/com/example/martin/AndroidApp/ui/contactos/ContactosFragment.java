@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.martin.AndroidApp.Contacto;
+import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
@@ -55,6 +56,16 @@ public class ContactosFragment extends Fragment implements  ContactosRecyclerAda
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_contacts, container, false);
+
+        FloatingActionButton botonEmergencia = root.findViewById(R.id.boton_emergencia);
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), Countdown.class);
+                startActivity(intent);
+            }
+        });
+
         mManejadorContactos = new ManejadorContactos(getContext());
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(this.getContext(), null);

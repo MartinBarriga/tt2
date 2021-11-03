@@ -1,6 +1,7 @@
 package com.example.martin.AndroidApp.ui.usuario;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,10 +11,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
 import com.example.martin.AndroidApp.Usuario;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class DatosUsuario extends AppCompatActivity {
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
@@ -69,6 +72,15 @@ public class DatosUsuario extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 guardarDatos(v, getApplicationContext());
+            }
+        });
+
+        FloatingActionButton botonEmergencia = findViewById(R.id.boton_emergencia);
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Countdown.class);
+                startActivity(intent);
             }
         });
     }

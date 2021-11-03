@@ -37,6 +37,7 @@ import com.example.martin.AndroidApp.SeguimientoDeAlerta;
 import com.example.martin.AndroidApp.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
@@ -142,11 +143,12 @@ public class NotificacionesFragment extends Fragment
                     }
                 });
 
-        Button mandarSMSBoton = root.findViewById(R.id.sendSMS);
-        mandarSMSBoton.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton botonEmergencia = root.findViewById(R.id.boton_emergencia);
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                enviarSMS(v, getContext());
+                Intent intent = new Intent(getContext(), Countdown.class);
+                startActivity(intent);
             }
         });
 
@@ -198,11 +200,6 @@ public class NotificacionesFragment extends Fragment
             }
 
         }
-    }
-
-    public void enviarSMS(View view, Context context) {
-        Intent intent = new Intent(getContext(), Countdown.class);
-        startActivity(intent);
     }
 
     @Override

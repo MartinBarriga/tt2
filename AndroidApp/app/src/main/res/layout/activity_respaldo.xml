@@ -84,4 +84,22 @@
         app:layout_constraintHorizontal_bias="0.11"
         app:layout_constraintStart_toEndOf="@+id/botonRealizarCopia"
         app:layout_constraintTop_toTopOf="@+id/botonRealizarCopia" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/boton_emergencia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:focusableInTouchMode="false"
+        android:src="@drawable/ic_baseline_error_outline_72"
+        android:textAlignment="textStart"
+        app:backgroundTint="#C81D1D"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:maxImageSize="48sp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
