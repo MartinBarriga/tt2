@@ -46,14 +46,17 @@
                 android:id="@+id/LinearLayout1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
+
+                android:orientation="horizontal"
+                android:layout_marginTop="32dp">
+
                 <Button
                     android:id="@+id/botonBuscar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginStart="24dp"
                     android:text="Buscar" />
+
             </LinearLayout>
 
 
@@ -69,11 +72,29 @@
                 android:id="@+id/graficaECGHistorial"
                 android:layout_width="match_parent"
                 android:layout_height="600sp"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="64dp"
+                >
 
             </com.github.mikephil.charting.charts.LineChart>
 
         </LinearLayout>
     </ScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/boton_emergencia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:focusableInTouchMode="false"
+        android:src="@drawable/ic_baseline_error_outline_72"
+        android:textAlignment="textStart"
+        app:backgroundTint="#C81D1D"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:maxImageSize="48sp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

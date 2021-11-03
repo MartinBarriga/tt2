@@ -16,10 +16,12 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
 import com.example.martin.AndroidApp.Usuario;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,6 +50,14 @@ public class Respaldo extends AppCompatActivity {
         Button botonRealizarRespaldo = findViewById(R.id.botonRealizarCopia);
         ImageButton botonInformacion = findViewById(R.id.botonInformacionRespaldo);
         Spinner spinnerFrecuenciaRespaldo = findViewById(R.id.spinnerFrecuenciaDeRespaldo);
+        FloatingActionButton botonEmergencia = findViewById(R.id.boton_emergencia);
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Countdown.class);
+                startActivity(intent);
+            }
+        });
 
         fechaUltimoRespaldo.setText(usuario.getFechaUltimoRespaldo());
         String[] opcionesFrecuenciaRespaldo =
