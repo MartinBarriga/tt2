@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.Dato;
+import com.example.martin.AndroidApp.Instructivo;
 import com.example.martin.AndroidApp.MainActivity;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
@@ -301,6 +302,16 @@ public class HistorialDeMediciones extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Countdown.class);
+                startActivity(intent);
+            }
+        });
+
+        FloatingActionButton botonInstructivo = findViewById(R.id.boton_instructivo_flotante);
+        botonInstructivo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Instructivo.class);
+                intent.putExtra("pantalla",Instructivo.PANTALLA_HISTORIAL_MEDICIONES);
                 startActivity(intent);
             }
         });

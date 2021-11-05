@@ -15,8 +15,10 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.martin.AndroidApp.Countdown;
+import com.example.martin.AndroidApp.Instructivo;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
@@ -105,7 +107,18 @@ public class Respaldo extends AppCompatActivity {
         botonInformacion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Toast.makeText(getApplicationContext(),
+                        "Selecciona esta opción si quieres generar un respaldo ahora mismo",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+        FloatingActionButton botonInstructivo = findViewById(R.id.boton_instructivo_flotante);
+        botonInstructivo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Instructivo.class);
+                intent.putExtra("pantalla", Instructivo.PANTALLA_RESPALDO);
+                startActivity(intent);
             }
         });
     }

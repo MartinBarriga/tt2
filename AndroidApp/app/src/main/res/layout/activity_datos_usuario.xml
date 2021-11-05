@@ -96,7 +96,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginRight="16dp"
-                android:text="Estos datos se guardarán en la nube cada que hagas un respaldo para que los puedan ver tus contactos cuando ocurra una emergencia. Esta información puede resultar muy útil al recibir atención médica." />
+                android:text="Los datos que ingrese aquí se incluirán en los mensajes de emergencia. Esta información puede resultar muy útil al recibir atención médica." />
 
             <EditText
                 android:id="@+id/nss"
@@ -125,7 +125,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/incluirDatos" />
 
-            <AutoCompleteTextView
+            <EditText
                 android:id="@+id/enfermedades"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -135,30 +135,11 @@
                 android:ems="10"
                 android:gravity="start|top"
                 android:hint="Enfermedades crónicas"
-                android:inputType="textMultiLine|textAutoComplete" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/enfermedadesChipGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:checkable="false"
-                    android:text="Gastritis"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    app:checkedIconVisible="false"
-                    app:chipIconVisible="true"
-                    app:closeIconVisible="true" />
-            </com.google.android.material.chip.ChipGroup>
+                android:inputType="textMultiLine"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/toxicomanias" />
 
             <EditText
                 android:id="@+id/toxicomanias"
@@ -260,6 +241,7 @@
 
         </LinearLayout>
     </ScrollView>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/boton_emergencia"
         android:layout_width="wrap_content"
@@ -274,6 +256,24 @@
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:maxImageSize="48sp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/boton_instructivo_flotante"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:focusableInTouchMode="false"
+        android:src="@drawable/ic_baseline_help_outline_24"
+        android:textAlignment="textStart"
+        app:backgroundTint="#FFFFFF"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         app:maxImageSize="48sp" />

@@ -19,27 +19,24 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
     private static final String NOMRE_BASE_DE_DATOS = "lifeguard";
-    private static final int VERSION_DE_BASE_DE_DATOS = 26;
+    private static final int VERSION_DE_BASE_DE_DATOS = 27;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
     private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
     private static final String NOMBRE_TABLA_RESUMEN = "resumen";
     private static final String NOMBRE_TABLA_MEDICION = "medicion";
     private static final String NOMBRE_TABLA_DATO = "dato";
-    private static final String NOMBRE_TABLA_ENFERMEDAD = "enfermedad";
-    private static final String NOMBRE_TABLA_ENFERMEDADESYUSUARIOS = "enfermedadesyusuarios";
 
     // Instrucciones para la creación de la base de datos
     private static final String CREAR_TABLA_USUARIO = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_USUARIO + " (idUsuario TEXT PRIMARY KEY, nombre TEXT, telefono INTEGER, " +
             "edad INTEGER, nss INTEGER, medicacion TEXT, " +
-            "toxicomanias TEXT, tiposangre TEXT, alergias TEXT, religion TEXT," +
+            "enfermedades TEXT, toxicomanias TEXT, tiposangre TEXT, alergias TEXT, religion TEXT," +
             " enNube INTEGER, fechaUltimoRespaldo TEXT, frecuenciaRespaldo TEXT, " +
             "frecuenciaCardiacaMinima INTEGER, frecuenciaCardiacaMaxima INTEGER, " +
             "enviaAlertasAUsuariosCercanos INTEGER, recibeAlertasDeUsuariosCercanos INTEGER)";
@@ -71,55 +68,6 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             NOMBRE_TABLA_MEDICION +
             " (idMedicion) ON UPDATE CASCADE ON DELETE CASCADE, frecuenciaCardiaca " +
             "INTEGER, ecg INTEGER, spo2 INTEGER, hora TEXT, enNube INTEGER)";
-    private static final String CREAR_TABLA_ENFERMEDAD = "CREATE TABLE IF NOT EXISTS " +
-            NOMBRE_TABLA_ENFERMEDAD +
-            " (idEnfermedad INTEGER PRIMARY KEY AUTOINCREMENT, enfermedad TEXT NOT NULL)";
-    private static final String CREAR_TABLA_ENFERMEDADESYUSUARIOS = "CREATE TABLE IF NOT EXISTS " +
-            NOMBRE_TABLA_ENFERMEDADESYUSUARIOS +
-            " (idEnfermedad INTEGER NOT NULL REFERENCES "+ NOMBRE_TABLA_ENFERMEDAD+" (idEnfermedad) " +
-            ", idUsuario TEXT NOT NULL REFERENCES " + NOMBRE_TABLA_USUARIO + " (idUsuario), " +
-            "PRIMARY KEY (idEnfermedad, idUsuario))";
-
-    private static final String INSERTAR_ENFERMEDADES_INICIALES = "INSERT OR IGNORE INTO " + NOMBRE_TABLA_ENFERMEDAD +
-            " (idEnfermedad, enfermedad) VALUES " +
-            "(1, 'Asma'), " +
-            "(2, 'Cancer'), " +
-            "(3, 'VIH / SIDA'), " +
-            "(4, 'Diabetes tipo 1'), " +
-            "(5, 'Diabetes tipo 2'), " +
-            "(6, 'Diabetes gestacional'), " +
-            "(7, 'Hipertensión arterial'), " +
-            "(8, 'Bronquitis crónica'), " +
-            "(9, 'Fibrosis quística'), " +
-            "(10, 'Cardiopatía coronaria / Arteriopatía coronaria'), " +
-            "(11, 'Cardiopatía congénita'), " +
-            "(12, 'Esclerosis múltiple'), " +
-            "(13, 'Parkinson'), " +
-            "(14, 'Insuficiencia renal crónica'), " +
-            "(15, 'Hemofilia'), " +
-            "(16, 'Artritis degenerativa / Osteoartritis'), " +
-            "(17, 'Artritis reumatoide'), " +
-            "(18, 'Lupus'), " +
-            "(19, 'Hipotiroidismo'), " +
-            "(20, 'Hipertiroidismo'), " +
-            "(21, 'Gastritis crónica'), " +
-            "(22, 'Demencia'), " +
-            "(23, 'Apnea del sueño'), " +
-            "(24, 'Hepatitis A'), " +
-            "(25, 'Hepatitis B'), " +
-            "(26, 'Hepatitis C'), " +
-            "(27, 'Hepatitis D'), " +
-            "(28, 'Hepatitis E'), " +
-            "(29, 'Hepatitis alcohólica'), " +
-            "(30, 'Hígado graso'), " +
-            "(31, 'Enfermedad de Crohn'), " +
-            "(32, 'Insuficiencia renal'), " +
-            "(33, 'Insuficiencia cardíaca'), " +
-            "(34, 'Linfangitis'), " +
-            "(35, 'Angina de pecho'), " +
-            "(36, 'Leucemia'), " +
-            "(37, 'Cirrosis'), " +
-            "(38, 'Cardiomegalia / Corazón dilatado'); ";
 
     public ManejadorBaseDeDatosLocal(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, NOMRE_BASE_DE_DATOS, factory, VERSION_DE_BASE_DE_DATOS);
@@ -133,9 +81,6 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         db.execSQL(CREAR_TABLA_RESUMEN);
         db.execSQL(CREAR_TABLA_MEDICION);
         db.execSQL(CREAR_TABLA_DATO);
-        db.execSQL(CREAR_TABLA_ENFERMEDAD);
-        db.execSQL(CREAR_TABLA_ENFERMEDADESYUSUARIOS);
-        db.execSQL(INSERTAR_ENFERMEDADES_INICIALES);
     }
 
     @Override
@@ -147,8 +92,6 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_RESUMEN);
             db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_MEDICION);
             db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_DATO);
-            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_ENFERMEDAD);
-            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_ENFERMEDADESYUSUARIOS);
             onCreate(db);
         }
     }
@@ -310,17 +253,17 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
                 .rawQuery("SELECT * FROM " + NOMBRE_TABLA_USUARIO + " WHERE idUsuario LIKE '" +
                         idUsuario + "'", null);
         if (cursor.moveToNext()) {
-            Boolean enNube = cursor.getInt(10) == 1;
-            Boolean enviaAlertasAUsuariosCercanos = cursor.getInt(15) == 1;
-            Boolean recibeAlertasDeUsuariosCercanos = cursor.getInt(16) == 1;
+            Boolean enNube = cursor.getInt(11) == 1;
+            Boolean enviaAlertasAUsuariosCercanos = cursor.getInt(16) == 1;
+            Boolean recibeAlertasDeUsuariosCercanos = cursor.getInt(17) == 1;
             Usuario usuario =
                     new Usuario(idUsuario, cursor.getString(1), cursor.getLong(2),
                             cursor.getInt(3),
                             cursor.getLong(4), cursor.getString(5),
                             cursor.getString(6),
                             cursor.getString(7), cursor.getString(8), cursor.getString(9),
-                            enNube, cursor.getString(11),
-                            cursor.getString(12), cursor.getInt(13), cursor.getInt(14),
+                            cursor.getString(10), enNube, cursor.getString(12),
+                            cursor.getString(13), cursor.getInt(14), cursor.getInt(15),
                             enviaAlertasAUsuariosCercanos, recibeAlertasDeUsuariosCercanos);
             lectura.close();
             return usuario;
@@ -478,6 +421,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         contentUsuario.put("edad", usuario.getEdad());
         contentUsuario.put("nss", usuario.getNss());
         contentUsuario.put("medicacion", usuario.getMedicacion());
+        contentUsuario.put("enfermedades", usuario.getEnfermedades());
         contentUsuario.put("toxicomanias", usuario.getToxicomanias());
         contentUsuario.put("tiposangre", usuario.getTipoSangre());
         contentUsuario.put("alergias", usuario.getAlergias());
@@ -706,58 +650,4 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return datosMedidos;
     }
 
-    public ArrayList<String> obtenerEnfermedades(){
-        SQLiteDatabase lectura = getReadableDatabase();
-        ArrayList<String> enfermedades = new ArrayList<>();
-        Cursor cursor = lectura.rawQuery(
-                "SELECT * FROM " + NOMBRE_TABLA_ENFERMEDAD,
-                null);
-        while (cursor.moveToNext()) {
-            enfermedades.add(cursor.getString(1));
-        }
-        lectura.close();
-        return enfermedades;
-    }
-
-    public ArrayList<String> obtenerEnfermedadesDeUnUsuario(String idUsuario){
-        SQLiteDatabase lectura = getReadableDatabase();
-        ArrayList<String> enfermedades = new ArrayList<>();
-        Cursor cursor = lectura.rawQuery(
-                "SELECT * FROM " + NOMBRE_TABLA_ENFERMEDAD + " INNER JOIN " +
-                        NOMBRE_TABLA_ENFERMEDADESYUSUARIOS +
-                        " USING(idEnfermedad) WHERE " + NOMBRE_TABLA_ENFERMEDADESYUSUARIOS
-                        + ".idUsuario LIKE '" + idUsuario + "'",
-                null);
-        while (cursor.moveToNext()) {
-            enfermedades.add(cursor.getString(1));
-        }
-        lectura.close();
-        return enfermedades;
-    }
-
-    public Long agregarEnfermadadAUsuario(String idUsuario, Long idEnfermedad){
-        SQLiteDatabase escritura = getWritableDatabase();
-        ContentValues enfermedadYUsuario = new ContentValues();
-        enfermedadYUsuario.put("idEnfermedad", idEnfermedad);
-        enfermedadYUsuario.put("idUsuario", idUsuario);
-        Long id = escritura.insert(NOMBRE_TABLA_ENFERMEDADESYUSUARIOS,null, enfermedadYUsuario);
-        escritura.close();
-        return id;
-    }
-
-    public void eliminarEnfermedadDeUsuario(String idUsuario, Long idEnfermedad){
-        SQLiteDatabase escritura = getWritableDatabase();
-        escritura.execSQL("DELETE FROM " + NOMBRE_TABLA_ENFERMEDADESYUSUARIOS + " WHERE " +
-                "idEnfermedad = " + idEnfermedad + " AND idUsuario LIKE '" + idUsuario + "'");
-        escritura.close();
-    }
-
-    public Long agregarEnfermedad(String enfermedad){
-        SQLiteDatabase escritura = getWritableDatabase();
-        ContentValues nuevaEnfermedad = new ContentValues();
-        nuevaEnfermedad.put("enfermedad", enfermedad);
-        Long id = escritura.insert(NOMBRE_TABLA_ENFERMEDAD, "idEnfermedad", nuevaEnfermedad);
-        escritura.close();
-        return id;
-    }
 }

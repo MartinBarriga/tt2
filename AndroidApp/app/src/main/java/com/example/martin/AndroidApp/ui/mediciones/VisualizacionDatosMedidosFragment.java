@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.martin.AndroidApp.Countdown;
+import com.example.martin.AndroidApp.Instructivo;
 import com.example.martin.AndroidApp.MainActivity;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
@@ -348,6 +349,15 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(), HistorialDeMediciones.class);
                 intent.putExtra("idUsuario",manejadorBaseDeDatosNube.obtenerIdUsuario());
+                startActivity(intent);
+            }
+        });
+        FloatingActionButton botonInstructivo = root.findViewById(R.id.boton_instructivo_flotante);
+        botonInstructivo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), Instructivo.class);
+                intent.putExtra("pantalla",Instructivo.PANTALLA_MEDICIONES_TIEMPO_REAL);
                 startActivity(intent);
             }
         });

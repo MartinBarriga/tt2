@@ -7,6 +7,7 @@ public class Usuario {
     private int edad;
     private Long nss;
     private String medicacion;
+    private String enfermedades;
     private String toxicomanias;
     private String tipoSangre;
     private String alergias;
@@ -20,7 +21,7 @@ public class Usuario {
     private Boolean recibeAlertasDeUsuariosCercanos;
 
     public Usuario(String idUsuario, String nombre, Long telefono, int edad, Long nss, String medicacion,
-                   String toxicomanias, String tipoSangre, String alergias,
+                   String enfermedades, String toxicomanias, String tipoSangre, String alergias,
                    String religion, Boolean enNube, String fechaUltimoRespaldo, String frecuenciaRespaldo,
                    int frecuenciaCardiacaMinima, int frecuenciaCardiacaMaxima,
                    Boolean enviaAlertasAUsuariosCercanos, Boolean recibeAlertasDeUsuariosCercanos) {
@@ -30,6 +31,7 @@ public class Usuario {
         this.edad = edad;
         this.nss = nss;
         this.medicacion = medicacion;
+        this.enfermedades = enfermedades;
         this.toxicomanias = toxicomanias;
         this.tipoSangre = tipoSangre;
         this.alergias = alergias;
@@ -89,6 +91,14 @@ public class Usuario {
 
     public void setEdad(int edad) {
         this.edad = edad;
+    }
+
+    public String getEnfermedades() {
+        return enfermedades;
+    }
+
+    public void setEnfermedades(String enfermedades) {
+        this.enfermedades = enfermedades;
     }
 
     public String getToxicomanias() {

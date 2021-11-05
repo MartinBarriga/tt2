@@ -3,12 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/JoseManuel/AndroidStudioProjects/tt2/AndroidApp/app/src/main/res/layout/activity_datos_usuario.xml" value="0.275" />
         <entry key="..\:/Users/JoseManuel/AndroidStudioProjects/tt2/AndroidApp/app/src/main/res/layout/activity_login.xml" value="0.17291666666666666" />
         <entry key="..\:/Users/JoseManuel/AndroidStudioProjects/tt2/AndroidApp/app/src/main/res/layout/activity_resumen_de_emergencia.xml" value="0.23550724637681159" />
         <entry key="..\:/Users/JoseManuel/AndroidStudioProjects/tt2/AndroidApp/app/src/main/res/layout/activity_seguimiento_de_alerta.xml" value="0.17291666666666666" />
         <entry key="..\:/Users/JoseManuel/AndroidStudioProjects/tt2/AndroidApp/app/src/main/res/layout/fragment_contacts.xml" value="0.15833333333333333" />
-        <entry key="..\:/Users/JoseManuel/AndroidStudioProjects/tt2/AndroidApp/app/src/main/res/layout/fragment_usuario.xml" value="0.21014492753623187" />
         <entry key="..\:/Users/JoseManuel/AndroidStudioProjects/tt2/AndroidApp/app/src/main/res/layout/item_notification.xml" value="0.4" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/drawable/ic_baseline_backup_24.xml" value="0.346875" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/drawable/ic_baseline_error_outline_24.xml" value="0.5703125" />
@@ -17,12 +15,14 @@
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_datos_usuario.xml" value="0.33" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_dispositivos_vinculados.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_historial_de_mediciones.xml" value="0.5" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_instructivo.xml" value="0.5541666666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_loading.xml" value="0.5541666666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_login.xml" value="0.5541666666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_main.xml" value="0.31979166666666664" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_respaldo.xml" value="0.44427083333333334" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_resumen_de_emergencia.xml" value="0.5541666666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/activity_seguimiento_de_alerta.xml" value="0.5541666666666667" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/dialog_instructivo.xml" value="0.5795660036166366" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/dispositivos.xml" value="0.31979166666666664" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_contacts.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_dashboard.xml" value="0.3307291666666667" />
@@ -30,7 +30,7 @@
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_form.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_navigation_usuario.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_usuario.xml" value="0.33" />
-        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_visualizacion_datos_medidos.xml" value="0.3307291666666667" />
+        <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/fragment_visualizacion_datos_medidos.xml" value="0.67" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/item_contact.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/layout/item_notification.xml" value="0.3307291666666667" />
         <entry key="..\:/Users/Martin/Desktop/TT/AndroidApp/app/src/main/res/menu/bottom_nav_menu.xml" value="0.3307291666666667" />
