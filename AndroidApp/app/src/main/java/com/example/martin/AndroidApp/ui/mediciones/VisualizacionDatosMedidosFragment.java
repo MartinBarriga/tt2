@@ -20,6 +20,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.MainActivity;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
@@ -30,6 +31,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class VisualizacionDatosMedidosFragment extends Fragment {
 
@@ -310,6 +312,14 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
         verHistorialMediciones = root.findViewById(R.id.verMedicionesCardView);
         verHistorialMediciones.setCardBackgroundColor(Color.TRANSPARENT);
         verHistorialMediciones.setCardElevation(0);
+        FloatingActionButton botonEmergencia = root.findViewById(R.id.boton_emergencia);
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), Countdown.class);
+                startActivity(intent);
+            }
+        });
 
         textViewValorECG.setOnClickListener(new View.OnClickListener() {
             @Override

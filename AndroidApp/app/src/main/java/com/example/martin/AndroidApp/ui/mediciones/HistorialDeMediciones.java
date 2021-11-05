@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.Dato;
 import com.example.martin.AndroidApp.MainActivity;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
@@ -28,6 +29,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -86,6 +88,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
         TextView textViewHoraInicio = findViewById(R.id.textViewHoraInicio);
         TextView textViewHoraFin = findViewById(R.id.textViewHoraFin);
         Button botonBuscar = findViewById(R.id.botonBuscar);
+        FloatingActionButton botonEmergencia = findViewById(R.id.boton_emergencia);
         Calendar calendario = Calendar.getInstance();
         final String[] fechaSeleccionada = {""};
         final String[] horaInicioSeleccionada = {""};
@@ -292,6 +295,13 @@ public class HistorialDeMediciones extends AppCompatActivity {
                     }
 
                 }
+            }
+        });
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Countdown.class);
+                startActivity(intent);
             }
         });
     }

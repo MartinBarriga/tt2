@@ -4,8 +4,8 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -17,8 +17,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
+import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 
 import static com.example.martin.AndroidApp.R.color.browser_actions_text_color;
 import static com.example.martin.AndroidApp.R.color.common_google_signin_btn_text_light_default;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class DatosUsuario extends AppCompatActivity {
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
@@ -140,6 +141,15 @@ public class DatosUsuario extends AppCompatActivity {
                 guardarDatos(v, getApplicationContext());
             }
         });
+
+        FloatingActionButton botonEmergencia = findViewById(R.id.boton_emergencia);
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Countdown.class);
+                startActivity(intent);
+            }
+        });
     }
 
 
@@ -223,7 +233,7 @@ public class DatosUsuario extends AppCompatActivity {
 
         Toast.makeText(context, "Datos actualizados.", Toast.LENGTH_LONG).show();
     }
-    
+
     private void actualizarChipGroupDeEnfermedades(){
         ChipGroup enfermedadesChipGroup = findViewById(R.id.enfermedadesChipGroup);
         enfermedadesChipGroup.removeAllViews();

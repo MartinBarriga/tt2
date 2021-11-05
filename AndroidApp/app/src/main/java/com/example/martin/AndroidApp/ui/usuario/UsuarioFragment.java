@@ -15,10 +15,12 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
+import com.example.martin.AndroidApp.Countdown;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
 import com.example.martin.AndroidApp.Usuario;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class UsuarioFragment extends Fragment{
@@ -83,6 +85,15 @@ public class UsuarioFragment extends Fragment{
             public void onClick(View view) {
                 System.out.println("PRESIONASTE CERRAR SESION");
                 cerrarSesion(view, getContext());
+            }
+        });
+
+        FloatingActionButton botonEmergencia = vista.findViewById(R.id.boton_emergencia);
+        botonEmergencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), Countdown.class);
+                startActivity(intent);
             }
         });
         return vista;
