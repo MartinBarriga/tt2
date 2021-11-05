@@ -23,6 +23,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -345,7 +346,7 @@ public class ManejadorBaseDeDatosNube {
 
     private void actualizarUsuario(Usuario usuarioCrudo,
                                    ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        ContentValues usuario = generarFormatoDeUsuarioParaActualizarBD(usuarioCrudo);
+        ContentValues usuario = generarFormatoDeUsuarioParaActualizarBD(usuarioCrudo, manejadorBaseDeDatosLocal);
         BaseDeDatos.collection("usuario").whereEqualTo("idUsuario", obtenerIdUsuario()).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -662,7 +663,6 @@ public class ManejadorBaseDeDatosNube {
                                             ((Long) document.get("edad")).intValue(),
                                             (Long) document.get("nss"),
                                             (String) document.get("medicacion"),
-                                            (String) document.get("enfermedades"),
                                             (String) document.get("toxicomanias"),
                                             (String) document.get("tipoSangre"),
                                             (String) document.get("alergias"),
@@ -678,6 +678,19 @@ public class ManejadorBaseDeDatosNube {
                             manejadorBaseDeDatosLocal.agregarUsuario(manejadorBaseDeDatosLocal
                                     .generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
 
+                            //Agregar enfermedades del respaldo
+                            ArrayList<String> enferdadesEnBD = manejadorBaseDeDatosLocal.obtenerEnfermedades();
+                            String enfermedadesDelUsuario = (String) document.get("enfermedades");
+                            String[] enfermedadesDelUsuarioArray = enfermedadesDelUsuario.split(", ");
+                            for (String enfermedad :
+                                    enfermedadesDelUsuarioArray) {
+                                if (enferdadesEnBD.contains(enfermedad))
+                                    manejadorBaseDeDatosLocal.agregarEnfermadadAUsuario(usuario.getIdUsuario(),
+                                            (long) (enferdadesEnBD.indexOf(enfermedad) + 1));
+                                else
+                                    manejadorBaseDeDatosLocal.agregarEnfermadadAUsuario(usuario.getIdUsuario(),
+                                            manejadorBaseDeDatosLocal.agregarEnfermedad(enfermedad));
+                            }
 
                         }
                     })
@@ -833,7 +846,8 @@ public class ManejadorBaseDeDatosNube {
     }
 
     private ContentValues generarFormatoDeUsuarioParaActualizarBD(
-            com.example.martin.AndroidApp.Usuario usuario) {
+            com.example.martin.AndroidApp.Usuario usuario,
+            ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
         ContentValues contentUsuario = new ContentValues();
         contentUsuario.put("idUsuario", usuario.getIdUsuario());
         contentUsuario.put("nombre", usuario.getNombre());
@@ -841,7 +855,15 @@ public class ManejadorBaseDeDatosNube {
         contentUsuario.put("edad", usuario.getEdad());
         contentUsuario.put("nss", usuario.getNss());
         contentUsuario.put("medicacion", usuario.getMedicacion());
-        contentUsuario.put("enfermedades", usuario.getEnfermedades());
+        String enfermedades = "";
+        for (String enfermedad :
+                manejadorBaseDeDatosLocal.obtenerEnfermedadesDeUnUsuario(obtenerIdUsuario())) {
+            if (enfermedades.matches(""))
+                enfermedades += enfermedad;
+            else
+                enfermedades += ", " + enfermedad;
+        }
+        contentUsuario.put("enfermedades", enfermedades);
         contentUsuario.put("toxicomanias", usuario.getToxicomanias());
         contentUsuario.put("tiposangre", usuario.getTipoSangre());
         contentUsuario.put("alergias", usuario.getAlergias());
