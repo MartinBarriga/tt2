@@ -202,7 +202,7 @@ public class LoadingLogin extends AppCompatActivity {
                                         limpiarNumeroDeTelefono(phone.getText().toString()
                                                 .replace(" ", "")),
                                         0,
-                                        Long.valueOf(0), "", "", "",
+                                        Long.valueOf(0), "", "",
                                         "", "", "", true,
                                         "Sin respaldo previo", "Cada dia",
                                         -1, -1,
