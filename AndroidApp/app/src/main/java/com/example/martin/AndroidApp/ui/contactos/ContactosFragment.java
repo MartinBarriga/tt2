@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.martin.AndroidApp.Contacto;
 import com.example.martin.AndroidApp.Countdown;
+import com.example.martin.AndroidApp.Instructivo;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
@@ -62,6 +63,15 @@ public class ContactosFragment extends Fragment implements  ContactosRecyclerAda
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), Countdown.class);
+                startActivity(intent);
+            }
+        });
+        FloatingActionButton botonInstructivo = root.findViewById(R.id.boton_instructivo_flotante);
+        botonInstructivo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), Instructivo.class);
+                intent.putExtra("pantalla",Instructivo.PANTALLA_CONTACTOS);
                 startActivity(intent);
             }
         });

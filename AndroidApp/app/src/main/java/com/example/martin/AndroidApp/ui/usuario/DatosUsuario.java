@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.martin.AndroidApp.Countdown;
+import com.example.martin.AndroidApp.Instructivo;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
@@ -147,6 +148,15 @@ public class DatosUsuario extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Countdown.class);
+                startActivity(intent);
+            }
+        });
+        FloatingActionButton botonInstructivo = findViewById(R.id.boton_instructivo_flotante);
+        botonInstructivo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Instructivo.class);
+                intent.putExtra("pantalla",Instructivo.PANTALLA_DATOS_USUARIO);
                 startActivity(intent);
             }
         });

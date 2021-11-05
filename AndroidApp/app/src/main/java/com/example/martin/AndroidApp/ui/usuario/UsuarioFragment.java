@@ -16,6 +16,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.example.martin.AndroidApp.Countdown;
+import com.example.martin.AndroidApp.Instructivo;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosLocal;
 import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.R;
@@ -23,12 +24,26 @@ import com.example.martin.AndroidApp.Usuario;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class UsuarioFragment extends Fragment{
+public class UsuarioFragment extends Fragment {
 
+    FirebaseAuth.AuthStateListener asl = new FirebaseAuth.AuthStateListener() {
+        @Override
+        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+            if (firebaseAuth.getCurrentUser() == null) {
+                Log.d("LOG", "Current user = null.");
+                (new Handler()).postDelayed(new Runnable() {
+                    public void run() {
+                        System.exit(0);
+                    }
+                }, 3000);
+            }
+        }
+    };
     private View vista;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
-    private FirebaseAuth auth = FirebaseAuth.getInstance();;
+    ;
+    private FirebaseAuth auth = FirebaseAuth.getInstance();
 
     public UsuarioFragment() {
         // Required empty public constructor
@@ -55,7 +70,6 @@ public class UsuarioFragment extends Fragment{
         datos_medicos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("PRECIONASTE DATOS MEDICOS");
                 Intent intent = new Intent(getContext(), DatosUsuario.class);
                 startActivity(intent);
             }
@@ -65,7 +79,9 @@ public class UsuarioFragment extends Fragment{
         instructivo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("PRESIONASTE INSTRUCTIVO");
+                Intent intent = new Intent(getContext(), Instructivo.class);
+                intent.putExtra("pantalla", Instructivo.PANTALLA_INSTRUCTIVO);
+                startActivity(intent);
             }
         });
 
@@ -73,7 +89,6 @@ public class UsuarioFragment extends Fragment{
         respaldo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("PRESIONASTE RESPALDO");
                 Intent intent = new Intent(getContext(), Respaldo.class);
                 startActivity(intent);
             }
@@ -83,7 +98,6 @@ public class UsuarioFragment extends Fragment{
         cerrar_sesion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("PRESIONASTE CERRAR SESION");
                 cerrarSesion(view, getContext());
             }
         });
@@ -96,6 +110,16 @@ public class UsuarioFragment extends Fragment{
                 startActivity(intent);
             }
         });
+
+        FloatingActionButton botonInstructivo = vista.findViewById(R.id.boton_instructivo_flotante);
+        botonInstructivo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), Instructivo.class);
+                intent.putExtra("pantalla", Instructivo.PANTALLA_USUARIO);
+                startActivity(intent);
+            }
+        });
         return vista;
     }
 
@@ -103,18 +127,4 @@ public class UsuarioFragment extends Fragment{
         Toast.makeText(context, "Cerrando sesión...", Toast.LENGTH_LONG).show();
         auth.signOut();
     }
-
-    FirebaseAuth.AuthStateListener asl = new FirebaseAuth.AuthStateListener() {
-        @Override
-        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            if (firebaseAuth.getCurrentUser() == null) {
-                Log.d("LOG", "Current user = null.");
-                (new Handler()).postDelayed(new Runnable() {
-                    public void run() {
-                        System.exit(0);
-                    }
-                }, 3000);
-            }
-        }
-    };
 }

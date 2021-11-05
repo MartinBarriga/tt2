@@ -31,6 +31,9 @@
             android:name=".ui.notificaciones.ResumenDeEmergencia"
             android:exported="true" />
         <activity
+            android:name=".Instructivo"
+            android:exported="true" />
+        <activity
             android:name=".SeguimientoDeAlerta"
             android:exported="true" />
         <activity
