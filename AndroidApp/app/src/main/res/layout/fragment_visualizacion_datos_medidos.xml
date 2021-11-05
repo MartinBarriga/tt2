@@ -122,4 +122,22 @@
         app:layout_constraintVertical_bias="1.0"
         app:maxImageSize="48sp" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/boton_instructivo_flotante"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:focusableInTouchMode="false"
+        android:src="@drawable/ic_baseline_help_outline_24"
+        android:textAlignment="textStart"
+        app:backgroundTint="#FFFFFF"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:maxImageSize="48sp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
