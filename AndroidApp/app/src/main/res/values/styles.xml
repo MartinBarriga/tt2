@@ -7,5 +7,11 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    <style name="instructivo_dialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="windowMinWidthMajor">100%</item>
+        <item name="windowMinWidthMinor">100%</item>
+        <item name="windowFixedHeightMinor">80%</item>
+        <item name="windowFixedHeightMajor">80%</item>
+    </style>
 
 </resources>
