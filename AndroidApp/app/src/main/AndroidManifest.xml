@@ -32,7 +32,8 @@
             android:exported="true" />
         <activity
             android:name=".Instructivo"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/instructivo_dialog"/>
         <activity
             android:name=".SeguimientoDeAlerta"
             android:exported="true" />
