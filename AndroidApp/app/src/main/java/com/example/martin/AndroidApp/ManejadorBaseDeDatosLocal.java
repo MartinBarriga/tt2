@@ -24,8 +24,8 @@ import java.util.List;
 public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
-    private static final String NOMRE_BASE_DE_DATOS = "lifeguard";
-    private static final int VERSION_DE_BASE_DE_DATOS = 26;
+    private static final String NOMRE_BASE_DE_DATOS = "TT2020B065";
+    private static final int VERSION_DE_BASE_DE_DATOS = 1;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
     private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
