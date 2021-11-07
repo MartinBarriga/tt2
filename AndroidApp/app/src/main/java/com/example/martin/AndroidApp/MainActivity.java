@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -113,14 +114,11 @@ public class MainActivity extends AppCompatActivity {
 
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
 
-        try {
-            this.getSupportActionBar().hide();
-        } catch (NullPointerException e) {
-        }
-
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_contacts, R.id.navigation_dashboard, R.id.navigation_usuario)
                 .build();

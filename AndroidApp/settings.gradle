@@ -1,3 +1,2 @@
-rootProject.name='LifeGuard'
+rootProject.name='TT 2020-B065'
 include ':app'
-include ':wear'

@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">LifeGuard</string>
-    <string name="title_contacts">Contacts</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="app_name">TT 2020-B065</string>
+    <string name="title_contacts">Contactos</string>
+    <string name="title_dashboard">Notificaciones</string>
     <string name="title_datos">Datos del Usuario</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -13,5 +13,5 @@
     <string name="title_sensor_data_visualization">Datos del sensor</string>
     <string name="textoEncenderBluetooth">Encender bluetooth</string>
     <string name="textoVincularSensor">Vincular Sensor</string>
-    <string name="title_usuario">usuario</string>
+    <string name="title_usuario">Usuario</string>
 </resources>
