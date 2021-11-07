@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:948425774486:android:a07b27fe7ee165f512b9b7",
+        "mobilesdk_app_id": "1:948425774486:android:dd98087c701cb88c12b9b7",
         "android_client_info": {
-          "package_name": "com.example.martin.lifeguard"
+          "package_name": "com.example.martin.TT2020B065"
         }
       },
       "oauth_client": [
