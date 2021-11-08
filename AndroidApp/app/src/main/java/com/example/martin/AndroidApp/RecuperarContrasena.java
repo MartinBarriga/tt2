@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class recuperarContrasena extends AppCompatActivity {
+public class RecuperarContrasena extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     @Override

@@ -17,10 +17,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.martin.AndroidApp.recuperarContrasena;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -289,7 +286,7 @@ public class LoadingLogin extends AppCompatActivity {
         EditText field = findViewById(R.id.email);
         String email = field.getText().toString();
 
-        Intent intent = new Intent(getApplicationContext(), recuperarContrasena.class);
+        Intent intent = new Intent(getApplicationContext(), RecuperarContrasena.class);
         if (email!=null && !email.matches("")){
             intent.putExtra("email", email);
         }
