@@ -144,6 +144,20 @@ public class NotificacionesFragment extends Fragment
                     }
                 });
 
+        if ( usuario.getRecibeAlertasDeUsuariosCercanos() ){
+            FirebaseMessaging.getInstance().subscribeToTopic("UsuariosCercanos")
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            String msg = "Suscrito a usuarios cercanos";
+                            if (!task.isSuccessful()) {
+                                msg = "No se pudo suscribir a usuarios cercanos";
+                            }
+                            Log.d("LOG", msg);
+                        }
+                    });
+        }
+
         FloatingActionButton botonEmergencia = root.findViewById(R.id.boton_emergencia);
         botonEmergencia.setOnClickListener(new View.OnClickListener() {
             @Override
