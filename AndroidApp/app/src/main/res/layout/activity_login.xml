@@ -29,7 +29,8 @@
             android:layout_marginTop="16dp"
             android:ems="10"
             android:hint="Correo Electrónico"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:minHeight="48dp" />
 
         <EditText
             android:id="@+id/password"
@@ -38,23 +39,34 @@
             android:layout_marginTop="16dp"
             android:ems="10"
             android:hint="Contraseña"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:minHeight="48dp" />
 
         <Button
             android:id="@+id/login"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="signIn"
             android:text="Ingresar" />
 
         <Button
+            android:id="@+id/recuperarContrasenaButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:onClick="recuperarContrasenaButtonOnClick"
+            android:text="Olvidé mi contraseña" />
+
+        <Button
             android:id="@+id/signup"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:onClick="signUp"
-            android:text="Registrar una nueva cuenta" />
+            android:text="¿Eres usuario nuevo?" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
