@@ -27,11 +27,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:ems="10"
                 android:hint="Nombre"
                 android:inputType="textPersonName"
+                android:minHeight="48dp"
                 android:textAlignment="viewStart"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -50,7 +51,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/nombre" />
+                app:layout_constraintTop_toBottomOf="@+id/nombre"
+                tools:ignore="TouchTargetSizeCheck" />
 
             <EditText
                 android:id="@+id/telefono"
@@ -62,6 +64,7 @@
                 android:ems="10"
                 android:hint="Teléfono"
                 android:inputType="phone"
+                android:minHeight="48dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/edad" />
@@ -83,8 +86,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Opcionales"
+                android:text="Datos médicos"
                 android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider" />
@@ -107,7 +111,8 @@
                 android:layout_marginRight="16dp"
                 android:ems="10"
                 android:hint="Número de Seguridad Social"
-                android:inputType="number" />
+                android:inputType="number"
+                android:minHeight="48dp" />
 
             <EditText
                 android:id="@+id/medicacion"
@@ -134,8 +139,9 @@
                 android:layout_marginEnd="16dp"
                 android:ems="10"
                 android:gravity="start|top"
-                android:hint="Enfermedades crónicas"
-                android:inputType="textMultiLine|textAutoComplete" />
+                android:hint="Enfermedades o padecimientos"
+                android:inputType="textAutoComplete"
+                android:minHeight="48dp" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/enfermedadesChipGroup"
@@ -143,22 +149,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:checkable="false"
-                    android:text="Gastritis"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    app:checkedIconVisible="false"
-                    app:chipIconVisible="true"
-                    app:closeIconVisible="true" />
-            </com.google.android.material.chip.ChipGroup>
+                android:layout_marginEnd="16dp"/>
 
             <EditText
                 android:id="@+id/toxicomanias"
@@ -187,6 +178,7 @@
                 android:gravity="start|top"
                 android:hint="Tipo de sangre"
                 android:inputType="text"
+                android:minHeight="48dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/enfermedades" />
@@ -249,17 +241,21 @@
 
             <Button
                 android:id="@+id/guardar"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:backgroundTint="@color/colorPrimary"
-                android:gravity="left"
                 android:text="Guardar"
-                android:textSize="18sp"/>
+                android:textAlignment="center"
+                android:textSize="18sp" />
 
         </LinearLayout>
     </ScrollView>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/boton_emergencia"
         android:layout_width="wrap_content"
@@ -268,6 +264,8 @@
         android:layout_marginBottom="8dp"
         android:clickable="true"
         android:focusableInTouchMode="false"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:src="@drawable/ic_baseline_error_outline_72"
         android:textAlignment="textStart"
         app:backgroundTint="#C81D1D"
@@ -276,7 +274,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
-        app:maxImageSize="48sp" />
+        app:maxImageSize="48sp"
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/boton_instructivo_flotante"
         android:layout_width="wrap_content"
@@ -285,6 +285,8 @@
         android:layout_marginBottom="8dp"
         android:clickable="true"
         android:focusableInTouchMode="false"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:src="@drawable/ic_baseline_help_outline_24"
         android:textAlignment="textStart"
         app:backgroundTint="#FFFFFF"
@@ -293,6 +295,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
-        app:maxImageSize="48sp" />
+        app:maxImageSize="48sp"
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

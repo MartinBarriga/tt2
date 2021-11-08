@@ -24,8 +24,6 @@ public class ResumenDeEmergencia extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE); //will hide the title
-        getSupportActionBar().hide(); // hide the title bar
         setContentView(R.layout.activity_resumen_de_emergencia);
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
@@ -42,7 +40,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
         TextView textNombreResumen = findViewById(R.id.nombreResumen);
         textNombreResumen.setText("Nombre: "+resumen.getNombre());
         TextView textCantidadDePersonasEnviadoResumen = findViewById(R.id.cantidadDePersonasEnviadoResumen);
-        textCantidadDePersonasEnviadoResumen.setText("Seenvió alerta a "+resumen.getCantidadDePersonasEnviado()+" personas");
+        textCantidadDePersonasEnviadoResumen.setText("Se envió alerta a "+resumen.getCantidadDePersonasEnviado()+" personas");
         TextView textDuracionResumen = findViewById(R.id.duracionResumen);
         textDuracionResumen.setText(resumen.getDuracion());
         TextView textDesenlaceResumen = findViewById(R.id.desenlaceResumen);

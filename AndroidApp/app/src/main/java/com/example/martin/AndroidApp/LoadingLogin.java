@@ -18,7 +18,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -281,6 +280,17 @@ public class LoadingLogin extends AppCompatActivity {
                     });
         else Toast.makeText(getApplicationContext(), "Ingrese todos los datos, por favor.",
                 Toast.LENGTH_LONG).show();
+    }
+
+    public void recuperarContrasenaButtonOnClick(View view){
+        EditText field = findViewById(R.id.email);
+        String email = field.getText().toString();
+
+        Intent intent = new Intent(getApplicationContext(), RecuperarContrasena.class);
+        if (email!=null && !email.matches("")){
+            intent.putExtra("email", email);
+        }
+        startActivity(intent);
     }
 
 }
