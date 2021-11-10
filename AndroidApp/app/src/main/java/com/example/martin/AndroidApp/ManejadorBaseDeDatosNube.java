@@ -1031,6 +1031,9 @@ public class ManejadorBaseDeDatosNube {
         } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
+        } catch (NullPointerException e) {
+            Log.d("LOG", "La emergencia podría no haber sido creada aún.");
+            return false;
         }
     }
 

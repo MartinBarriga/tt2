@@ -30,11 +30,12 @@ public class RecuperarContrasena extends AppCompatActivity {
     public void solicitarCambioDeContrasenaButtonOnClick(View view){
         TextView emailTextview = findViewById(R.id.recuperarContrasenaEmailTextview);
         String email = emailTextview.getText().toString();
-        if (email != null && !email.matches("")){
+        if (email != null && !email.trim().matches("")){
             mAuth.sendPasswordResetEmail(email);
-            Toast.makeText(getApplicationContext(), "Correo enviado", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "Correo enviado", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(getApplicationContext(), "Ingresa tu correo electrónico", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "Ingresa tu correo electrónico",
+                    Toast.LENGTH_LONG).show();
         }
     }
 

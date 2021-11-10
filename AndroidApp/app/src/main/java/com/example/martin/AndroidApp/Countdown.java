@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -81,7 +82,9 @@ public class Countdown extends AppCompatActivity {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        HiloParaEnviarEmergencias hiloParaEnviarEmergencias = new HiloParaEnviarEmergencias(idEmergencia, idUsuario, fecha, location, mManejadorBaseDeDatosLocal, mManejadorBaseDeDatosNube);
+                        HiloParaEnviarEmergencias hiloParaEnviarEmergencias = new HiloParaEnviarEmergencias(
+                                idEmergencia, idUsuario, fecha, location, mManejadorBaseDeDatosLocal,
+                                mManejadorBaseDeDatosNube);
                         hiloParaEnviarEmergencias.start();
                         try {
                             hiloParaEnviarEmergencias.join();
@@ -94,6 +97,14 @@ public class Countdown extends AppCompatActivity {
             }
         };
         cdt.start();
+    }
+
+    private boolean tieneConexionAInternet() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+
+        return connectivityManager.getActiveNetworkInfo() != null
+                && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
     public void saltarCountDown(View view) {
@@ -110,7 +121,9 @@ public class Countdown extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                HiloParaEnviarEmergencias hiloParaEnviarEmergencias = new HiloParaEnviarEmergencias(idEmergencia, idUsuario, fecha, location, mManejadorBaseDeDatosLocal, mManejadorBaseDeDatosNube);
+                HiloParaEnviarEmergencias hiloParaEnviarEmergencias = new HiloParaEnviarEmergencias(
+                        idEmergencia, idUsuario, fecha, location, mManejadorBaseDeDatosLocal,
+                        mManejadorBaseDeDatosNube);
                 hiloParaEnviarEmergencias.start();
                 try {
                     hiloParaEnviarEmergencias.join();
@@ -127,19 +140,23 @@ public class Countdown extends AppCompatActivity {
         System.exit(0);
     }
 
-    public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha, String localizacion){
-        Notificacion notificacion = new Notificacion(null,idUsuario,idEmergencia,"Te encuentras en una emergencia", 0, fecha, false, true, false);
-        notificacion.setIdNotificacion(mManejadorBaseDeDatosLocal.agregarNotificacion(mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(notificacion)));
+    public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha,
+                                          String localizacion){
+        Notificacion notificacion = new Notificacion(null,idUsuario,idEmergencia,
+                "Te encuentras en una emergencia", 0, fecha, false, true,
+                false);
+        notificacion.setIdNotificacion(mManejadorBaseDeDatosLocal.agregarNotificacion(
+                mManejadorBaseDeDatosLocal.generarFormatoDeNotificacionParaIntroducirEnBD(notificacion)));
         notificarAlUsuario(notificacion, localizacion);
     }
 
     public void enviarNotificacion(String idEmergencia, String idUsuario, String fecha,
-                                   String localizacion, ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, ManejadorBaseDeDatosNube manejadorBaseDeDatosNube) {
+                                   String localizacion, ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
+                                   ManejadorBaseDeDatosNube manejadorBaseDeDatosNube) {
         try {
             if(manejadorBaseDeDatosNube.crearEmergencia(idEmergencia, fecha, localizacion,
                     manejadorBaseDeDatosLocal.obtenerCantidadDeContactos(idUsuario)))
-                Log.d("LOG", "Ya se peude notificar.");
-            agregarNotificacionPropia(idUsuario,idEmergencia,fecha, localizacion);
+                Log.d("LOG", "Ya se puede notificar.");
             JSONObject datosDelUsuario = manejadorBaseDeDatosLocal
                     .obtenerDatosDelUsuarioEnFormatoJsonParaEnvioDeNotificaciones(
                            idUsuario , idEmergencia, fecha, localizacion);
@@ -166,9 +183,9 @@ public class Countdown extends AppCompatActivity {
 
                             header.put("content-type", "application/json");
                             header.put("authorization",
-                                    "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOxNJAL" +
-                                            "9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Yed2KRvprMhwZ" +
-                                            "UUuBQY4tvlZ8txWE1ir5XTWfi2");
+                                    "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOx" +
+                                            "NJAL9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Y" +
+                                            "ed2KRvprMhwZUUuBQY4tvlZ8txWE1ir5XTWfi2");
                             return header;
                         }
                     };
@@ -201,9 +218,9 @@ public class Countdown extends AppCompatActivity {
 
                                 header.put("content-type", "application/json");
                                 header.put("authorization",
-                                        "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOxNJAL" +
-                                                "9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Yed2KRvprMhwZ" +
-                                                "UUuBQY4tvlZ8txWE1ir5XTWfi2");
+                                        "key=AAAA3NKU1ZY:APA91bFGJAcm3kPvzQftNXIir4fzQj9jjo9Li-PXZ70JJOx" +
+                                                "NJAL9xfK-IiXhez0_TxsginhawfnMfa9FwfVBD4ULwEzX88bvjCRk_Y" +
+                                                "ed2KRvprMhwZUUuBQY4tvlZ8txWE1ir5XTWfi2");
                                 return header;
                             }
                         };
@@ -215,7 +232,9 @@ public class Countdown extends AppCompatActivity {
         }
     }
 
-    public void enviarSMS(View view, Context context, String idEmergencia, String localizacion, ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, ManejadorBaseDeDatosNube manejadorBaseDeDatosNube) {
+    public void enviarSMS(View view, Context context, String idEmergencia, String localizacion,
+                          ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
+                          ManejadorBaseDeDatosNube manejadorBaseDeDatosNube) {
         ArrayList<Pair<String, String>> mensajesYNumerosDeTelefonos =
                 manejadorBaseDeDatosLocal
                         .obtenerMensajeYNumerosDeTelefonosParaEnvioDeSMS(
@@ -232,7 +251,8 @@ public class Countdown extends AppCompatActivity {
             for (String msj : mensajeEnPartes ) {
                 Log.d("LOG", "Mensaje: " + msj);
             }
-            sms.sendMultipartTextMessage(mensajeYTelefono.second, null, mensajeEnPartes, null, null);
+            sms.sendMultipartTextMessage(mensajeYTelefono.second, null, mensajeEnPartes,
+                    null, null);
             Log.d("LOG", "Se envió un mensaje a: " + mensajeYTelefono.second);
         }
 
@@ -251,7 +271,8 @@ public class Countdown extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.getActivity(this, 0, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this, "Alerta")
@@ -329,8 +350,18 @@ public class Countdown extends AppCompatActivity {
 
         @Override
         public void run() {
-            enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion, manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
-            enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia, localizacion, manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
+            if (tieneConexionAInternet()){
+                enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion,
+                        manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
+            } else {
+                Log.d("LOG", "No tiene conexión a internet, sólo se enviarán SMS");
+                Looper.prepare();
+                Toast.makeText( getApplicationContext(),
+                        "No tiene conexión a internet, sólo se enviarán SMS", Toast.LENGTH_LONG ).show();
+            }
+            agregarNotificacionPropia(idUsuario,idEmergencia,fecha, localizacion);
+            enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia, localizacion,
+                    manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
         }
     }
 }
