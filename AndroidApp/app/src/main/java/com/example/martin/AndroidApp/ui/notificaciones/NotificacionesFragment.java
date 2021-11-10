@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.SpannableString;
@@ -64,7 +65,8 @@ public class NotificacionesFragment extends Fragment
     private View root;
     private ArrayList<Notificacion> mNotificaciones;
     ItemTouchHelper.SimpleCallback itemTouchHelperCallback =
-            new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+            new ItemTouchHelper.SimpleCallback(0,
+                    ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
 
                 @Override
                 public boolean onMove(@NonNull RecyclerView recyclerView,
@@ -181,7 +183,8 @@ public class NotificacionesFragment extends Fragment
         Bundle bundle = getArguments();
         if (bundle!=null)
             if (bundle.getBoolean("nuevaAlerta")){
-                onNotificacionClick(mNotificacionesManager.obtenerPosicionDeUnaNotificacion(bundle.getLong("idNotificacion")));
+                onNotificacionClick(mNotificacionesManager.obtenerPosicionDeUnaNotificacion(
+                        bundle.getLong("idNotificacion")));
             }
         return root;
     }
@@ -198,6 +201,14 @@ public class NotificacionesFragment extends Fragment
         new ItemTouchHelper(itemTouchHelperCallback)
                 .attachToRecyclerView(notificacionesRecyclerView);
         notificacionesRecyclerView.setAdapter(mNotificacionesRecyclerAdapter);
+    }
+
+    private boolean tieneConexionAInternet() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+
+        return connectivityManager.getActiveNetworkInfo() != null
+                && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
     @Override
@@ -231,7 +242,8 @@ public class NotificacionesFragment extends Fragment
         String idEmergencia = mNotificaciones.get(position).getIdEmergencia();
         if (mNotificaciones.get(position).getEstado()==0){
             HiloParaRevisarSiLaEmergenciaFueTerminada hiloParaRevisarSiLaEmergenciaFueTerminada =
-                    new HiloParaRevisarSiLaEmergenciaFueTerminada(idEmergencia, mNotificacionesManager, position);
+                    new HiloParaRevisarSiLaEmergenciaFueTerminada(idEmergencia, mNotificacionesManager,
+                            position);
             hiloParaRevisarSiLaEmergenciaFueTerminada.start();
             try {
                 hiloParaRevisarSiLaEmergenciaFueTerminada.join();
@@ -244,23 +256,29 @@ public class NotificacionesFragment extends Fragment
                 }
             }, 200);
             if (mNotificaciones.get(position).getEstado()==0){
-                String nombre;
-                if (mNotificaciones.get(position).getEsPropia()) {
-                    nombre = "Emergencia";
+                if (tieneConexionAInternet()) {
+                    String nombre;
+                    if (mNotificaciones.get(position).getEsPropia()) {
+                        nombre = "Emergencia";
+                    } else {
+                        Usuario usuario = mManejadorBaseDeDatosLocal
+                                .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
+                        nombre = usuario.getNombre().replace(" ", "_");
+                    }
+                    String parametroUbicacion = "";
+                    Bundle bundle = getArguments();
+                    if (bundle != null)
+                        parametroUbicacion = "&ubicacion=" + bundle.getString("localizacion");
+                    String enlace = "https://seguimiento-de-alerta.firebaseapp.com/?id=" + idEmergencia
+                            + "&nombre=" + nombre + parametroUbicacion;
+                    Intent intent = new Intent(getContext(), SeguimientoDeAlerta.class);
+                    intent.putExtra("enlace", enlace);
+                    startActivity(intent);
                 } else {
-                    Usuario usuario = mManejadorBaseDeDatosLocal
-                            .obtenerUsuario(mManejadorBaseDeDatosNube.obtenerIdUsuario());
-                    nombre = usuario.getNombre().replace(" ", "_");
+                    Toast.makeText(getContext(),
+                            "No hay conexión a internet, no se puede hacer el seguimiento de la emergencia.",
+                            Toast.LENGTH_LONG).show();
                 }
-                String parametroUbicacion = "";
-                Bundle bundle = getArguments();
-                if (bundle!=null)
-                    parametroUbicacion = "&ubicacion="+bundle.getString("localizacion");
-                String enlace = "https://seguimiento-de-alerta.firebaseapp.com/?id=" + idEmergencia
-                        + "&nombre=" + nombre + parametroUbicacion;
-                Intent intent = new Intent(getContext(), SeguimientoDeAlerta.class);
-                intent.putExtra("enlace", enlace);
-                startActivity(intent);
             }
         }
         if (mNotificaciones.get(position).getEstado()==1){
@@ -289,7 +307,9 @@ public class NotificacionesFragment extends Fragment
         String idEmergencia;
         int posicion;
         ManejadorNotificaciones manejadorNotificaciones;
-        HiloParaRevisarSiLaEmergenciaFueTerminada(String idEmergencia, ManejadorNotificaciones manejadorNotificaciones, int posicion){
+        HiloParaRevisarSiLaEmergenciaFueTerminada(String idEmergencia,
+                                                  ManejadorNotificaciones manejadorNotificaciones,
+                                                  int posicion){
             this.idEmergencia = idEmergencia;
             this.manejadorNotificaciones = manejadorNotificaciones;
             this.posicion = posicion;
