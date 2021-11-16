@@ -1,13 +1,13 @@
 package com.example.martin.AndroidApp;
 
 public class Dato {
-    Long idDato;
-    Long idMedicion;
-    int frecuenciaCardiaca;
-    int ecg;
-    int spo2;
-    String hora;
-    Boolean enNube;
+    private Long idDato;
+    private Long idMedicion;
+    private int frecuenciaCardiaca;
+    private int ecg;
+    private int spo2;
+    private String hora;
+    private Boolean enNube;
 
     public Dato(Long idDato, Long idMedicion, int frecuenciaCardiaca, int ecg, int spo2,
                 String hora, Boolean enNube) {

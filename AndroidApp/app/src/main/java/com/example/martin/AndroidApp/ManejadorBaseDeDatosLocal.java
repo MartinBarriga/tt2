@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -17,9 +16,9 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
@@ -76,50 +75,52 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             " (idEnfermedad INTEGER PRIMARY KEY AUTOINCREMENT, enfermedad TEXT NOT NULL)";
     private static final String CREAR_TABLA_ENFERMEDADESYUSUARIOS = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_ENFERMEDADESYUSUARIOS +
-            " (idEnfermedad INTEGER NOT NULL REFERENCES "+ NOMBRE_TABLA_ENFERMEDAD+" (idEnfermedad) " +
+            " (idEnfermedad INTEGER NOT NULL REFERENCES " + NOMBRE_TABLA_ENFERMEDAD +
+            " (idEnfermedad) " +
             ", idUsuario TEXT NOT NULL REFERENCES " + NOMBRE_TABLA_USUARIO + " (idUsuario), " +
             "PRIMARY KEY (idEnfermedad, idUsuario))";
 
-    private static final String INSERTAR_ENFERMEDADES_INICIALES = "INSERT OR IGNORE INTO " + NOMBRE_TABLA_ENFERMEDAD +
-            " (idEnfermedad, enfermedad) VALUES " +
-            "(1, 'Asma'), " +
-            "(2, 'Cancer'), " +
-            "(3, 'VIH / SIDA'), " +
-            "(4, 'Diabetes tipo 1'), " +
-            "(5, 'Diabetes tipo 2'), " +
-            "(6, 'Diabetes gestacional'), " +
-            "(7, 'Hipertensión arterial'), " +
-            "(8, 'Bronquitis crónica'), " +
-            "(9, 'Fibrosis quística'), " +
-            "(10, 'Cardiopatía coronaria / Arteriopatía coronaria'), " +
-            "(11, 'Cardiopatía congénita'), " +
-            "(12, 'Esclerosis múltiple'), " +
-            "(13, 'Parkinson'), " +
-            "(14, 'Insuficiencia renal crónica'), " +
-            "(15, 'Hemofilia'), " +
-            "(16, 'Artritis degenerativa / Osteoartritis'), " +
-            "(17, 'Artritis reumatoide'), " +
-            "(18, 'Lupus'), " +
-            "(19, 'Hipotiroidismo'), " +
-            "(20, 'Hipertiroidismo'), " +
-            "(21, 'Gastritis crónica'), " +
-            "(22, 'Demencia'), " +
-            "(23, 'Apnea del sueño'), " +
-            "(24, 'Hepatitis A'), " +
-            "(25, 'Hepatitis B'), " +
-            "(26, 'Hepatitis C'), " +
-            "(27, 'Hepatitis D'), " +
-            "(28, 'Hepatitis E'), " +
-            "(29, 'Hepatitis alcohólica'), " +
-            "(30, 'Hígado graso'), " +
-            "(31, 'Enfermedad de Crohn'), " +
-            "(32, 'Insuficiencia renal'), " +
-            "(33, 'Insuficiencia cardíaca'), " +
-            "(34, 'Linfangitis'), " +
-            "(35, 'Angina de pecho'), " +
-            "(36, 'Leucemia'), " +
-            "(37, 'Cirrosis'), " +
-            "(38, 'Cardiomegalia / Corazón dilatado'); ";
+    private static final String INSERTAR_ENFERMEDADES_INICIALES =
+            "INSERT OR IGNORE INTO " + NOMBRE_TABLA_ENFERMEDAD +
+                    " (idEnfermedad, enfermedad) VALUES " +
+                    "(1, 'Asma'), " +
+                    "(2, 'Cancer'), " +
+                    "(3, 'VIH / SIDA'), " +
+                    "(4, 'Diabetes tipo 1'), " +
+                    "(5, 'Diabetes tipo 2'), " +
+                    "(6, 'Diabetes gestacional'), " +
+                    "(7, 'Hipertensión arterial'), " +
+                    "(8, 'Bronquitis crónica'), " +
+                    "(9, 'Fibrosis quística'), " +
+                    "(10, 'Cardiopatía coronaria / Arteriopatía coronaria'), " +
+                    "(11, 'Cardiopatía congénita'), " +
+                    "(12, 'Esclerosis múltiple'), " +
+                    "(13, 'Parkinson'), " +
+                    "(14, 'Insuficiencia renal crónica'), " +
+                    "(15, 'Hemofilia'), " +
+                    "(16, 'Artritis degenerativa / Osteoartritis'), " +
+                    "(17, 'Artritis reumatoide'), " +
+                    "(18, 'Lupus'), " +
+                    "(19, 'Hipotiroidismo'), " +
+                    "(20, 'Hipertiroidismo'), " +
+                    "(21, 'Gastritis crónica'), " +
+                    "(22, 'Demencia'), " +
+                    "(23, 'Apnea del sueño'), " +
+                    "(24, 'Hepatitis A'), " +
+                    "(25, 'Hepatitis B'), " +
+                    "(26, 'Hepatitis C'), " +
+                    "(27, 'Hepatitis D'), " +
+                    "(28, 'Hepatitis E'), " +
+                    "(29, 'Hepatitis alcohólica'), " +
+                    "(30, 'Hígado graso'), " +
+                    "(31, 'Enfermedad de Crohn'), " +
+                    "(32, 'Insuficiencia renal'), " +
+                    "(33, 'Insuficiencia cardíaca'), " +
+                    "(34, 'Linfangitis'), " +
+                    "(35, 'Angina de pecho'), " +
+                    "(36, 'Leucemia'), " +
+                    "(37, 'Cirrosis'), " +
+                    "(38, 'Cardiomegalia / Corazón dilatado'); ";
 
     public ManejadorBaseDeDatosLocal(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, NOMRE_BASE_DE_DATOS, factory, VERSION_DE_BASE_DE_DATOS);
@@ -293,6 +294,22 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         escritura.update(NOMBRE_TABLA_CONTACTO, contacto, "idContacto = ? AND idUsuario = ? ",
                 new String[]{idContacto,
                         (String) contacto.get("idUsuario")});
+        escritura.close();
+    }
+
+    public void actualizarMedicion(ContentValues medicion) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.update(NOMBRE_TABLA_MEDICION, medicion, "idMedicion = ? AND idUsuario = ? ",
+                new String[]{Long.toString((Long) medicion.get("idMedicion")),
+                        (String) medicion.get("idUsuario")});
+        escritura.close();
+    }
+
+    public void actualizarDato(ContentValues dato, String idUsuario) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.update(NOMBRE_TABLA_DATO, dato, "idMedicion = ? AND idDato = ? ",
+                new String[]{Long.toString((Long) dato.get("idMedicion")),
+                        Long.toString((Long) dato.get("idDato"))});
         escritura.close();
     }
 
@@ -602,16 +619,16 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return true;
     }
 
-    private ContentValues generarFormatoDeMedicionParaIntroducirEnBD(Medicion medicion) {
+    public ContentValues generarFormatoDeMedicionParaIntroducirEnBD(Medicion medicion) {
         ContentValues contentMedicion = new ContentValues();
         contentMedicion.put("idMedicion", medicion.getIdMedicion());
         contentMedicion.put("idUsuario", medicion.getIdUsuario());
         contentMedicion.put("fecha", medicion.getFecha());
-        contentMedicion.put("enNube", medicion.getEnNube() ? 1 : 0);
+        contentMedicion.put("enNube", medicion.getEnNube() == true ? 1 : 0);
         return contentMedicion;
     }
 
-    private ContentValues generarFormadoDeDatoParaIntroducirEnBD(Dato dato) {
+    public ContentValues generarFormatoDeDatoParaIntroducirEnBD(Dato dato) {
         ContentValues contentDato = new ContentValues();
         contentDato.put("idDato", dato.getIdDato());
         contentDato.put("idMedicion", dato.getIdMedicion());
@@ -644,7 +661,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         String hora = formatoParaHoras.format(new Date(tiempo));
         Dato dato = new Dato(null, medicion.getIdMedicion(), frecuenciaCardiaca, ecg, spo2, hora,
                 false);
-        Long idDato = agregarDato(generarFormadoDeDatoParaIntroducirEnBD(dato));
+        Long idDato = agregarDato(generarFormatoDeDatoParaIntroducirEnBD(dato));
         dato.setIdDato(idDato);
     }
 
@@ -706,7 +723,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return datosMedidos;
     }
 
-    public ArrayList<String> obtenerEnfermedades(){
+    public ArrayList<String> obtenerEnfermedades() {
         SQLiteDatabase lectura = getReadableDatabase();
         ArrayList<String> enfermedades = new ArrayList<>();
         Cursor cursor = lectura.rawQuery(
@@ -719,7 +736,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return enfermedades;
     }
 
-    public ArrayList<String> obtenerEnfermedadesDeUnUsuario(String idUsuario){
+    public ArrayList<String> obtenerEnfermedadesDeUnUsuario(String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         ArrayList<String> enfermedades = new ArrayList<>();
         Cursor cursor = lectura.rawQuery(
@@ -735,29 +752,76 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return enfermedades;
     }
 
-    public Long agregarEnfermadadAUsuario(String idUsuario, Long idEnfermedad){
+    public Long agregarEnfermadadAUsuario(String idUsuario, Long idEnfermedad) {
         SQLiteDatabase escritura = getWritableDatabase();
         ContentValues enfermedadYUsuario = new ContentValues();
         enfermedadYUsuario.put("idEnfermedad", idEnfermedad);
         enfermedadYUsuario.put("idUsuario", idUsuario);
-        Long id = escritura.insert(NOMBRE_TABLA_ENFERMEDADESYUSUARIOS,null, enfermedadYUsuario);
+        Long id = escritura.insert(NOMBRE_TABLA_ENFERMEDADESYUSUARIOS, null, enfermedadYUsuario);
         escritura.close();
         return id;
     }
 
-    public void eliminarEnfermedadDeUsuario(String idUsuario, Long idEnfermedad){
+    public void eliminarEnfermedadDeUsuario(String idUsuario, Long idEnfermedad) {
         SQLiteDatabase escritura = getWritableDatabase();
         escritura.execSQL("DELETE FROM " + NOMBRE_TABLA_ENFERMEDADESYUSUARIOS + " WHERE " +
                 "idEnfermedad = " + idEnfermedad + " AND idUsuario LIKE '" + idUsuario + "'");
         escritura.close();
     }
 
-    public Long agregarEnfermedad(String enfermedad){
+    public Long agregarEnfermedad(String enfermedad) {
         SQLiteDatabase escritura = getWritableDatabase();
         ContentValues nuevaEnfermedad = new ContentValues();
         nuevaEnfermedad.put("enfermedad", enfermedad);
         Long id = escritura.insert(NOMBRE_TABLA_ENFERMEDAD, "idEnfermedad", nuevaEnfermedad);
         escritura.close();
         return id;
+    }
+
+    public ArrayList<Medicion> obtenerMediciones(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<Medicion> mediciones = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_MEDICION + " WHERE idUsuario LIKE '" + idUsuario +
+                        "'", null);
+        while (cursor.moveToNext()) {
+            Medicion medicion =
+                    new Medicion(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
+                            cursor.getInt(3) == 1 ? true : false);
+            mediciones.add(medicion);
+        }
+        lectura.close();
+        return mediciones;
+    }
+
+    public ArrayList<Dato> obtenerDatosDeMedicionQueNoSeEncuentranEnNube(Medicion medicion) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<Dato> datos = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_DATO + " WHERE idMedicion LIKE '" +
+                        medicion.getIdMedicion() + "' AND enNube = 0", null);
+
+        while (cursor.moveToNext()) {
+            Dato dato = new Dato(cursor.getLong(0), cursor.getLong(1), cursor.getInt(2),
+                    cursor.getInt(3), cursor.getInt(4), cursor.getString(5),
+                    cursor.getInt(6) == 1 ? true : false);
+            datos.add(dato);
+        }
+        lectura.close();
+        return datos;
+    }
+
+    public Map<Medicion, ArrayList<Dato>> obtenerMedicionesYDatosEnFormatoDeMap(String idUsuario) {
+        Map<Medicion, ArrayList<Dato>> idsMedicionesYDatosEnBDLocal =
+                new HashMap<Medicion, ArrayList<Dato>>();
+        for (Medicion medicion : obtenerMediciones(idUsuario)) {
+            idsMedicionesYDatosEnBDLocal.put(medicion, new ArrayList<Dato>());
+            ArrayList<Dato> datos = new ArrayList<Dato>();
+            for (Dato dato : obtenerDatosDeMedicionQueNoSeEncuentranEnNube(medicion)) {
+                datos.add(dato);
+            }
+            idsMedicionesYDatosEnBDLocal.put(medicion, datos);
+        }
+        return idsMedicionesYDatosEnBDLocal;
     }
 }

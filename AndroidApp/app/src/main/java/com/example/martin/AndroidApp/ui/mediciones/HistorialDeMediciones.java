@@ -115,10 +115,10 @@ public class HistorialDeMediciones extends AppCompatActivity {
         graficaECG.setData(informacionECG);
         graficaECG.getAxisLeft().setDrawGridLines(false);
         graficaECG.getXAxis().setDrawGridLines(false);
-        graficaECG.getAxisLeft().setAxisMaxValue(700);
-        graficaECG.getAxisLeft().setAxisMinValue(200);
-        graficaECG.getAxisRight().setAxisMaxValue(700);
-        graficaECG.getAxisRight().setAxisMinValue(200);
+        graficaECG.getAxisLeft().setAxisMaxValue(500);
+        graficaECG.getAxisLeft().setAxisMinValue(300);
+        graficaECG.getAxisRight().setAxisMaxValue(500);
+        graficaECG.getAxisRight().setAxisMinValue(300);
         graficaECG.setDrawBorders(false);
         XAxis xAxisGraficaECG = graficaECG.getXAxis();
         xAxisGraficaECG.setPosition(XAxis.XAxisPosition.BOTTOM);

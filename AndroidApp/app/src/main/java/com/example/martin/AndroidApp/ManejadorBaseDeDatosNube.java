@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -346,7 +347,8 @@ public class ManejadorBaseDeDatosNube {
 
     private void actualizarUsuario(Usuario usuarioCrudo,
                                    ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        ContentValues usuario = generarFormatoDeUsuarioParaActualizarBD(usuarioCrudo, manejadorBaseDeDatosLocal);
+        ContentValues usuario =
+                generarFormatoDeUsuarioParaActualizarBD(usuarioCrudo, manejadorBaseDeDatosLocal);
         BaseDeDatos.collection("usuario").whereEqualTo("idUsuario", obtenerIdUsuario()).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -616,18 +618,19 @@ public class ManejadorBaseDeDatosNube {
                 });
     }
 
-    public String obtenerNombreDeUsuarioConIdDeEmergencia(String idEmergencia){
+    public String obtenerNombreDeUsuarioConIdDeEmergencia(String idEmergencia) {
         try {
-            String idUsuario = idEmergencia.substring(0,idEmergencia.length()-20);
+            String idUsuario = idEmergencia.substring(0, idEmergencia.length() - 20);
             return (String) Tasks.await(BaseDeDatos.collection("usuario").whereEqualTo("idUsuario",
                     idUsuario).get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()){
-                                DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot documentSnapshot =
+                                        task.getResult().getDocuments().get(0);
                                 if (documentSnapshot.exists()) {
-                                    Log.d("LOG", "Usuario encontrado: "+
+                                    Log.d("LOG", "Usuario encontrado: " +
                                             (String) documentSnapshot.get("nombre"));
                                 } else {
                                     Log.d("LOG", "No se encontró el usuario");
@@ -652,7 +655,7 @@ public class ManejadorBaseDeDatosNube {
                     .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            Log.d("LOG", "UID: "+UID);
+                            Log.d("LOG", "UID: " + UID);
                             DocumentSnapshot document =
                                     queryDocumentSnapshots.getDocuments().get(0);
                             Log.d("LOG", document.getId() + " => " + document.getData());
@@ -674,22 +677,29 @@ public class ManejadorBaseDeDatosNube {
                                             ((Long) document.get("frecuenciaCardiacaMaxima"))
                                                     .intValue(),
                                             (boolean) document.get("enviaAlertasAUsuariosCercanos"),
-                                            (boolean) document.get("recibeAlertasDeUsuariosCercanos"));
+                                            (boolean) document
+                                                    .get("recibeAlertasDeUsuariosCercanos"));
                             manejadorBaseDeDatosLocal.agregarUsuario(manejadorBaseDeDatosLocal
                                     .generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
 
                             //Agregar enfermedades del respaldo
-                            ArrayList<String> enferdadesEnBD = manejadorBaseDeDatosLocal.obtenerEnfermedades();
+                            ArrayList<String> enferdadesEnBD =
+                                    manejadorBaseDeDatosLocal.obtenerEnfermedades();
                             String enfermedadesDelUsuario = (String) document.get("enfermedades");
-                            String[] enfermedadesDelUsuarioArray = enfermedadesDelUsuario.split(", ");
+                            String[] enfermedadesDelUsuarioArray =
+                                    enfermedadesDelUsuario.split(", ");
                             for (String enfermedad :
                                     enfermedadesDelUsuarioArray) {
                                 if (enferdadesEnBD.contains(enfermedad))
-                                    manejadorBaseDeDatosLocal.agregarEnfermadadAUsuario(usuario.getIdUsuario(),
-                                            (long) (enferdadesEnBD.indexOf(enfermedad) + 1));
+                                    manejadorBaseDeDatosLocal
+                                            .agregarEnfermadadAUsuario(usuario.getIdUsuario(),
+                                                    (long) (enferdadesEnBD.indexOf(enfermedad) +
+                                                            1));
                                 else
-                                    manejadorBaseDeDatosLocal.agregarEnfermadadAUsuario(usuario.getIdUsuario(),
-                                            manejadorBaseDeDatosLocal.agregarEnfermedad(enfermedad));
+                                    manejadorBaseDeDatosLocal
+                                            .agregarEnfermadadAUsuario(usuario.getIdUsuario(),
+                                                    manejadorBaseDeDatosLocal
+                                                            .agregarEnfermedad(enfermedad));
                             }
 
                         }
@@ -781,19 +791,21 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
-    public void descargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, String idEmergencia,
-                                  Long idNotificacion, String nombre) {
+    public void descargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
+                                 String idEmergencia,
+                                 Long idNotificacion, String nombre) {
         try {
-            DocumentSnapshot document = Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia).get()
-                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot document) {
-                            }
-                    }));
-            Log.d("LOG", "Descargando resumen: "+idEmergencia);
+            DocumentSnapshot document =
+                    Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia).get()
+                            .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot document) {
+                                }
+                            }));
+            Log.d("LOG", "Descargando resumen: " + idEmergencia);
             Log.d("LOG", document.getId() + " => " + document.getData());
             String detalles;
-            if (!((String)document.get("hospitalTrasladado")).matches("")){
+            if (!((String) document.get("hospitalTrasladado")).matches("")) {
                 detalles = (String) document.get("hospitalTrasladado");
             } else {
                 detalles = (String) document.get("nombreFamiliar");
@@ -806,7 +818,7 @@ public class ManejadorBaseDeDatosNube {
                             detalles,
 //                          (String) document.get("duracion"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
                             "8 minutos 12 segundos (prueba)",
-                            ((Long)document.get("cantidadDePersonasEnviado")).intValue(),
+                            ((Long) document.get("cantidadDePersonasEnviado")).intValue(),
 //                          (int) document.get("seguidores"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
                             0,
                             false);
@@ -823,7 +835,8 @@ public class ManejadorBaseDeDatosNube {
 
     public void descargarRespaldo(
             ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        HiloParaDescargarRespaldo hiloParaDescargarRespaldo = new HiloParaDescargarRespaldo(manejadorBaseDeDatosLocal);
+        HiloParaDescargarRespaldo hiloParaDescargarRespaldo =
+                new HiloParaDescargarRespaldo(manejadorBaseDeDatosLocal);
         hiloParaDescargarRespaldo.start();
         try {
             hiloParaDescargarRespaldo.join();
@@ -873,8 +886,10 @@ public class ManejadorBaseDeDatosNube {
         contentUsuario.put("frecuenciaRespaldo", usuario.getFrecuenciaRespaldo());
         contentUsuario.put("frecuenciaCardiacaMinima", usuario.getFrecuenciaCardiacaMinima());
         contentUsuario.put("frecuenciaCardiacaMaxima", usuario.getFrecuenciaCardiacaMaxima());
-        contentUsuario.put("enviaAlertasAUsuariosCercanos", usuario.getEnviaAlertasAUsuariosCercanos());
-        contentUsuario.put("recibeAlertasDeUsuariosCercanos", usuario.getRecibeAlertasDeUsuariosCercanos());
+        contentUsuario
+                .put("enviaAlertasAUsuariosCercanos", usuario.getEnviaAlertasAUsuariosCercanos());
+        contentUsuario.put("recibeAlertasDeUsuariosCercanos",
+                usuario.getRecibeAlertasDeUsuariosCercanos());
         return contentUsuario;
     }
 
@@ -929,32 +944,35 @@ public class ManejadorBaseDeDatosNube {
     }
 
     public void realizarRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-        HiloParaHacerRespaldo hiloParaHacerRespaldo = new HiloParaHacerRespaldo(manejadorBaseDeDatosLocal);
+        HiloParaHacerRespaldo hiloParaHacerRespaldo =
+                new HiloParaHacerRespaldo(manejadorBaseDeDatosLocal);
         hiloParaHacerRespaldo.start();
     }
 
-    public boolean crearEmergencia(String idEmergencia, String fecha, String localizacion, int cantidadDePersonasEnviado){
+    public boolean crearEmergencia(String idEmergencia, String fecha, String localizacion,
+                                   int cantidadDePersonasEnviado) {
         Map<String, Object> datosIniciales = new HashMap<>();
         datosIniciales.put("inicio", fecha);
         datosIniciales.put("terminada", false);
         datosIniciales.put("cantidadDePersonasEnviado", cantidadDePersonasEnviado);
 
         try {
-            Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia).set(datosIniciales)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+            Tasks.await(
+                    BaseDeDatos.collection("emergencias").document(idEmergencia).set(datosIniciales)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("LOG", "EMERGENCIA CREADA");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w("LOG", "Error al crear emergencia", e);
+                                }
+                            }).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.d("LOG", "EMERGENCIA CREADA");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w("LOG", "Error al crear emergencia", e);
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Void>(){
-                        @Override
-                        public void onComplete(Task<Void> task){
+                        public void onComplete(Task<Void> task) {
                         }
                     }));
         } catch (ExecutionException e) {
@@ -987,7 +1005,7 @@ public class ManejadorBaseDeDatosNube {
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()){
+                            if (task.isSuccessful()) {
                                 DocumentSnapshot documentSnapshot = task.getResult();
                                 if (documentSnapshot.exists()) {
                                     Log.d("LOG", "Emergencia creada y localización agregada");
@@ -1007,24 +1025,25 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
-    public boolean revisarSiUnaEmergenciaFueTerminada(String idEmergencia){
+    public boolean revisarSiUnaEmergenciaFueTerminada(String idEmergencia) {
         try {
-            return (boolean) Tasks.await(BaseDeDatos.collection("emergencias").document(idEmergencia).get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()){
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                if (documentSnapshot.exists()) {
-                                    Log.d("LOG", "Emergencia terminada: "+
-                                            (boolean) documentSnapshot.get("terminada"));
-                                } else {
-                                    Log.d("LOG", "No se encontró el documento");
+            return (boolean) Tasks
+                    .await(BaseDeDatos.collection("emergencias").document(idEmergencia).get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot documentSnapshot = task.getResult();
+                                        if (documentSnapshot.exists()) {
+                                            Log.d("LOG", "Emergencia terminada: " +
+                                                    (boolean) documentSnapshot.get("terminada"));
+                                        } else {
+                                            Log.d("LOG", "No se encontró el documento");
+                                        }
+                                    }
+                                    Log.d("LOG", "Task complete");
                                 }
-                            }
-                            Log.d("LOG", "Task complete");
-                        }
-                        })).get("terminada");
+                            })).get("terminada");
         } catch (ExecutionException e) {
             e.printStackTrace();
             return false;
@@ -1037,9 +1056,12 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
-    public void iniciarDescargaDeResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, String idEmergencia,
-                                         Long idNotificacion){
-        HiloParaDescargarResumen hiloParaDescargarResumen = new HiloParaDescargarResumen(manejadorBaseDeDatosLocal,idEmergencia,idNotificacion);
+    public void iniciarDescargaDeResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
+                                         String idEmergencia,
+                                         Long idNotificacion) {
+        HiloParaDescargarResumen hiloParaDescargarResumen =
+                new HiloParaDescargarResumen(manejadorBaseDeDatosLocal, idEmergencia,
+                        idNotificacion);
         hiloParaDescargarResumen.start();
         try {
             hiloParaDescargarResumen.join();
@@ -1048,13 +1070,119 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
-    class HiloParaHacerRespaldo extends Thread{
+    private void agregarDatoAMedicion(Medicion medicion, ArrayList<Dato> datos,
+                                      ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
+        BaseDeDatos.collection("medicion")
+                .whereEqualTo("idUsuario", medicion.getIdUsuario())
+                .whereEqualTo("idMedicion", medicion.getIdMedicion()).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("LOG", document.getId() + " => " + document.getData());
+                                for (Dato dato : datos) {
+                                    dato.setEnNube(true);
+                                    BaseDeDatos.collection("medicion").document(document.getId())
+                                            .collection("dato").add(dato)
+                                            .addOnSuccessListener(
+                                                    new OnSuccessListener<DocumentReference>() {
+                                                        @Override
+                                                        public void onSuccess(
+                                                                DocumentReference documentReference) {
+                                                            Log.d("LOG",
+                                                                    "DocumentSnapshot added with " +
+                                                                            "ID: " +
+                                                                            documentReference
+                                                                                    .getId());
+                                                            System.out.println(
+                                                                    "Se agregó el Dato: " +
+                                                                            dato.getIdDato());
+                                                            manejadorBaseDeDatosLocal
+                                                                    .actualizarDato(
+                                                                            manejadorBaseDeDatosLocal
+                                                                                    .generarFormatoDeDatoParaIntroducirEnBD(
+                                                                                            dato),
+                                                                            medicion
+                                                                                    .getIdUsuario());
+                                                        }
+                                                    });
+                                }
+                            }
+                        } else {
+                            Log.d("LOG", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void agregarMedicionYDatos(Medicion medicion, ArrayList<Dato> datos,
+                                       ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
+        medicion.setEnNube(true);
+        BaseDeDatos.collection("medicion").add(medicion)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("LOG",
+                                "DocumentSnapshot added with ID: " + documentReference.getId());
+                        System.out.println("Se agregó la Medicion: " + medicion.getIdMedicion());
+                        manejadorBaseDeDatosLocal
+                                .actualizarMedicion(
+                                        manejadorBaseDeDatosLocal
+                                                .generarFormatoDeMedicionParaIntroducirEnBD(
+                                                        medicion));
+                        agregarDatoAMedicion(medicion, datos, manejadorBaseDeDatosLocal);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("LOG", "Error adding document", e);
+                    }
+                });
+    }
+
+    private void subirIdsMedicionesYDatos(
+            Map<Medicion, ArrayList<Dato>> idsMedicionesYDatosEnBDLocal,
+            ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
+        for (Map.Entry<Medicion, ArrayList<Dato>> medicionYDato : idsMedicionesYDatosEnBDLocal
+                .entrySet()) {
+                BaseDeDatos.collection("medicion")
+                        .whereEqualTo("idUsuario", obtenerIdUsuario())
+                        .whereEqualTo("idMedicion", medicionYDato.getKey().getIdMedicion()).get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    QuerySnapshot documentSnapshot = task.getResult();
+                                    if (documentSnapshot.isEmpty()) {
+                                        // No existe la medicion, toca que agregar medicion y datos
+                                        agregarMedicionYDatos(medicionYDato.getKey(),
+                                                medicionYDato.getValue(),
+                                                manejadorBaseDeDatosLocal);
+                                    } else {
+                                        // Si existe la medicion y toca que agregar sólo datos
+                                        agregarDatoAMedicion(medicionYDato.getKey(),
+                                                medicionYDato.getValue(),
+                                                manejadorBaseDeDatosLocal);
+                                    }
+
+                                } else {
+                                    Log.d("LOG", "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+        }
+    }
+
+    class HiloParaHacerRespaldo extends Thread {
         ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
-        HiloParaHacerRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal){
+
+        HiloParaHacerRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
             this.manejadorBaseDeDatosLocal = manejadorBaseDeDatosLocal;
         }
 
-        public void run(){
+        public void run() {
             Usuario usuario = manejadorBaseDeDatosLocal.obtenerUsuario(obtenerIdUsuario());
             String fechaUltimoRespaldo = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(
                     Calendar.getInstance().getTime());
@@ -1067,6 +1195,20 @@ public class ManejadorBaseDeDatosNube {
             // registro en un set de id's
             Set<Long> idsContactosEnNube = obtenerIdsContactos();
             Set<Long> idsNotificacionesEnNube = obtenerIdsNotificaciones();
+            subirIdsMedicionesYDatos(manejadorBaseDeDatosLocal
+                            .obtenerMedicionesYDatosEnFormatoDeMap(obtenerIdUsuario()),
+                    manejadorBaseDeDatosLocal);
+
+            /*Map<Medicion, ArrayList<Dato>> idsMedicionesYDatosEnBDLocal = manejadorBaseDeDatosLocal.obtenerMedicionesYDatosEnFormatoDeMap(obtenerIdUsuario());
+
+            for (Map.Entry<Medicion, ArrayList<Dato>> medicionYDato : idsMedicionesYDatosEnBDLocal
+                    .entrySet()){
+                System.out.println("Medicion: " + medicionYDato.getKey().getIdMedicion() + " EnNube: " + medicionYDato.getKey().getEnNube());
+                for(Dato dato: medicionYDato.getValue()) {
+                    System.out.println("Dato: " + dato.getIdDato() + " EnNube: " + dato.getEnNube());
+                }
+            }*/
+
 
             //Realizar recorrido por cada registro de cada tabla de nuestra BD Local y eliminamos el
             // id del set
@@ -1117,32 +1259,34 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
-    class HiloParaDescargarRespaldo extends Thread{
+    class HiloParaDescargarRespaldo extends Thread {
         ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
-        HiloParaDescargarRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal){
+
+        HiloParaDescargarRespaldo(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
             this.manejadorBaseDeDatosLocal = manejadorBaseDeDatosLocal;
         }
 
-        public void run(){
+        public void run() {
             descargarUsuario(manejadorBaseDeDatosLocal);
             descargarContactos(manejadorBaseDeDatosLocal);
             descargarNotificaciones(manejadorBaseDeDatosLocal);
         }
     }
 
-    class HiloParaDescargarResumen extends Thread{
+    class HiloParaDescargarResumen extends Thread {
         private ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
         private String idEmergencia;
         private Long idNotificacion;
 
-        HiloParaDescargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal, String idEmergencia,
-                                 Long idNotificacion){
+        HiloParaDescargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
+                                 String idEmergencia,
+                                 Long idNotificacion) {
             this.manejadorBaseDeDatosLocal = manejadorBaseDeDatosLocal;
             this.idEmergencia = idEmergencia;
             this.idNotificacion = idNotificacion;
         }
 
-        public void run(){
+        public void run() {
             String nombre = obtenerNombreDeUsuarioConIdDeEmergencia(idEmergencia);
             descargarResumen(manejadorBaseDeDatosLocal, idEmergencia, idNotificacion, nombre);
             Looper.prepare();

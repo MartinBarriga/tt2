@@ -57,6 +57,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
     private Boolean seEstaReproduciendoGraficaECG;
     private ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube manejadorBaseDeDatosNube;
+    private Long ultimaVezQueSePicaronLosBotones;
 
     private void conectarDispositivo() {
         botonBluetooth.setVisibility(View.INVISIBLE);
@@ -158,6 +159,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
         return set;
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -178,7 +180,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                     }
                 }
                 n++;
-                if (mensaje.length() == 10) {
+                if (mensaje.length() == 12) {
                     int valorECG =
                             (mensaje.charAt(0) - '0') * 1000 + (mensaje.charAt(1) - '0') * 100 +
                                     (mensaje.charAt(2) - '0') * 10 + (mensaje.charAt(3) - '0');
@@ -188,6 +190,13 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                     int valorCardiaco =
                             (mensaje.charAt(7) - '0') * 100 + (mensaje.charAt(8) - '0') * 10 +
                                     (mensaje.charAt(9) - '0');
+                    int valorBoton1 = (mensaje.charAt(10) - '0');
+                    int valorBoton2 = (mensaje.charAt(11) - '0');
+                    if(valorBoton1 == 1 && valorBoton2 == 1 && System.currentTimeMillis() - ultimaVezQueSePicaronLosBotones > 1000) {
+                        ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
+                        Intent intentCountDown = new Intent(getContext(), Countdown.class);
+                        startActivity(intentCountDown);
+                    }
 
                     textViewValorECG.setText("Valor ECG: " + Integer.toString(valorECG) + " mv");
                     textViewValorCardiaco
@@ -314,6 +323,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
         verHistorialMediciones.setCardBackgroundColor(Color.TRANSPARENT);
         verHistorialMediciones.setCardElevation(0);
         FloatingActionButton botonEmergencia = root.findViewById(R.id.boton_emergencia);
+        ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
         botonEmergencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -377,10 +387,10 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
         graficaECG.getAxisLeft().setDrawGridLines(false);
         graficaECG.getXAxis().setDrawGridLines(false);
         graficaECG.getXAxis().setTextColor(0);
-        graficaECG.getAxisLeft().setAxisMaxValue(700);
-        graficaECG.getAxisLeft().setAxisMinValue(200);
-        graficaECG.getAxisRight().setAxisMaxValue(700);
-        graficaECG.getAxisRight().setAxisMinValue(200);
+        graficaECG.getAxisLeft().setAxisMaxValue(500);
+        graficaECG.getAxisLeft().setAxisMinValue(300);
+        graficaECG.getAxisRight().setAxisMaxValue(500);
+        graficaECG.getAxisRight().setAxisMinValue(300);
         graficaECG.setDrawBorders(false);
         graficaECG.invalidate();
 
