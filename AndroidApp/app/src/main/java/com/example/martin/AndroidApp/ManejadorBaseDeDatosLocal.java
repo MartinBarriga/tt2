@@ -594,7 +594,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return contentResumen;
     }
 
-    private Long agregarMedicion(ContentValues medicion) {
+    public Long agregarMedicion(ContentValues medicion) {
 
         SQLiteDatabase escritura = getWritableDatabase();
         Long idMedicion = escritura.insert(NOMBRE_TABLA_MEDICION, "idMedicion", medicion);
@@ -640,7 +640,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         return contentDato;
     }
 
-    private Long agregarDato(ContentValues dato) {
+    public Long agregarDato(ContentValues dato) {
 
         SQLiteDatabase escritura = getWritableDatabase();
         Long IdDato = escritura.insert(NOMBRE_TABLA_DATO, "idDato", dato);

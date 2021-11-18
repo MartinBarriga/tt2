@@ -791,6 +791,67 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
+    private void descargarMedicionesYDatos(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
+            BaseDeDatos.collection("medicion")
+                    .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d("LOG", document.getId() + " => " + document.getData());
+                                    Medicion medicion =
+                                            new Medicion((Long) document.get("idMedicion"),
+                                                    (String) document.get("idUsuario"),
+                                                    (String) document.get("fecha"),
+                                                    true);
+                                    manejadorBaseDeDatosLocal
+                                            .agregarMedicion(manejadorBaseDeDatosLocal
+                                                    .generarFormatoDeMedicionParaIntroducirEnBD(
+                                                            medicion));
+                                    BaseDeDatos.collection("medicion").document(document.getId())
+                                            .collection("dato").get().addOnCompleteListener(
+                                            new OnCompleteListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onComplete(
+                                                        @NonNull Task<QuerySnapshot> taskDato) {
+                                                    if (taskDato.isSuccessful()) {
+                                                        for (QueryDocumentSnapshot documentDato :
+                                                                taskDato
+                                                                .getResult()) {
+                                                            Log.d("LOG",
+                                                                    documentDato.getId() + " => " +
+                                                                            documentDato.getData());
+                                                            Dato dato = new Dato((Long) documentDato
+                                                                    .get("idDato"),
+                                                                    (Long) documentDato
+                                                                            .get("idMedicion"),
+                                                                    ((Long) documentDato
+                                                                            .get("frecuenciaCardiaca"))
+                                                                            .intValue(),
+                                                                    ((Long) documentDato.get("ecg"))
+                                                                            .intValue(),
+                                                                    ((Long) documentDato
+                                                                            .get("spo2"))
+                                                                            .intValue(),
+                                                                    (String) documentDato
+                                                                            .get("hora"), true);
+                                                            manejadorBaseDeDatosLocal
+                                                                    .agregarDato(manejadorBaseDeDatosLocal
+                                                                            .generarFormatoDeDatoParaIntroducirEnBD(
+                                                                                    dato));
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                }
+                            } else {
+                                Log.d("LOG", "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+    }
+
     public void descargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
                                  String idEmergencia,
                                  Long idNotificacion, String nombre) {
@@ -1147,31 +1208,31 @@ public class ManejadorBaseDeDatosNube {
             ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
         for (Map.Entry<Medicion, ArrayList<Dato>> medicionYDato : idsMedicionesYDatosEnBDLocal
                 .entrySet()) {
-                BaseDeDatos.collection("medicion")
-                        .whereEqualTo("idUsuario", obtenerIdUsuario())
-                        .whereEqualTo("idMedicion", medicionYDato.getKey().getIdMedicion()).get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    QuerySnapshot documentSnapshot = task.getResult();
-                                    if (documentSnapshot.isEmpty()) {
-                                        // No existe la medicion, toca que agregar medicion y datos
-                                        agregarMedicionYDatos(medicionYDato.getKey(),
-                                                medicionYDato.getValue(),
-                                                manejadorBaseDeDatosLocal);
-                                    } else {
-                                        // Si existe la medicion y toca que agregar sólo datos
-                                        agregarDatoAMedicion(medicionYDato.getKey(),
-                                                medicionYDato.getValue(),
-                                                manejadorBaseDeDatosLocal);
-                                    }
-
+            BaseDeDatos.collection("medicion")
+                    .whereEqualTo("idUsuario", obtenerIdUsuario())
+                    .whereEqualTo("idMedicion", medicionYDato.getKey().getIdMedicion()).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                QuerySnapshot documentSnapshot = task.getResult();
+                                if (documentSnapshot.isEmpty()) {
+                                    // No existe la medicion, toca que agregar medicion y datos
+                                    agregarMedicionYDatos(medicionYDato.getKey(),
+                                            medicionYDato.getValue(),
+                                            manejadorBaseDeDatosLocal);
                                 } else {
-                                    Log.d("LOG", "Error getting documents: ", task.getException());
+                                    // Si existe la medicion y toca que agregar sólo datos
+                                    agregarDatoAMedicion(medicionYDato.getKey(),
+                                            medicionYDato.getValue(),
+                                            manejadorBaseDeDatosLocal);
                                 }
+
+                            } else {
+                                Log.d("LOG", "Error getting documents: ", task.getException());
                             }
-                        });
+                        }
+                    });
         }
     }
 
@@ -1198,16 +1259,6 @@ public class ManejadorBaseDeDatosNube {
             subirIdsMedicionesYDatos(manejadorBaseDeDatosLocal
                             .obtenerMedicionesYDatosEnFormatoDeMap(obtenerIdUsuario()),
                     manejadorBaseDeDatosLocal);
-
-            /*Map<Medicion, ArrayList<Dato>> idsMedicionesYDatosEnBDLocal = manejadorBaseDeDatosLocal.obtenerMedicionesYDatosEnFormatoDeMap(obtenerIdUsuario());
-
-            for (Map.Entry<Medicion, ArrayList<Dato>> medicionYDato : idsMedicionesYDatosEnBDLocal
-                    .entrySet()){
-                System.out.println("Medicion: " + medicionYDato.getKey().getIdMedicion() + " EnNube: " + medicionYDato.getKey().getEnNube());
-                for(Dato dato: medicionYDato.getValue()) {
-                    System.out.println("Dato: " + dato.getIdDato() + " EnNube: " + dato.getEnNube());
-                }
-            }*/
 
 
             //Realizar recorrido por cada registro de cada tabla de nuestra BD Local y eliminamos el
@@ -1270,6 +1321,7 @@ public class ManejadorBaseDeDatosNube {
             descargarUsuario(manejadorBaseDeDatosLocal);
             descargarContactos(manejadorBaseDeDatosLocal);
             descargarNotificaciones(manejadorBaseDeDatosLocal);
+            descargarMedicionesYDatos(manejadorBaseDeDatosLocal);
         }
     }
 

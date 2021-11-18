@@ -2,6 +2,7 @@ package com.example.martin.AndroidApp.ui.mediciones;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -196,6 +197,13 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                         ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
                         Intent intentCountDown = new Intent(getContext(), Countdown.class);
                         startActivity(intentCountDown);
+                        /*intentCountDown.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        PendingIntent pendingIntentCountDown = PendingIntent.getActivity(getContext(), 0, intentCountDown, PendingIntent.FLAG_UPDATE_CURRENT);
+                        try {
+                            pendingIntentCountDown.send(getContext(), 0, intentCountDown);
+                        } catch (PendingIntent.CanceledException e) {
+                            e.printStackTrace();
+                        }*/
                     }
 
                     textViewValorECG.setText("Valor ECG: " + Integer.toString(valorECG) + " mv");
