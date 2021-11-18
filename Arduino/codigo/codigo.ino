@@ -5,28 +5,13 @@
  
 #define REPORTING_PERIOD_MS     1000
 
-/* Programa el modulo bluetooth HC-06 con un nuevo: 
-  NOMBRE  (Nombre de 20 caracteres)
-  PIN     (Clave de cuatro numeros)
-  BPS     (Velocidad de conexion en baudios)
-  
-  Tienda donde se compro el modulo: http://dinastiatecnologica.com/producto/modulo-bluetooth-hc-05/
-  By: http://elprofegarcia.com
-  
-  CONEXIONES:
-  ARDUINO   BLUETOOTH
-  5V        VCC
-  GND       GND
-  PIN 2     TX
-  PIN 3     RX
-  
- */
-
 SoftwareSerial blue(2, 3);   //Crea conexion al bluetooth - PIN 2 a TX y PIN 3 a RX
 
 int pinLOMasAD8232 = 10;
 int pinLOMenosAD8232 = 11;
 int pinOutputAD8232 = A0;
+int pinBoton1 = 7;
+int pinBoton2 = 8;
 uint32_t tsLastReport = 0;
  
 PulseOximeter pox;
@@ -36,6 +21,8 @@ void setup()
     Serial.begin(9600);
     pinMode(pinLOMasAD8232, INPUT);
     pinMode(pinLOMenosAD8232, INPUT);
+    pinMode(pinBoton1, INPUT);
+    pinMode(pinBoton2, INPUT);
     pox.begin();
     pox.setIRLedCurrent(MAX30100_LED_CURR_7_6MA);
     /*pinMode(13,OUTPUT);
@@ -64,19 +51,13 @@ void loop()
 {
   pox.update();
   //if (millis() - tsLastReport > REPORTING_PERIOD_MS) {
-    char mensaje[12] = "+0000000000";
-    //digitalWrite(13, !digitalRead(13)); // cuando termina de configurar el Bluetooth queda el LED 13 parpadeando
-    //delay(300);
-    //blue.write(72);
+    char mensaje[14] = "+000000000000";
     //El indice 0 indica si se presionó el botón de envío manual.
     //TODO: En caso de ser mensaje de alerta manual se debe de escribir un ! en el primer indice. 
     if(digitalRead(pinLOMasAD8232) == 1 || digitalRead(pinLOMenosAD8232) == 1) { //En caso de que no se detecte señal por parte del sensor ECG, escribir un - en el indice 0.
      mensaje[0] = '-';
-     //blue.write(-1);
-     //Serial.println(-1);
     }
     else { //En caso contrario debemos de meter el número arrojado por el ECG en el mensaje, en los indices 1 al 4 (El entero más grande que puede arrojar analogRead es 1024).
-     //blue.write(analogRead(pinOutputAD8232));
      int valorECG = analogRead(pinOutputAD8232);
      int indice = 4;
      while(valorECG > 0) {
@@ -84,7 +65,6 @@ void loop()
       valorECG = valorECG/10;
       indice--;
      }
-     //Serial.println(analogRead(pinOutputAD8232));
     }
     // Se mete el número arrojado por el SPO2 en el mensaje, en los indices 5 al 7 (El entero más grande que puede arrojar es de 3 digitos).
     int valorOximetro = pox.getSpO2();
@@ -101,6 +81,13 @@ void loop()
        mensaje[index] = valorRitmoCardiaco%10 + '0';
        valorRitmoCardiaco = valorRitmoCardiaco/10;
        index--;
+     }
+     //Si se pulsa boton1, agregamos un 1 al mensaje en el indice 11
+     if(digitalRead(pinBoton1)== HIGH) {
+      mensaje[11] = '1';
+     }
+     if(digitalRead(pinBoton2)== HIGH) {
+      mensaje[12] = '1';
      }
     blue.write(mensaje);
     tsLastReport = millis();

@@ -83,8 +83,6 @@ public class Respaldo extends AppCompatActivity {
                         mManejadorBaseDeDatosLocal.actualizarUsuario(
                                 mManejadorBaseDeDatosLocal
                                         .generarFormatoDeUsuarioParaIntroducirEnBD(usuario));
-                        Log.i("Frecuencia Seleccionada : ", frecuenciaRespaldo);
-                        System.out.println("Frecuencia Seleccionada: " + frecuenciaRespaldo);
                         programarRespaldo();
                     }
 
