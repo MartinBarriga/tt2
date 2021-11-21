@@ -353,6 +353,8 @@ public class Countdown extends AppCompatActivity {
             if (tieneConexionAInternet()){
                 enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion,
                         manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
+                manejadorBaseDeDatosNube.ejecutarHiloParaActualizarDatosEnLaEmergencia(idEmergencia,
+                        getApplicationContext());
             } else {
                 Log.d("LOG", "No tiene conexión a internet, sólo se enviarán SMS");
                 Looper.prepare();

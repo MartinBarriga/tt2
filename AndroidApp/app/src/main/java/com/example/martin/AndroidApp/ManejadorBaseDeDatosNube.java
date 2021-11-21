@@ -1,14 +1,31 @@
 package com.example.martin.AndroidApp;
 
+import android.Manifest;
+import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -18,7 +35,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -1348,6 +1367,162 @@ public class ManejadorBaseDeDatosNube {
                 }
             }, 200);
         }
+    }
+
+    public boolean tieneConexionAInternet(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+
+        return connectivityManager.getActiveNetworkInfo() != null
+                && connectivityManager.getActiveNetworkInfo().isConnected();
+    }
+
+    class HiloParaActualizarDatosEnLaEmergencia extends Thread{
+        private String idEmergencia;
+        private Context context;
+        private BroadcastReceiver actualizacionesEnConexion;
+        private boolean TERMINADA = false;
+
+        HiloParaActualizarDatosEnLaEmergencia(String idEmergencia , Context context){
+            this.idEmergencia = idEmergencia;
+            this.context = context;
+
+            actualizacionesEnConexion = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context arg0, Intent intent) {
+                    String mensajeSucio = intent.getStringExtra("MENSAJE");
+                    Long tiempo = intent.getLongExtra("TIEMPO", 0);
+
+                    //El mensaje viene en forma de un string con corchetes y comas, asi que lo vamos
+                    // a limpiar dejando solo el string identico a como se mando del arduino
+                    String mensaje = "";
+                    for (int i = 0; i < mensajeSucio.length(); i++) {
+                        if (mensajeSucio.charAt(i) >= '0' && mensajeSucio.charAt(i) <= '9') {
+                            mensaje += mensajeSucio.charAt(i);
+                        }
+                    }
+                    if (mensaje.length() == 12) {
+                        int valorSpo2 =
+                                (mensaje.charAt(4) - '0') * 100 + (mensaje.charAt(5) - '0') * 10 +
+                                        (mensaje.charAt(6) - '0');
+                        int valorCardiaco =
+                                (mensaje.charAt(7) - '0') * 100 + (mensaje.charAt(8) - '0') * 10 +
+                                        (mensaje.charAt(9) - '0');
+
+                        if (tieneConexionAInternet( context )){
+                            Map<String, Object> mLocalizacion = new HashMap<>();
+                            mLocalizacion.put("frecuencia", valorCardiaco);
+                            mLocalizacion.put("niveloxigeno", valorSpo2);
+
+                            BaseDeDatos.collection("emergencias").document(idEmergencia)
+                                    .collection("signosvitales").document(idEmergencia)
+                                    .set(mLocalizacion).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("LOG", "Signos vitales actualizados");
+                                }
+                            })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w("LOG", "Error al actualizar signos vitales: ", e);
+                                        }
+                                    });
+                        }
+                    }
+                }
+            };
+        }
+
+        @Override
+        public void run() {
+            Looper.prepare();
+            do {
+                BaseDeDatos.collection("emergencias").document(idEmergencia).
+                        addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable DocumentSnapshot documentSnapshot,
+                                                @Nullable FirebaseFirestoreException error) {
+                                if ( documentSnapshot != null ){
+                                    if (documentSnapshot.exists()){
+                                        TERMINADA = (boolean) documentSnapshot.get("terminada");
+                                    } else {
+                                        Log.d("LOG" ,
+                                                "HiloParaActualizarDatosEnLaEmergencia: " +
+                                                        "No se encontró la emergencia.");
+                                    }
+                                }
+                            }
+                        });
+
+
+                LocalBroadcastManager.getInstance(context).registerReceiver( actualizacionesEnConexion,
+                        new IntentFilter("INTENT_MENSAJE"));
+
+                final LocationRequest locationRequest = new LocationRequest();
+                locationRequest.setInterval(10000);
+                locationRequest.setFastestInterval(30000);
+                locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                        PackageManager.PERMISSION_GRANTED && ActivityCompat
+                        .checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                        PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                LocationServices.getFusedLocationProviderClient( context )
+                    .requestLocationUpdates(locationRequest, new LocationCallback() {
+                        @Override
+                        public void onLocationResult(LocationResult locationResult) {
+                        super.onLocationResult(locationResult);
+                        LocationServices.getFusedLocationProviderClient( context )
+                                .removeLocationUpdates(this);
+                        if (locationResult != null && locationResult.getLocations().size() > 0) {
+                            int latestLocationIndex = locationResult.getLocations().size() - 1;
+                            double latitude = locationResult.getLocations().get(latestLocationIndex)
+                                    .getLatitude();
+                            double longitude =
+                                    locationResult.getLocations().get(latestLocationIndex)
+                                            .getLongitude();
+                            if (tieneConexionAInternet( context )){
+                                Map<String, Object> mLocalizacion = new HashMap<>();
+                                mLocalizacion.put("longitud", Double.toString(longitude));
+                                mLocalizacion.put("latitud", Double.toString(latitude));
+
+                                BaseDeDatos.collection("emergencias").document(idEmergencia)
+                                    .collection("localizacion").document(idEmergencia)
+                                    .set(mLocalizacion).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d("LOG", "Localizacion actualizada");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w("LOG", "Error al actualizar localizacion: ", e);
+                                        }
+                                    });
+                            }
+                        }
+                        }
+                    }, Looper.myLooper());
+                Handler handler = new Handler();
+                handler.postDelayed(() -> {}, 1000);
+            } while (!TERMINADA);
+        }
+    }
+
+    public void ejecutarHiloParaActualizarDatosEnLaEmergencia (String idEmergencia, Context context){
+        HiloParaActualizarDatosEnLaEmergencia hiloParaActualizarDatosEnLaEmergencia =
+                new HiloParaActualizarDatosEnLaEmergencia( idEmergencia, context);
+        hiloParaActualizarDatosEnLaEmergencia.start();
     }
 
 }
