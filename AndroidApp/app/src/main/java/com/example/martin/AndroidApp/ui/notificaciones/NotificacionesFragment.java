@@ -94,6 +94,8 @@ public class NotificacionesFragment extends Fragment
         if (ContextCompat
                 .checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED || ContextCompat
+                .checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED || ContextCompat
                 .checkSelfPermission(this.getContext(), Manifest.permission.SEND_SMS) !=
                 PackageManager.PERMISSION_GRANTED || ContextCompat
                 .checkSelfPermission(this.getContext(), Manifest.permission.READ_PHONE_STATE) !=
@@ -109,6 +111,7 @@ public class NotificacionesFragment extends Fragment
                 public void onClick(DialogInterface dialog, int which) {
                     ActivityCompat.requestPermissions(getActivity(),
                             new String[]{Manifest.permission.SEND_SMS,
+                                    Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                                     Manifest.permission.ACCESS_FINE_LOCATION,
                                     Manifest.permission.READ_PHONE_STATE}, PERMISSION_SEND_SMS);
                 }

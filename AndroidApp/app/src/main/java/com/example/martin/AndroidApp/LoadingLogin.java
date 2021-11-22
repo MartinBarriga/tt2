@@ -68,6 +68,24 @@ public class LoadingLogin extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Servicio en ejecución";
+            String description = "Servicio en segundo plano para actualización de localización y " +
+                    "signos vitales en tiempo real.";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel =
+                    new NotificationChannel("Servicio", name, importance);
+            channel.setDescription(description);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                channel.setAllowBubbles(true);
+            }
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
 
     }
 
