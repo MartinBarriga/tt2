@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
@@ -353,6 +354,9 @@ public class Countdown extends AppCompatActivity {
             if (tieneConexionAInternet()){
                 enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion,
                         manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
+                ContextWrapper cw = new ContextWrapper(getApplicationContext());
+                manejadorBaseDeDatosNube.ejecutarHiloParaActualizarDatosEnLaEmergencia(idEmergencia,
+                        getApplicationContext(), cw);
             } else {
                 Log.d("LOG", "No tiene conexión a internet, sólo se enviarán SMS");
                 Looper.prepare();
