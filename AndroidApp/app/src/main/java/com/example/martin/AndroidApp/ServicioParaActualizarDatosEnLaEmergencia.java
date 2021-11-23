@@ -47,6 +47,7 @@ public class ServicioParaActualizarDatosEnLaEmergencia extends Service{
     private LocationCallback locationCallback;
     private LocationRequest locationRequest;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private Long ultimaVezQueActualizoSignosVitales = null;
 
     public boolean tieneConexionAInternet(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(
@@ -172,9 +173,6 @@ public class ServicioParaActualizarDatosEnLaEmergencia extends Service{
         locationRequest.setFastestInterval(3000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        LocalBroadcastManager.getInstance( getApplicationContext() ).registerReceiver(actualizacionesEnConexion,
-                new IntentFilter("INTENT_MENSAJE"));
-
         if (ActivityCompat.checkSelfPermission( getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED && ActivityCompat
                 .checkSelfPermission( getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) !=
@@ -192,48 +190,57 @@ public class ServicioParaActualizarDatosEnLaEmergencia extends Service{
         actualizacionesEnConexion = new BroadcastReceiver() {
             @Override
             public void onReceive(Context arg0, Intent intent) {
-                String mensajeSucio = intent.getStringExtra("MENSAJE");
-                Long tiempo = intent.getLongExtra("TIEMPO", 0);
-
-                //El mensaje viene en forma de un string con corchetes y comas, asi que lo vamos
-                // a limpiar dejando solo el string identico a como se mando del arduino
-                String mensaje = "";
-                for (int i = 0; i < mensajeSucio.length(); i++) {
-                    if (mensajeSucio.charAt(i) >= '0' && mensajeSucio.charAt(i) <= '9') {
-                        mensaje += mensajeSucio.charAt(i);
-                    }
+                if ( ultimaVezQueActualizoSignosVitales == null ){
+                    ultimaVezQueActualizoSignosVitales = System.currentTimeMillis();
                 }
-                if (mensaje.length() == 12) {
-                    int valorSpo2 =
-                            (mensaje.charAt(4) - '0') * 100 + (mensaje.charAt(5) - '0') * 10 +
-                                    (mensaje.charAt(6) - '0');
-                    int valorCardiaco =
-                            (mensaje.charAt(7) - '0') * 100 + (mensaje.charAt(8) - '0') * 10 +
-                                    (mensaje.charAt(9) - '0');
+                if ( System.currentTimeMillis() - ultimaVezQueActualizoSignosVitales > 5000 ) {
+                    ultimaVezQueActualizoSignosVitales = System.currentTimeMillis();
+                    String mensajeSucio = intent.getStringExtra("MENSAJE");
+                    Long tiempo = intent.getLongExtra("TIEMPO", 0);
 
-                    if (tieneConexionAInternet( getApplicationContext() )){
-                        Map<String, Object> mLocalizacion = new HashMap<>();
-                        mLocalizacion.put("frecuencia", valorCardiaco);
-                        mLocalizacion.put("niveloxigeno", valorSpo2);
+                    //El mensaje viene en forma de un string con corchetes y comas, asi que lo vamos
+                    // a limpiar dejando solo el string identico a como se mando del arduino
+                    String mensaje = "";
+                    for (int i = 0; i < mensajeSucio.length(); i++) {
+                        if (mensajeSucio.charAt(i) >= '0' && mensajeSucio.charAt(i) <= '9') {
+                            mensaje += mensajeSucio.charAt(i);
+                        }
+                    }
+                    if (mensaje.length() == 12) {
+                        int valorSpo2 =
+                                (mensaje.charAt(4) - '0') * 100 + (mensaje.charAt(5) - '0') * 10 +
+                                        (mensaje.charAt(6) - '0');
+                        int valorCardiaco =
+                                (mensaje.charAt(7) - '0') * 100 + (mensaje.charAt(8) - '0') * 10 +
+                                        (mensaje.charAt(9) - '0');
 
-                        BaseDeDatos.collection("emergencias").document(idEmergencia)
-                                .collection("signosvitales").document(idEmergencia)
-                                .set(mLocalizacion).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d("LOG", "Signos vitales actualizados");
-                            }
-                        })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.w("LOG", "Error al actualizar signos vitales: ", e);
-                                    }
-                                });
+                        if (tieneConexionAInternet(getApplicationContext())) {
+                            Map<String, Object> mLocalizacion = new HashMap<>();
+                            mLocalizacion.put("frecuencia", valorCardiaco);
+                            mLocalizacion.put("niveloxigeno", valorSpo2);
+
+                            BaseDeDatos.collection("emergencias").document(idEmergencia)
+                                    .collection("signosvitales").document(idEmergencia)
+                                    .set(mLocalizacion).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("LOG", "Signos vitales actualizados");
+                                }
+                            })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w("LOG", "Error al actualizar signos vitales: ", e);
+                                        }
+                                    });
+                        }
                     }
                 }
             }
         };
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
+                actualizacionesEnConexion,
+                new IntentFilter("INTENT_MENSAJE"));
 
         return START_STICKY;
     }
