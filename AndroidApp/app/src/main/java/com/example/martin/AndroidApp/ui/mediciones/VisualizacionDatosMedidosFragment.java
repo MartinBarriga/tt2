@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
     private final int indiceSetParaSpo2 = 3;
     //Mientras sea un valor mayor a 0, la constante pedirá que se habilite el bluetooth
     public MainActivity mainActivity;
-    int n = 50;
+
     private Button botonBluetooth;
     private BroadcastReceiver actualizacionesEnConexion;
     private LineChart graficaECG;
@@ -168,113 +169,86 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
 
             @Override
             public void onReceive(Context arg0, Intent intent) {
-                String mensajeSucio = intent.getStringExtra("MENSAJE");
+                String mensaje = intent.getStringExtra("MENSAJE");
                 Long tiempo = intent.getLongExtra("TIEMPO", 0);
 
 
-                //El mensaje viene en forma de un string con corchetes y comas, asi que lo vamos
-                // a limpiar dejando solo el string identico a como se mando del arduino
-                String mensaje = "";
-                for (int i = 0; i < mensajeSucio.length(); i++) {
-                    if (mensajeSucio.charAt(i) >= '0' && mensajeSucio.charAt(i) <= '9') {
-                        mensaje += mensajeSucio.charAt(i);
+                int valorECG =
+                        (mensaje.charAt(0) - '0') * 1000 + (mensaje.charAt(1) - '0') * 100 +
+                                (mensaje.charAt(2) - '0') * 10 + (mensaje.charAt(3) - '0');
+                int valorSpo2 =
+                        (mensaje.charAt(4) - '0') * 100 + (mensaje.charAt(5) - '0') * 10 +
+                                (mensaje.charAt(6) - '0');
+                int valorCardiaco =
+                        (mensaje.charAt(7) - '0') * 100 + (mensaje.charAt(8) - '0') * 10 +
+                                (mensaje.charAt(9) - '0');
+
+                textViewValorECG.setText("Valor ECG: " + Integer.toString(valorECG) + " mv");
+                textViewValorCardiaco
+                        .setText(
+                                "Frecuencia Cardiaca: " + Integer.toString(valorCardiaco) +
+                                        " ppm");
+                textViewValorSpo2.setText("Spo2: " + Integer.toString(valorSpo2) + "%");
+                manejadorBaseDeDatosLocal
+                        .agregarDatosAMedicion(valorECG, valorCardiaco, valorSpo2,
+                                System.currentTimeMillis(),
+                                manejadorBaseDeDatosNube.obtenerIdUsuario());
+
+                LineData informacionECG = graficaECG.getData();
+                if (informacionECG != null) {
+                    LineDataSet setECG =
+                            (LineDataSet) informacionECG
+                                    .getDataSetByIndex(indiceSetParaECG);
+                    if (setECG == null) {
+                        setECG = crearSetECG();
+                        informacionECG.addDataSet(setECG);
+
                     }
+
+                    informacionECG.addEntry(new Entry(tiempo, valorECG), indiceSetParaECG);
+                    if (setECG.getEntryCount() > 200) {
+                        setECG.removeFirst();
+                    }
+                    informacionECG.notifyDataChanged();
+                    graficaECG.notifyDataSetChanged();
+                    graficaECG.moveViewToX(informacionECG.getEntryCount());
                 }
-                n++;
-                if (mensaje.length() == 12) {
-                    int valorECG =
-                            (mensaje.charAt(0) - '0') * 1000 + (mensaje.charAt(1) - '0') * 100 +
-                                    (mensaje.charAt(2) - '0') * 10 + (mensaje.charAt(3) - '0');
-                    int valorSpo2 =
-                            (mensaje.charAt(4) - '0') * 100 + (mensaje.charAt(5) - '0') * 10 +
-                                    (mensaje.charAt(6) - '0');
-                    int valorCardiaco =
-                            (mensaje.charAt(7) - '0') * 100 + (mensaje.charAt(8) - '0') * 10 +
-                                    (mensaje.charAt(9) - '0');
-                    int valorBoton1 = (mensaje.charAt(10) - '0');
-                    int valorBoton2 = (mensaje.charAt(11) - '0');
-                    if(valorBoton1 == 1 && valorBoton2 == 1 && System.currentTimeMillis() - ultimaVezQueSePicaronLosBotones > 1000) {
-                        ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
-                        Intent intentCountDown = new Intent(getContext(), Countdown.class);
-                        startActivity(intentCountDown);
-                        /*intentCountDown.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        PendingIntent pendingIntentCountDown = PendingIntent.getActivity(getContext(), 0, intentCountDown, PendingIntent.FLAG_UPDATE_CURRENT);
-                        try {
-                            pendingIntentCountDown.send(getContext(), 0, intentCountDown);
-                        } catch (PendingIntent.CanceledException e) {
-                            e.printStackTrace();
-                        }*/
+
+                LineData informacionCardiacaSpo2 = graficaFrecuenciaCardiacaSpo2.getData();
+                if (informacionCardiacaSpo2 != null) {
+                    LineDataSet setFrecuenciaCardiaca =
+                            (LineDataSet) informacionCardiacaSpo2
+                                    .getDataSetByIndex(indiceSetParaFrecuenciaCardiaca);
+                    if (setFrecuenciaCardiaca == null) {
+                        setFrecuenciaCardiaca = crearSetFrecuenciaCardiaca();
+                        informacionCardiacaSpo2.addDataSet(setFrecuenciaCardiaca);
                     }
 
-                    textViewValorECG.setText("Valor ECG: " + Integer.toString(valorECG) + " mv");
-                    textViewValorCardiaco
-                            .setText(
-                                    "Frecuencia Cardiaca: " + Integer.toString(valorCardiaco) +
-                                            " ppm");
-                    textViewValorSpo2.setText("Spo2: " + Integer.toString(valorSpo2) + "%");
-                    manejadorBaseDeDatosLocal
-                            .agregarDatosAMedicion(valorECG, valorCardiaco, valorSpo2,
-                                    System.currentTimeMillis(),
-                                    manejadorBaseDeDatosNube.obtenerIdUsuario());
-
-                    LineData informacionECG = graficaECG.getData();
-                    if (informacionECG != null) {
-                        LineDataSet setECG =
-                                (LineDataSet) informacionECG
-                                        .getDataSetByIndex(indiceSetParaECG);
-                        if (setECG == null) {
-                            setECG = crearSetECG();
-                            informacionECG.addDataSet(setECG);
-
-                        }
-
-                        informacionECG.addEntry(new Entry(tiempo, valorECG), indiceSetParaECG);
-                        if (setECG.getEntryCount() > 200) {
-                            setECG.removeFirst();
-                        }
-                        informacionECG.notifyDataChanged();
-                        graficaECG.notifyDataSetChanged();
-                        graficaECG.moveViewToX(informacionECG.getEntryCount());
+                    informacionCardiacaSpo2.addEntry(new Entry(tiempo, valorCardiaco),
+                            indiceSetParaFrecuenciaCardiaca);
+                    if (setFrecuenciaCardiaca.getEntryCount() > 200) {
+                        setFrecuenciaCardiaca.removeFirst();
                     }
 
-                    LineData informacionCardiacaSpo2 = graficaFrecuenciaCardiacaSpo2.getData();
-                    if (informacionCardiacaSpo2 != null) {
-                        LineDataSet setFrecuenciaCardiaca =
-                                (LineDataSet) informacionCardiacaSpo2
-                                        .getDataSetByIndex(indiceSetParaFrecuenciaCardiaca);
-                        if (setFrecuenciaCardiaca == null) {
-                            setFrecuenciaCardiaca = crearSetFrecuenciaCardiaca();
-                            informacionCardiacaSpo2.addDataSet(setFrecuenciaCardiaca);
-                        }
+                    LineDataSet setSpo2 =
+                            (LineDataSet) informacionCardiacaSpo2
+                                    .getDataSetByIndex(indiceSetParaSpo2);
+                    if (setSpo2 == null) {
+                        setSpo2 = crearSetSpo2();
+                        informacionCardiacaSpo2.addDataSet(setSpo2);
+                    }
 
-                        informacionCardiacaSpo2.addEntry(new Entry(tiempo, valorCardiaco),
-                                indiceSetParaFrecuenciaCardiaca);
-                        if (setFrecuenciaCardiaca.getEntryCount() > 200) {
-                            setFrecuenciaCardiaca.removeFirst();
-                        }
-
-                        LineDataSet setSpo2 =
-                                (LineDataSet) informacionCardiacaSpo2
-                                        .getDataSetByIndex(indiceSetParaSpo2);
-                        if (setSpo2 == null) {
-                            setSpo2 = crearSetSpo2();
-                            informacionCardiacaSpo2.addDataSet(setSpo2);
-                        }
-
-                        informacionCardiacaSpo2.addEntry(new Entry(tiempo, valorSpo2),
-                                indiceSetParaSpo2);
-                        if (setSpo2.getEntryCount() > 200) {
-                            setSpo2.removeFirst();
-                        }
-
-
-                        informacionCardiacaSpo2.notifyDataChanged();
-                        graficaFrecuenciaCardiacaSpo2.notifyDataSetChanged();
-                        graficaFrecuenciaCardiacaSpo2
-                                .moveViewToX(informacionCardiacaSpo2.getEntryCount());
+                    informacionCardiacaSpo2.addEntry(new Entry(tiempo, valorSpo2),
+                            indiceSetParaSpo2);
+                    if (setSpo2.getEntryCount() > 200) {
+                        setSpo2.removeFirst();
                     }
 
 
+                    informacionCardiacaSpo2.notifyDataChanged();
+                    graficaFrecuenciaCardiacaSpo2.notifyDataSetChanged();
+                    graficaFrecuenciaCardiacaSpo2
+                            .moveViewToX(informacionCardiacaSpo2.getEntryCount());
                 }
             }
         };
@@ -344,7 +318,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), Instructivo.class);
-                intent.putExtra("pantalla",Instructivo.PANTALLA_MEDICIONES_TIEMPO_REAL);
+                intent.putExtra("pantalla", Instructivo.PANTALLA_MEDICIONES_TIEMPO_REAL);
                 startActivity(intent);
             }
         });
@@ -375,7 +349,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(), HistorialDeMediciones.class);
-                intent.putExtra("idUsuario",manejadorBaseDeDatosNube.obtenerIdUsuario());
+                intent.putExtra("idUsuario", manejadorBaseDeDatosNube.obtenerIdUsuario());
                 startActivity(intent);
             }
         });

@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     NavController navController;
     private BluetoothSocket btSocket = null;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
+    private Long ultimaVezQueSePicaronLosBotones;
 
     @Override
     protected void onResume() {
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         //getSupportFragmentManager()
         //        .findFragmentById(R.id.navigation_visualizacion_datos_medidos);
@@ -94,20 +95,36 @@ public class MainActivity extends AppCompatActivity {
                 if (msg.what == handlerState) {
 
                     //Interacción con los datos de ingreso
-                    String mensaje = (String) msg.obj;
-                    /*long current = now.getEpochSecond();
-                    if(current != lastSecond) {
-                        lastSecond = current;
-                        values = 0;
+                    String mensajeSucio = (String) msg.obj;
+                    //El mensaje viene en forma de un string con corchetes y comas, asi que lo vamos
+                    // a limpiar dejando solo el string identico a como se mando del arduino
+                    String mensaje = "";
+                    for (int i = 0; i < mensajeSucio.length(); i++) {
+                        if (mensajeSucio.charAt(i) >= '0' && mensajeSucio.charAt(i) <= '9') {
+                            mensaje += mensajeSucio.charAt(i);
+                        }
                     }
-                    values++;*/
 
-                    Long tiempo = System.nanoTime();
-                    Intent intentMensaje = new Intent("INTENT_MENSAJE");
-                    intentMensaje.putExtra("MENSAJE", mensaje);
-                    intentMensaje.putExtra("TIEMPO", tiempo);
-                    LocalBroadcastManager.getInstance(getApplicationContext())
-                            .sendBroadcast(intentMensaje);
+                    if (mensaje.length() == 12) {
+                        int valorBoton1 = (mensaje.charAt(10) - '0');
+                        int valorBoton2 = (mensaje.charAt(11) - '0');
+
+                        if(valorBoton1 == 1 && valorBoton2 == 1 &&
+                                System.currentTimeMillis() - ultimaVezQueSePicaronLosBotones > 1000) {
+                            ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
+                            System.out.println("Se preseionaron los botones de emergencia");
+                            Toast.makeText(getApplicationContext(), "Se presionaron los botones de emergencia", Toast.LENGTH_LONG)
+                                    .show();
+                            Intent intentCountDown = new Intent(getApplicationContext(), Countdown.class);
+                            startActivity(intentCountDown);
+                        }
+                        Long tiempo = System.nanoTime();
+                        Intent intentMensaje = new Intent("INTENT_MENSAJE");
+                        intentMensaje.putExtra("MENSAJE", mensaje);
+                        intentMensaje.putExtra("TIEMPO", tiempo);
+                        LocalBroadcastManager.getInstance(getApplicationContext())
+                                .sendBroadcast(intentMensaje);
+                    }
                 }
             }
         };

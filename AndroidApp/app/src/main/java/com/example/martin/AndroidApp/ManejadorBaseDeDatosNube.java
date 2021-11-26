@@ -816,64 +816,65 @@ public class ManejadorBaseDeDatosNube {
     }
 
     private void descargarMedicionesYDatos(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal) {
-            BaseDeDatos.collection("medicion")
-                    .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d("LOG", document.getId() + " => " + document.getData());
-                                    Medicion medicion =
-                                            new Medicion((Long) document.get("idMedicion"),
-                                                    (String) document.get("idUsuario"),
-                                                    (String) document.get("fecha"),
-                                                    true);
-                                    manejadorBaseDeDatosLocal
-                                            .agregarMedicion(manejadorBaseDeDatosLocal
-                                                    .generarFormatoDeMedicionParaIntroducirEnBD(
-                                                            medicion));
-                                    BaseDeDatos.collection("medicion").document(document.getId())
-                                            .collection("dato").get().addOnCompleteListener(
-                                            new OnCompleteListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onComplete(
-                                                        @NonNull Task<QuerySnapshot> taskDato) {
-                                                    if (taskDato.isSuccessful()) {
-                                                        for (QueryDocumentSnapshot documentDato :
-                                                                taskDato
-                                                                .getResult()) {
-                                                            Log.d("LOG",
-                                                                    documentDato.getId() + " => " +
-                                                                            documentDato.getData());
-                                                            Dato dato = new Dato((Long) documentDato
-                                                                    .get("idDato"),
-                                                                    (Long) documentDato
-                                                                            .get("idMedicion"),
-                                                                    ((Long) documentDato
-                                                                            .get("frecuenciaCardiaca"))
-                                                                            .intValue(),
-                                                                    ((Long) documentDato.get("ecg"))
-                                                                            .intValue(),
-                                                                    ((Long) documentDato
-                                                                            .get("spo2"))
-                                                                            .intValue(),
-                                                                    (String) documentDato
-                                                                            .get("hora"), true);
-                                                            manejadorBaseDeDatosLocal
-                                                                    .agregarDato(manejadorBaseDeDatosLocal
-                                                                            .generarFormatoDeDatoParaIntroducirEnBD(
-                                                                                    dato));
-                                                        }
+        BaseDeDatos.collection("medicion")
+                .whereEqualTo("idUsuario", obtenerIdUsuario()).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("LOG", document.getId() + " => " + document.getData());
+                                Medicion medicion =
+                                        new Medicion((Long) document.get("idMedicion"),
+                                                (String) document.get("idUsuario"),
+                                                (String) document.get("fecha"),
+                                                true);
+                                manejadorBaseDeDatosLocal
+                                        .agregarMedicion(manejadorBaseDeDatosLocal
+                                                .generarFormatoDeMedicionParaIntroducirEnBD(
+                                                        medicion));
+                                BaseDeDatos.collection("medicion").document(document.getId())
+                                        .collection("dato").get().addOnCompleteListener(
+                                        new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(
+                                                    @NonNull Task<QuerySnapshot> taskDato) {
+                                                if (taskDato.isSuccessful()) {
+                                                    for (QueryDocumentSnapshot documentDato :
+                                                            taskDato
+                                                                    .getResult()) {
+                                                        Log.d("LOG",
+                                                                documentDato.getId() + " => " +
+                                                                        documentDato.getData());
+                                                        Dato dato = new Dato((Long) documentDato
+                                                                .get("idDato"),
+                                                                (Long) documentDato
+                                                                        .get("idMedicion"),
+                                                                ((Long) documentDato
+                                                                        .get("frecuenciaCardiaca"))
+                                                                        .intValue(),
+                                                                ((Long) documentDato.get("ecg"))
+                                                                        .intValue(),
+                                                                ((Long) documentDato
+                                                                        .get("spo2"))
+                                                                        .intValue(),
+                                                                (String) documentDato
+                                                                        .get("hora"), true);
+                                                        manejadorBaseDeDatosLocal
+                                                                .agregarDato(
+                                                                        manejadorBaseDeDatosLocal
+                                                                                .generarFormatoDeDatoParaIntroducirEnBD(
+                                                                                        dato));
                                                     }
                                                 }
-                                            });
-                                }
-                            } else {
-                                Log.d("LOG", "Error getting documents: ", task.getException());
+                                            }
+                                        });
                             }
+                        } else {
+                            Log.d("LOG", "Error getting documents: ", task.getException());
                         }
-                    });
+                    }
+                });
     }
 
     public void descargarResumen(ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal,
@@ -901,12 +902,10 @@ public class ManejadorBaseDeDatosNube {
                             (String) document.get("comentariosAdicionales"),
                             (String) document.get("Desenlace"),
                             detalles,
-//                          (String) document.get("duracion"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
-                            "8 minutos 12 segundos (prueba)",
+                            (String) document.get("duracion"),
                             ((Long) document.get("cantidadDePersonasEnviado")).intValue(),
-//                          (int) document.get("seguidores"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
-                            0,
-                            false);
+                            (int) document.get("seguidores"), (String) document.get("inicio"),
+                            (String) document.get("fin") , false);
 
             manejadorBaseDeDatosLocal.agregarResumen(manejadorBaseDeDatosLocal
                     .generarFormatoDeResumenParaIntroducirEnBD(resumen));
@@ -1065,6 +1064,7 @@ public class ManejadorBaseDeDatosNube {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Log.d("LOG", "localizacion: " + localizacion);
         String[] longitudYLatitud = localizacion.split(",");
         Map<String, Object> mLocalizacion = new HashMap<>();
         mLocalizacion.put("usuario", "Emergencia");
@@ -1260,6 +1260,14 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
+    public void ejecutarHiloParaActualizarDatosEnLaEmergencia(String idEmergencia, Context context,
+                                                              ContextWrapper contextWrapper) {
+        Intent intent = new Intent(context, ServicioParaActualizarDatosEnLaEmergencia.class);
+        intent.putExtra("idEmergencia", idEmergencia);
+        contextWrapper.startService(intent);
+
+    }
+
     class HiloParaHacerRespaldo extends Thread {
         ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
 
@@ -1372,14 +1380,6 @@ public class ManejadorBaseDeDatosNube {
                 }
             }, 200);
         }
-    }
-
-    public void ejecutarHiloParaActualizarDatosEnLaEmergencia (String idEmergencia, Context context,
-                                                               ContextWrapper contextWrapper){
-        Intent intent = new Intent(context, ServicioParaActualizarDatosEnLaEmergencia.class);
-        intent.putExtra("idEmergencia", idEmergencia);
-        contextWrapper.startService(intent);
-
     }
 
 }

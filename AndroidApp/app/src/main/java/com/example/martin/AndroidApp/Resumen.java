@@ -9,12 +9,14 @@ public class Resumen {
     String desenlace;
     String detalles;
     String duracion;
+    String inicio;
+    String fin;
     int cantidadDePersonasEnviado;
     int seguidores;
     boolean enNube;
 
     public Resumen(Long idResumen, Long idNotificacion, String nombre, String comentario, String desenlace, String detalles,
-                   String duracion, int cantidadDePersonasEnviado, int seguidores, boolean enNube) {
+                   String duracion, int cantidadDePersonasEnviado, int seguidores, String inicio, String fin, boolean enNube) {
         this.idResumen = idResumen;
         this.idNotificacion = idNotificacion;
         this.nombre = nombre;
@@ -54,7 +56,6 @@ public class Resumen {
     public String getComentario() {
         return comentario;
     }
-
     public void setComentario(String comentario) {
         this.comentario = comentario;
     }
@@ -97,6 +98,22 @@ public class Resumen {
 
     public void setSeguidores(int seguidores) {
         this.seguidores = seguidores;
+    }
+
+    public String getInicio() {
+        return inicio;
+    }
+
+    public void setInicio(String inicio) {
+        this.inicio = inicio;
+    }
+
+    public String getFin() {
+        return fin;
+    }
+
+    public void setFin(String fin) {
+        this.fin = fin;
     }
 
     public boolean isEnNube() {

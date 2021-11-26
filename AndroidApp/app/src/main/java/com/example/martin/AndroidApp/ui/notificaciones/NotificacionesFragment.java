@@ -258,6 +258,7 @@ public class NotificacionesFragment extends Fragment
                     mNotificacionesRecyclerAdapter.notifyItemChanged(position);
                 }
             }, 200);
+            //emergencia aún no terminada
             if (mNotificaciones.get(position).getEstado()==0){
                 if (tieneConexionAInternet()) {
                     String nombre;
@@ -284,6 +285,7 @@ public class NotificacionesFragment extends Fragment
                 }
             }
         }
+        //emergencia terminada y de alguein mas
         if (mNotificaciones.get(position).getEstado()==1){
             //Abrir Activity del resumen
             Intent intent = new Intent(getContext(), ResumenDeEmergencia.class);
@@ -292,11 +294,20 @@ public class NotificacionesFragment extends Fragment
             startActivity(intent);
         }else if (mNotificaciones.get(position).getEstado()==2){
             //Abrir Activity del resumen de una emergencia propia que sí envió alertas
+            Intent intent = new Intent(getContext(), EmergenciaFinalizada.class);
+            intent.putExtra("idNotificacion", mNotificaciones.get(position).getIdNotificacion());
+            intent.putExtra("idEmergencia", mNotificaciones.get(position).getIdEmergencia());
+            intent.putExtra("estado", mNotificaciones.get(position).getIdEmergencia());
+            startActivity(intent);
         }else if (mNotificaciones.get(position).getEstado()==3){
             //Abrir lo correspondiente a una emergencia cancelada manualmente
-        }else if (mNotificaciones.get(position).getEstado()==4){
-            //Abrir activity de las mediciones de una emergencia que no envió alertas
+            Intent intent = new Intent(getContext(), EmergenciaFinalizada.class);
+            intent.putExtra("idNotificacion", mNotificaciones.get(position).getIdNotificacion());
+            intent.putExtra("idEmergencia", mNotificaciones.get(position).getIdEmergencia());
+            intent.putExtra("estado", mNotificaciones.get(position).getIdEmergencia());
+            startActivity(intent);
         }
+
         mNotificacionesManager.actualizarCampoLeido(position);
         (new Handler()).postDelayed(new Runnable() {
             public void run() {
