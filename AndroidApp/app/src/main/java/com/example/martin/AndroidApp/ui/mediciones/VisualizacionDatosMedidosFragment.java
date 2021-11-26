@@ -212,10 +212,6 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                                     "Frecuencia Cardiaca: " + Integer.toString(valorCardiaco) +
                                             " ppm");
                     textViewValorSpo2.setText("Spo2: " + Integer.toString(valorSpo2) + "%");
-                    manejadorBaseDeDatosLocal
-                            .agregarDatosAMedicion(valorECG, valorCardiaco, valorSpo2,
-                                    System.currentTimeMillis(),
-                                    manejadorBaseDeDatosNube.obtenerIdUsuario());
 
                     LineData informacionECG = graficaECG.getData();
                     if (informacionECG != null) {

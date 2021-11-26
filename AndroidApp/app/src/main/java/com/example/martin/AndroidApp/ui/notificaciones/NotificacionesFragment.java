@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -99,7 +100,7 @@ public class NotificacionesFragment extends Fragment
                 .checkSelfPermission(this.getContext(), Manifest.permission.SEND_SMS) !=
                 PackageManager.PERMISSION_GRANTED || ContextCompat
                 .checkSelfPermission(this.getContext(), Manifest.permission.READ_PHONE_STATE) !=
-                PackageManager.PERMISSION_GRANTED) {
+                PackageManager.PERMISSION_GRANTED ) {
             final AlertDialog.Builder mensajeDePermiso = new AlertDialog.Builder(getContext());
             mensajeDePermiso.setTitle("Permiso para enviar SMS.");
             mensajeDePermiso.setMessage(
@@ -116,7 +117,6 @@ public class NotificacionesFragment extends Fragment
                                     Manifest.permission.READ_PHONE_STATE}, PERMISSION_SEND_SMS);
                 }
             });
-            Log.d("LOG", "no hay permisos de enviar sms");
 
             mensajeDePermiso.setNegativeButton(getString(R.string.newNameDialogCancelingButton),
                     new DialogInterface.OnClickListener() {
@@ -129,8 +129,32 @@ public class NotificacionesFragment extends Fragment
                         }
                     });
             mensajeDePermiso.create().show();
-        } else {
-            Log.d("LOG", "sí hay permisos de enviar sms");
+        }
+
+        if ( !Settings.canDrawOverlays(getContext()) ){
+            final AlertDialog.Builder mensajeDePermiso = new AlertDialog.Builder(getContext());
+            mensajeDePermiso.setTitle("Permiso para mostrar sobre otras aplicaciones.");
+            mensajeDePermiso.setMessage(
+                    "Adicionalmente te pedimos actives la función para mostrar sobre otras aplicaciones.");
+            mensajeDePermiso.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent myIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                    startActivity(myIntent);
+                }
+            });
+
+            mensajeDePermiso.setNegativeButton(getString(R.string.newNameDialogCancelingButton),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // InputMethodManager imm = (InputMethodManager)getSystemService
+                            // (Context.INPUT_METHOD_SERVICE);
+                            //imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                            dialog.cancel();
+                        }
+                    });
+            mensajeDePermiso.create().show();
         }
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(
