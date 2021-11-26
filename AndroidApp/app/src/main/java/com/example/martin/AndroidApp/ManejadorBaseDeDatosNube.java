@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -1064,7 +1066,6 @@ public class ManejadorBaseDeDatosNube {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.d("LOG", "localizacion: " + localizacion);
         String[] longitudYLatitud = localizacion.split(",");
         Map<String, Object> mLocalizacion = new HashMap<>();
         mLocalizacion.put("usuario", "Emergencia");
@@ -1260,14 +1261,6 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
-    public void ejecutarHiloParaActualizarDatosEnLaEmergencia(String idEmergencia, Context context,
-                                                              ContextWrapper contextWrapper) {
-        Intent intent = new Intent(context, ServicioParaActualizarDatosEnLaEmergencia.class);
-        intent.putExtra("idEmergencia", idEmergencia);
-        contextWrapper.startService(intent);
-
-    }
-
     class HiloParaHacerRespaldo extends Thread {
         ManejadorBaseDeDatosLocal manejadorBaseDeDatosLocal;
 
@@ -1380,6 +1373,42 @@ public class ManejadorBaseDeDatosNube {
                 }
             }, 200);
         }
+    }
+
+    public void ejecutarHiloParaActualizarDatosEnLaEmergencia (String idEmergencia, Context context,
+                                                               ContextWrapper contextWrapper){
+        Intent intent = new Intent(context, ServicioParaObtenerDatosDelCircuito.class);
+        intent.putExtra("emergenciaActivada", true);
+        intent.putExtra("idEmergencia", idEmergencia);
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
+        contextWrapper.bindService(intent, serviceConnection, Context.BIND_ABOVE_CLIENT);
+    }
+
+    protected void comunicarCancelacionAlServicio(Context context, ContextWrapper contextWrapper){
+        Intent intent = new Intent(context, ServicioParaObtenerDatosDelCircuito.class);
+        intent.putExtra("emergenciaActivada", false);
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
+        contextWrapper.bindService(intent, serviceConnection, Context.BIND_ABOVE_CLIENT);
     }
 
 }

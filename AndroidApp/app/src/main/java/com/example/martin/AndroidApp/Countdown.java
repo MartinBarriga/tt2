@@ -3,9 +3,11 @@ package com.example.martin.AndroidApp;
 import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
@@ -14,11 +16,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,6 +61,7 @@ public class Countdown extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.getWindow().setFlags(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_countdown);
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
@@ -138,7 +143,9 @@ public class Countdown extends AppCompatActivity {
 
     public void cancelarAlerta(View view) {
         cdt.cancel();
-        System.exit(0);
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        mManejadorBaseDeDatosNube.comunicarCancelacionAlServicio( getApplicationContext(), cw);
+        finish();
     }
 
     public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha,
@@ -295,7 +302,7 @@ public class Countdown extends AppCompatActivity {
         location = "";
         final LocationRequest locationRequest = new LocationRequest();
         locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(30000);
+        locationRequest.setFastestInterval(3000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED && ActivityCompat
