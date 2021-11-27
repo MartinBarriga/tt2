@@ -57,6 +57,21 @@ public class Countdown extends AppCompatActivity {
     private String location;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
+    private ServicioParaObtenerDatosDelCircuito servicio;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ServicioParaObtenerDatosDelCircuito.LocalBinder binder =
+                    (ServicioParaObtenerDatosDelCircuito.LocalBinder) service;
+            servicio = binder.getService();
+            Log.d("LOG", "onServiceConnected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +81,11 @@ public class Countdown extends AppCompatActivity {
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
+
+        Intent intent = new Intent(getApplicationContext(), ServicioParaObtenerDatosDelCircuito.class);
+
+        (new ContextWrapper(getApplicationContext())).bindService(intent,
+                serviceConnection, Context.BIND_ABOVE_CLIENT);
 
         cdt = new CountDownTimer(11000, 1000) {
             TextView text = findViewById(R.id.segundos);
@@ -143,8 +163,7 @@ public class Countdown extends AppCompatActivity {
 
     public void cancelarAlerta(View view) {
         cdt.cancel();
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        mManejadorBaseDeDatosNube.comunicarCancelacionAlServicio( getApplicationContext(), cw);
+        comunicarCancelacionAlServicio();
         finish();
     }
 
@@ -361,9 +380,7 @@ public class Countdown extends AppCompatActivity {
             if (tieneConexionAInternet()){
                 enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion,
                         manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
-                ContextWrapper cw = new ContextWrapper(getApplicationContext());
-                manejadorBaseDeDatosNube.ejecutarHiloParaActualizarDatosEnLaEmergencia(idEmergencia,
-                        getApplicationContext(), cw);
+                servicio.activarEmergencia(idEmergencia);
             } else {
                 Log.d("LOG", "No tiene conexión a internet, sólo se enviarán SMS");
                 Looper.prepare();
@@ -374,5 +391,9 @@ public class Countdown extends AppCompatActivity {
             enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia, localizacion,
                     manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
         }
+    }
+
+    protected void comunicarCancelacionAlServicio(){
+        servicio.desactivarEmergencia();
     }
 }

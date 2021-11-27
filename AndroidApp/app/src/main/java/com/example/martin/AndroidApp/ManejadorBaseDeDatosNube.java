@@ -1376,40 +1376,4 @@ public class ManejadorBaseDeDatosNube {
         }
     }
 
-    public void ejecutarHiloParaActualizarDatosEnLaEmergencia (String idEmergencia, Context context,
-                                                               ContextWrapper contextWrapper){
-        Intent intent = new Intent(context, ServicioParaObtenerDatosDelCircuito.class);
-        intent.putExtra("emergenciaActivada", true);
-        intent.putExtra("idEmergencia", idEmergencia);
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        };
-        contextWrapper.bindService(intent, serviceConnection, Context.BIND_ABOVE_CLIENT);
-    }
-
-    protected void comunicarCancelacionAlServicio(Context context, ContextWrapper contextWrapper){
-        Intent intent = new Intent(context, ServicioParaObtenerDatosDelCircuito.class);
-        intent.putExtra("emergenciaActivada", false);
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        };
-        contextWrapper.bindService(intent, serviceConnection, Context.BIND_ABOVE_CLIENT);
-    }
-
 }

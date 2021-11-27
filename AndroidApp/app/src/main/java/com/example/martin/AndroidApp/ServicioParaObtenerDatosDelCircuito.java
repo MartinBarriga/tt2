@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
@@ -43,7 +44,14 @@ public class ServicioParaObtenerDatosDelCircuito extends Service{
     private Context context;
     private HiloParaActualizarLocalizacionEnEmergencia hiloParaActualizarDatosEnEmergencia;
     private HiloParaGuardarMediciones hiloParaGuardarMediciones;
+    private final IBinder binder = new LocalBinder();
 
+    public class LocalBinder extends Binder {
+        ServicioParaObtenerDatosDelCircuito getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return ServicioParaObtenerDatosDelCircuito.this;
+        }
+    }
     private boolean tieneConexionAInternet(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
@@ -300,25 +308,21 @@ public class ServicioParaObtenerDatosDelCircuito extends Service{
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        enEmergencia = intent.getBooleanExtra( "emergenciaActivada", false);
-        if ( enEmergencia ){
-            idEmergencia =  intent.getStringExtra("idEmergencia");
-            actualizarDatosEnEmergencia();
-        } else {
-            enEmergencia = false;
-        }
-        return null;
+        return binder;
     }
 
-    @Override
-    public void onRebind(Intent intent) {
-        enEmergencia = intent.getBooleanExtra( "emergenciaActivada", false);
-        if ( enEmergencia ){
-            idEmergencia =  intent.getStringExtra("idEmergencia");
-            actualizarDatosEnEmergencia();
-        } else {
-            enEmergencia = false;
-        }
+
+    //Métodos para el cliente (Countdown)
+
+    protected void activarEmergencia(String idEmergencia){
+        enEmergencia = true;
+        this.idEmergencia = idEmergencia;
+        actualizarDatosEnEmergencia();
+    }
+
+    protected void desactivarEmergencia(){
+        enEmergencia = false;
+        this.idEmergencia = null;
     }
 
     public void onCreate (){
