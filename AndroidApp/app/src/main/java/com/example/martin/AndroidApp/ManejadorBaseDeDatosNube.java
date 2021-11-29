@@ -898,15 +898,19 @@ public class ManejadorBaseDeDatosNube {
             } else {
                 detalles = (String) document.get("nombreFamiliar");
             }
+            int seguidores = 0;
+            if (document.get("seguidores") != null) {
+                seguidores = Integer.parseInt((String)document.get("seguidores"));
+            }
             com.example.martin.AndroidApp.Resumen resumen =
                     new Resumen(null, idNotificacion,
                             nombre,
                             (String) document.get("comentariosAdicionales"),
                             (String) document.get("Desenlace"),
                             detalles,
-                            (String) document.get("duracion"),
+                            (String) document.get("duracionEmergencia"),
                             ((Long) document.get("cantidadDePersonasEnviado")).intValue(),
-                            (int) document.get("seguidores"), (String) document.get("inicio"),
+                            seguidores, (String) document.get("inicio"),
                             (String) document.get("fin") , false);
 
             manejadorBaseDeDatosLocal.agregarResumen(manejadorBaseDeDatosLocal
@@ -1371,7 +1375,7 @@ public class ManejadorBaseDeDatosNube {
                 public void run() {
                     System.exit(0);
                 }
-            }, 200);
+            }, 1000);
         }
     }
 
