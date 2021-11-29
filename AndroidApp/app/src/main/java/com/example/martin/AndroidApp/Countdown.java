@@ -3,9 +3,11 @@ package com.example.martin.AndroidApp;
 import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
@@ -14,11 +16,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,14 +57,35 @@ public class Countdown extends AppCompatActivity {
     private String location;
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
+    private ServicioParaObtenerDatosDelCircuito servicio;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ServicioParaObtenerDatosDelCircuito.LocalBinder binder =
+                    (ServicioParaObtenerDatosDelCircuito.LocalBinder) service;
+            servicio = binder.getService();
+            Log.d("LOG", "onServiceConnected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.getWindow().setFlags(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_countdown);
 
         mManejadorBaseDeDatosLocal = new ManejadorBaseDeDatosLocal(getApplicationContext(), null);
         mManejadorBaseDeDatosNube = new ManejadorBaseDeDatosNube();
+
+        Intent intent = new Intent(getApplicationContext(), ServicioParaObtenerDatosDelCircuito.class);
+
+        (new ContextWrapper(getApplicationContext())).bindService(intent,
+                serviceConnection, Context.BIND_ABOVE_CLIENT);
 
         cdt = new CountDownTimer(11000, 1000) {
             TextView text = findViewById(R.id.segundos);
@@ -138,7 +163,8 @@ public class Countdown extends AppCompatActivity {
 
     public void cancelarAlerta(View view) {
         cdt.cancel();
-        System.exit(0);
+        comunicarCancelacionAlServicio();
+        finish();
     }
 
     public void agregarNotificacionPropia(String idUsuario, String idEmergencia, String fecha,
@@ -295,7 +321,7 @@ public class Countdown extends AppCompatActivity {
         location = "";
         final LocationRequest locationRequest = new LocationRequest();
         locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(30000);
+        locationRequest.setFastestInterval(3000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED && ActivityCompat
@@ -354,9 +380,7 @@ public class Countdown extends AppCompatActivity {
             if (tieneConexionAInternet()){
                 enviarNotificacion(idEmergencia, idUsuario, fecha, localizacion,
                         manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
-                ContextWrapper cw = new ContextWrapper(getApplicationContext());
-                manejadorBaseDeDatosNube.ejecutarHiloParaActualizarDatosEnLaEmergencia(idEmergencia,
-                        getApplicationContext(), cw);
+                servicio.activarEmergencia(idEmergencia);
             } else {
                 Log.d("LOG", "No tiene conexión a internet, sólo se enviarán SMS");
                 Looper.prepare();
@@ -367,5 +391,9 @@ public class Countdown extends AppCompatActivity {
             enviarSMS(getCurrentFocus(), getApplicationContext(), idEmergencia, localizacion,
                     manejadorBaseDeDatosLocal, manejadorBaseDeDatosNube);
         }
+    }
+
+    protected void comunicarCancelacionAlServicio(){
+        servicio.desactivarEmergencia();
     }
 }

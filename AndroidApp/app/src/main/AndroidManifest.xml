@@ -69,7 +69,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".ServicioParaActualizarDatosEnLaEmergencia"
+        <service android:name=".ServicioParaObtenerDatosDelCircuito"
             android:exported="false" />
     </application>
 

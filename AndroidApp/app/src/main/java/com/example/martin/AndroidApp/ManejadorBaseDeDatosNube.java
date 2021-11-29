@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -1372,14 +1374,6 @@ public class ManejadorBaseDeDatosNube {
                 }
             }, 200);
         }
-    }
-
-    public void ejecutarHiloParaActualizarDatosEnLaEmergencia (String idEmergencia, Context context,
-                                                               ContextWrapper contextWrapper){
-        Intent intent = new Intent(context, ServicioParaActualizarDatosEnLaEmergencia.class);
-        intent.putExtra("idEmergencia", idEmergencia);
-        contextWrapper.startService(intent);
-
     }
 
 }

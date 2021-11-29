@@ -191,20 +191,20 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                     int valorCardiaco =
                             (mensaje.charAt(7) - '0') * 100 + (mensaje.charAt(8) - '0') * 10 +
                                     (mensaje.charAt(9) - '0');
-                    int valorBoton1 = (mensaje.charAt(10) - '0');
-                    int valorBoton2 = (mensaje.charAt(11) - '0');
-                    if(valorBoton1 == 1 && valorBoton2 == 1 && System.currentTimeMillis() - ultimaVezQueSePicaronLosBotones > 1000) {
-                        ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
-                        Intent intentCountDown = new Intent(getContext(), Countdown.class);
-                        startActivity(intentCountDown);
-                        /*intentCountDown.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        PendingIntent pendingIntentCountDown = PendingIntent.getActivity(getContext(), 0, intentCountDown, PendingIntent.FLAG_UPDATE_CURRENT);
-                        try {
-                            pendingIntentCountDown.send(getContext(), 0, intentCountDown);
-                        } catch (PendingIntent.CanceledException e) {
-                            e.printStackTrace();
-                        }*/
-                    }
+//                    int valorBoton1 = (mensaje.charAt(10) - '0');
+//                    int valorBoton2 = (mensaje.charAt(11) - '0');
+//                    if(valorBoton1 == 1 && valorBoton2 == 1 && System.currentTimeMillis() - ultimaVezQueSePicaronLosBotones > 1000) {
+//                        ultimaVezQueSePicaronLosBotones = System.currentTimeMillis();
+//                        Intent intentCountDown = new Intent(getContext(), Countdown.class);
+//                        startActivity(intentCountDown);
+//                        /*intentCountDown.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                        PendingIntent pendingIntentCountDown = PendingIntent.getActivity(getContext(), 0, intentCountDown, PendingIntent.FLAG_UPDATE_CURRENT);
+//                        try {
+//                            pendingIntentCountDown.send(getContext(), 0, intentCountDown);
+//                        } catch (PendingIntent.CanceledException e) {
+//                            e.printStackTrace();
+//                        }*/
+//                    }
 
                     textViewValorECG.setText("Valor ECG: " + Integer.toString(valorECG) + " mv");
                     textViewValorCardiaco
@@ -212,10 +212,6 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                                     "Frecuencia Cardiaca: " + Integer.toString(valorCardiaco) +
                                             " ppm");
                     textViewValorSpo2.setText("Spo2: " + Integer.toString(valorSpo2) + "%");
-                    manejadorBaseDeDatosLocal
-                            .agregarDatosAMedicion(valorECG, valorCardiaco, valorSpo2,
-                                    System.currentTimeMillis(),
-                                    manejadorBaseDeDatosNube.obtenerIdUsuario());
 
                     LineData informacionECG = graficaECG.getData();
                     if (informacionECG != null) {
