@@ -24,7 +24,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
     private static final String NOMRE_BASE_DE_DATOS = "TT2020B065";
-    private static final int VERSION_DE_BASE_DE_DATOS = 1;
+    private static final int VERSION_DE_BASE_DE_DATOS = 102;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
     private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
@@ -59,7 +59,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             "REFERENCES " + NOMBRE_TABLA_NOTIFICACION +
             " (idNotificacion) ON UPDATE CASCADE ON DELETE CASCADE, " +
             "nombre TEXT, comentario TEXT, " + "desenlace TEXT, detalles TEXT, duracion TEXT, " +
-            "cantidadDePersonasEnviado INTEGER, " + "seguidores INTEGER, enNube INTEGER)";
+            "cantidadDePersonasEnviado INTEGER, " + "seguidores INTEGER, inicio TEXT, fin TEXT, enNube INTEGER)";
     private static final String CREAR_TABLA_MEDICION = "CREATE TABLE IF NOT EXISTS " +
             NOMBRE_TABLA_MEDICION +
             " (idMedicion INTEGER PRIMARY KEY AUTOINCREMENT, idUsuario TEXT NOT NULL REFERENCES " +
@@ -471,7 +471,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             Resumen resumen = new Resumen(cursor.getLong(0), cursor.getLong(1), cursor.getString(2),
                     cursor.getString(3),
                     cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getInt(7),
-                    cursor.getInt(8), enNube);
+                    cursor.getInt(8), cursor.getString(9), cursor.getString(10), enNube);
             lectura.close();
             return resumen;
         }
@@ -589,6 +589,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         contentResumen.put("duracion", resumen.getDuracion());
         contentResumen.put("cantidadDePersonasEnviado", resumen.getCantidadDePersonasEnviado());
         contentResumen.put("seguidores", resumen.getSeguidores());
+        contentResumen.put("inicio", resumen.getInicio());
+        contentResumen.put("fin", resumen.getFin());
         contentResumen.put("enNube", resumen.isEnNube() ? 1 : 0);
 
         return contentResumen;

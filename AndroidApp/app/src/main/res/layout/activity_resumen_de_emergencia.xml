@@ -119,6 +119,44 @@
                 android:textAlignment="textStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
+            <TextView
+                android:id="@+id/fechaEmergenciaFinalizada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/informacionEmergenciaFinalizada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textSize="16sp" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/graficaFrecuenciaCardiacaSpo2EmergenciaFinalizada"
+                android:layout_width="match_parent"
+                android:layout_height="600sp"
+                android:layout_marginTop="16dp">
+
+            </com.github.mikephil.charting.charts.LineChart>
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/graficaECGEmergenciaFinalizada"
+                android:layout_width="match_parent"
+                android:layout_height="600sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="64dp"
+                >
+
+            </com.github.mikephil.charting.charts.LineChart>
+
         </LinearLayout>
     </ScrollView>
 

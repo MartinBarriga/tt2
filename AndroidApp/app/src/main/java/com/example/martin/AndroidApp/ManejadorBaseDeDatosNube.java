@@ -908,6 +908,8 @@ public class ManejadorBaseDeDatosNube {
                             ((Long) document.get("cantidadDePersonasEnviado")).intValue(),
 //                          (int) document.get("seguidores"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
                             0,
+                            (String) document.get("inicio"),
+                            (String) document.get("fin"),
                             false);
 
             manejadorBaseDeDatosLocal.agregarResumen(manejadorBaseDeDatosLocal

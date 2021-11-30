@@ -307,8 +307,14 @@ public class NotificacionesFragment extends Fragment
                             Toast.LENGTH_LONG).show();
                 }
             }
+        } else {
+            Intent intent = new Intent(getContext(), ResumenDeEmergencia.class);
+            intent.putExtra("idNotificacion", mNotificaciones.get(position).getIdNotificacion());
+            intent.putExtra("idEmergencia", mNotificaciones.get(position).getIdEmergencia());
+            intent.putExtra("estado", mNotificaciones.get(position).getEstado());
+            startActivity(intent);
         }
-        if (mNotificaciones.get(position).getEstado()==1){
+        /*if (mNotificaciones.get(position).getEstado()==1){
             //Abrir Activity del resumen
             Intent intent = new Intent(getContext(), ResumenDeEmergencia.class);
             intent.putExtra("idNotificacion", mNotificaciones.get(position).getIdNotificacion());
@@ -320,7 +326,7 @@ public class NotificacionesFragment extends Fragment
             //Abrir lo correspondiente a una emergencia cancelada manualmente
         }else if (mNotificaciones.get(position).getEstado()==4){
             //Abrir activity de las mediciones de una emergencia que no envió alertas
-        }
+        }*/
         mNotificacionesManager.actualizarCampoLeido(position);
         (new Handler()).postDelayed(new Runnable() {
             public void run() {
