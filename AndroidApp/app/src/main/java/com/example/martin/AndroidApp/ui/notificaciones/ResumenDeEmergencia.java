@@ -93,7 +93,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
         // Si la emergencia fue propia, mostramos graficas con los datos, sino ocultamos las gráficas
         if(estado > 1) {
             String fecha = resumen.getInicio().substring(0, resumen.getInicio().indexOf(' '));
-            fecha.replace('-', '/');
+            fecha = fecha.replace('-', '/');
             String horaInicio =
                     resumen.getInicio().substring(resumen.getInicio().indexOf(' ') + 1) + ".000";
             String horaFin =

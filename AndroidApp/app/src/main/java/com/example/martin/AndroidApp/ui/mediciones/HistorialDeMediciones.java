@@ -258,7 +258,6 @@ public class HistorialDeMediciones extends AppCompatActivity {
                                             new SimpleDateFormat("HH:mm:ss.SSS").parse(horayMinuto);
                                     horayMinuto = new SimpleDateFormat("HH:mm:ss.SSS")
                                             .format(horayMinutoTipoDate);
-                                    ;
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
