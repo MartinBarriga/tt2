@@ -1,9 +1,6 @@
 package com.example.martin.AndroidApp;
 
 public class Resumen {
-    private Long idResumen;
-    private Long idNotificacion;
-
     String nombre;
     String comentario;
     String desenlace;
@@ -11,10 +8,16 @@ public class Resumen {
     String duracion;
     int cantidadDePersonasEnviado;
     int seguidores;
+    String inicio;
+    String fin;
     boolean enNube;
+    private Long idResumen;
+    private Long idNotificacion;
 
-    public Resumen(Long idResumen, Long idNotificacion, String nombre, String comentario, String desenlace, String detalles,
-                   String duracion, int cantidadDePersonasEnviado, int seguidores, boolean enNube) {
+    public Resumen(Long idResumen, Long idNotificacion, String nombre, String comentario,
+                   String desenlace, String detalles,
+                   String duracion, int cantidadDePersonasEnviado, int seguidores, String inicio,
+                   String fin, boolean enNube) {
         this.idResumen = idResumen;
         this.idNotificacion = idNotificacion;
         this.nombre = nombre;
@@ -24,6 +27,8 @@ public class Resumen {
         this.duracion = duracion;
         this.cantidadDePersonasEnviado = cantidadDePersonasEnviado;
         this.seguidores = seguidores;
+        this.inicio = inicio;
+        this.fin = fin;
         this.enNube = enNube;
     }
 
@@ -97,6 +102,14 @@ public class Resumen {
 
     public void setSeguidores(int seguidores) {
         this.seguidores = seguidores;
+    }
+
+    public String getInicio() {
+        return inicio;
+    }
+
+    public String getFin() {
+        return fin;
     }
 
     public boolean isEnNube() {
