@@ -53,7 +53,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
     private LineDataSet crearSetECG() {
         LineDataSet set = new LineDataSet(null, "Valores ECG");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setLineWidth(3f);
+        set.setLineWidth(1f);
         set.setColor(Color.BLUE);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
@@ -115,10 +115,10 @@ public class HistorialDeMediciones extends AppCompatActivity {
         graficaECG.setData(informacionECG);
         graficaECG.getAxisLeft().setDrawGridLines(false);
         graficaECG.getXAxis().setDrawGridLines(false);
-        graficaECG.getAxisLeft().setAxisMaxValue(500);
-        graficaECG.getAxisLeft().setAxisMinValue(300);
-        graficaECG.getAxisRight().setAxisMaxValue(500);
-        graficaECG.getAxisRight().setAxisMinValue(300);
+        graficaECG.getAxisLeft().setAxisMaxValue(900);
+        graficaECG.getAxisLeft().setAxisMinValue(200);
+        graficaECG.getAxisRight().setAxisMaxValue(900);
+        graficaECG.getAxisRight().setAxisMinValue(200);
         graficaECG.setDrawBorders(false);
         XAxis xAxisGraficaECG = graficaECG.getXAxis();
         xAxisGraficaECG.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -162,9 +162,9 @@ public class HistorialDeMediciones extends AppCompatActivity {
         graficaFrecuenciaCardiacaSpo2.setData(informacionFrecuenciaSpo2);
         graficaFrecuenciaCardiacaSpo2.getAxisLeft().setDrawGridLines(false);
         graficaFrecuenciaCardiacaSpo2.getXAxis().setDrawGridLines(false);
-        graficaFrecuenciaCardiacaSpo2.getAxisLeft().setAxisMaxValue(100);
+        graficaFrecuenciaCardiacaSpo2.getAxisLeft().setAxisMaxValue(200);
         graficaFrecuenciaCardiacaSpo2.getAxisLeft().setAxisMinValue(0);
-        graficaFrecuenciaCardiacaSpo2.getAxisRight().setAxisMaxValue(100);
+        graficaFrecuenciaCardiacaSpo2.getAxisRight().setAxisMaxValue(200);
         graficaFrecuenciaCardiacaSpo2.getAxisRight().setAxisMinValue(0);
         graficaFrecuenciaCardiacaSpo2.setDrawBorders(false);
         XAxis xAxisFrecuenciaCardiacaSpo2 = graficaFrecuenciaCardiacaSpo2.getXAxis();
@@ -280,6 +280,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
                             Toast.LENGTH_SHORT)
                             .show();
                 } else {
+                    Toast.makeText(getApplicationContext(), "Cargando datos...", Toast.LENGTH_LONG).show();
                     ArrayList<Dato> datosMedidos = manejadorBaseDeDatosLocal
                             .obtenerDatosMedidosDeUnRangoEspecificado(idUsuario,
                                     fechaSeleccionada[0],

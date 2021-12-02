@@ -46,7 +46,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
     private final int indiceSetParaSpo2 = 3;
     //Mientras sea un valor mayor a 0, la constante pedirá que se habilite el bluetooth
     public MainActivity mainActivity;
-    int n = 50;
+    Long n = (long) 0;
     private Button botonBluetooth;
     private BroadcastReceiver actualizacionesEnConexion;
     private LineChart graficaECG;
@@ -133,7 +133,7 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
     private LineDataSet crearSetECG() {
         LineDataSet set = new LineDataSet(null, "Valores ECG");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setLineWidth(3f);
+        set.setLineWidth(1f);
         set.setColor(Color.BLUE);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
@@ -180,7 +180,11 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
                         mensaje += mensajeSucio.charAt(i);
                     }
                 }
-                n++;
+                if ( n < Long.MAX_VALUE ){
+                    n++;
+                } else {
+                    n = (long) 0;
+                }
                 if (mensaje.length() == 12) {
                     int valorECG =
                             (mensaje.charAt(0) - '0') * 1000 + (mensaje.charAt(1) - '0') * 100 +
@@ -224,8 +228,8 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
 
                         }
 
-                        informacionECG.addEntry(new Entry(tiempo, valorECG), indiceSetParaECG);
-                        if (setECG.getEntryCount() > 200) {
+                        informacionECG.addEntry(new Entry(n, valorECG), indiceSetParaECG);
+                        if (setECG.getEntryCount() > 100) {
                             setECG.removeFirst();
                         }
                         informacionECG.notifyDataChanged();
@@ -391,10 +395,10 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
         graficaECG.getAxisLeft().setDrawGridLines(false);
         graficaECG.getXAxis().setDrawGridLines(false);
         graficaECG.getXAxis().setTextColor(0);
-        graficaECG.getAxisLeft().setAxisMaxValue(500);
-        graficaECG.getAxisLeft().setAxisMinValue(300);
-        graficaECG.getAxisRight().setAxisMaxValue(500);
-        graficaECG.getAxisRight().setAxisMinValue(300);
+        graficaECG.getAxisLeft().setAxisMaxValue(900);
+        graficaECG.getAxisLeft().setAxisMinValue(200);
+        graficaECG.getAxisRight().setAxisMaxValue(900);
+        graficaECG.getAxisRight().setAxisMinValue(200);
         graficaECG.setDrawBorders(false);
         graficaECG.invalidate();
 
@@ -415,9 +419,9 @@ public class VisualizacionDatosMedidosFragment extends Fragment {
         graficaFrecuenciaCardiacaSpo2.getAxisLeft().setDrawGridLines(false);
         graficaFrecuenciaCardiacaSpo2.getXAxis().setDrawGridLines(false);
         graficaFrecuenciaCardiacaSpo2.getXAxis().setTextColor(0);
-        graficaFrecuenciaCardiacaSpo2.getAxisLeft().setAxisMaxValue(100);
+        graficaFrecuenciaCardiacaSpo2.getAxisLeft().setAxisMaxValue(200);
         graficaFrecuenciaCardiacaSpo2.getAxisLeft().setAxisMinValue(0);
-        graficaFrecuenciaCardiacaSpo2.getAxisRight().setAxisMaxValue(100);
+        graficaFrecuenciaCardiacaSpo2.getAxisRight().setAxisMaxValue(200);
         graficaFrecuenciaCardiacaSpo2.getAxisRight().setAxisMinValue(0);
         graficaFrecuenciaCardiacaSpo2.setDrawBorders(false);
         graficaFrecuenciaCardiacaSpo2.invalidate();
