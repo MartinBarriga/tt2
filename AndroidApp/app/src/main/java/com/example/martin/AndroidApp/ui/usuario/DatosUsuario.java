@@ -85,36 +85,39 @@ public class DatosUsuario extends AppCompatActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getAction()==KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                    final AlertDialog.Builder mensajeDePermiso = new AlertDialog.Builder(DatosUsuario.this);
-                    mensajeDePermiso.setTitle("Agregar enfermedad");
-                    mensajeDePermiso.setMessage( "La enfermedad \"" + textViewEnfermedades.getText().toString() +
-                            "\" no había sido registrada anteriormente, ¿deseas agregarla? Por favor, revisa que" +
-                            " esté escrita correctamente.");
-                    mensajeDePermiso.setPositiveButton("Agregar", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mManejadorBaseDeDatosLocal.agregarEnfermadadAUsuario(usuario.getIdUsuario(),
-                                    mManejadorBaseDeDatosLocal.agregarEnfermedad(
-                                            textViewEnfermedades.getText().toString()));
-                            listaDeEnfermedades = mManejadorBaseDeDatosLocal.obtenerEnfermedades();
-                            adaptadorEnfermedades.add(textViewEnfermedades.getText().toString());
-                            textViewEnfermedades.setAdapter(adaptadorEnfermedades);
-                            textViewEnfermedades.setText("");
-                            actualizarChipGroupDeEnfermedades();
-                        }
-                    });
-                    mensajeDePermiso.setNegativeButton(getString(R.string.newNameDialogCancelingButton),
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // InputMethodManager imm = (InputMethodManager)getSystemService
-                                    // (Context.INPUT_METHOD_SERVICE);
-                                    //imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                    dialog.cancel();
-                                }
-                            });
-                    mensajeDePermiso.create().show();
-                    return true;
+                    if ( textViewEnfermedades.getText().toString() != null &&
+                            !textViewEnfermedades.getText().toString().trim().matches("") ) {
+                        final AlertDialog.Builder mensajeDePermiso = new AlertDialog.Builder(DatosUsuario.this);
+                        mensajeDePermiso.setTitle("Agregar enfermedad");
+                        mensajeDePermiso.setMessage("La enfermedad \"" + textViewEnfermedades.getText().toString() +
+                                "\" no había sido registrada anteriormente, ¿deseas agregarla? Por favor, revisa que" +
+                                " esté escrita correctamente.");
+                        mensajeDePermiso.setPositiveButton("Agregar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mManejadorBaseDeDatosLocal.agregarEnfermadadAUsuario(usuario.getIdUsuario(),
+                                        mManejadorBaseDeDatosLocal.agregarEnfermedad(
+                                                textViewEnfermedades.getText().toString()));
+                                listaDeEnfermedades = mManejadorBaseDeDatosLocal.obtenerEnfermedades();
+                                adaptadorEnfermedades.add(textViewEnfermedades.getText().toString());
+                                textViewEnfermedades.setAdapter(adaptadorEnfermedades);
+                                textViewEnfermedades.setText("");
+                                actualizarChipGroupDeEnfermedades();
+                            }
+                        });
+                        mensajeDePermiso.setNegativeButton(getString(R.string.newNameDialogCancelingButton),
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // InputMethodManager imm = (InputMethodManager)getSystemService
+                                        // (Context.INPUT_METHOD_SERVICE);
+                                        //imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                                        dialog.cancel();
+                                    }
+                                });
+                        mensajeDePermiso.create().show();
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -215,6 +218,12 @@ public class DatosUsuario extends AppCompatActivity {
         text = findViewById(R.id.frecuenciaCardiacaMinima);
         if(!(text.getText().toString().matches(""))) {
             frecuenciaCardiacaMinima = Integer.parseInt(text.getText().toString());
+
+            if ( frecuenciaCardiacaMinima < 0 ){
+                Toast.makeText( getApplicationContext(), "Valor no válido para frecuencia cardiaca.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
         } else {
             frecuenciaCardiacaMinima = -1;
         }
@@ -223,6 +232,12 @@ public class DatosUsuario extends AppCompatActivity {
         text = findViewById(R.id.frecuenciaCardiacaMaxima);
         if(!(text.getText().toString().matches(""))) {
             frecuenciaCardiacaMaxima = Integer.parseInt(text.getText().toString());
+
+            if ( frecuenciaCardiacaMaxima < 0 ){
+                Toast.makeText( getApplicationContext(), "Valor no válido para frecuencia cardiaca.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
         } else {
             frecuenciaCardiacaMaxima = -1;
         }
