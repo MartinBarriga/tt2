@@ -343,7 +343,7 @@ public class ServicioParaObtenerDatosDelCircuito extends Service{
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(getApplicationContext(), "Servicio")
-                        .setSmallIcon(R.drawable.ic_warning_black_24dp)
+                        .setSmallIcon(R.drawable.ic_ipn)
                         .setContentTitle("TT 2020-B065")
                         .setContentText("La aplicación etá ejecutando en segundo plano.")
                         .setStyle(new NotificationCompat.BigTextStyle())

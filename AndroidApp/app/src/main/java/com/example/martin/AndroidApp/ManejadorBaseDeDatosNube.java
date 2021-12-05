@@ -903,11 +903,9 @@ public class ManejadorBaseDeDatosNube {
                             (String) document.get("comentariosAdicionales"),
                             (String) document.get("Desenlace"),
                             detalles,
-//                          (String) document.get("duracion"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
-                            "8 minutos 12 segundos (prueba)",
+                            (String) document.get("duracionEmergencia"),
                             ((Long) document.get("cantidadDePersonasEnviado")).intValue(),
-//                          (int) document.get("seguidores"), DE MOMENTO ESTE NO ESTÁ EN FIREBASE
-                            0,
+                            Integer.parseInt( (String) document.get("seguidores")),
                             (String) document.get("inicio"),
                             (String) document.get("fin"),
                             false);

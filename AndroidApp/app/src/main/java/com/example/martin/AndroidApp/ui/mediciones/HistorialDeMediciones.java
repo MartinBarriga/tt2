@@ -4,9 +4,12 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -23,13 +26,17 @@ import com.example.martin.AndroidApp.ManejadorBaseDeDatosNube;
 import com.example.martin.AndroidApp.Medicion;
 import com.example.martin.AndroidApp.R;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.formatter.IFillFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.renderer.DataRenderer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +46,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class HistorialDeMediciones extends AppCompatActivity {
 
@@ -57,6 +65,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
         set.setColor(Color.BLUE);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
+        set.setDrawCircles(false);
         return set;
     }
 
@@ -67,6 +76,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
         set.setColor(Color.RED);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
+        set.setDrawCircles(false);
         return set;
     }
 
@@ -77,6 +87,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
         set.setColor(Color.YELLOW);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
+        set.setDrawCircles(false);
         return set;
     }
 
@@ -124,24 +135,9 @@ public class HistorialDeMediciones extends AppCompatActivity {
         xAxisGraficaECG.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxisGraficaECG.setValueFormatter(new ValueFormatter() {
             @Override
-            public String getFormattedValue(float horaFloat) {
-                String horaString = "";
-                int hora = (int) horaFloat;
-                String horaStringSinFormato = Integer.toString(hora);
-                while (horaStringSinFormato.length() < 9) {
-                    horaStringSinFormato = "0" + horaStringSinFormato;
-                }
-                int decimalesmovidos = 0;
-                for (int i = horaStringSinFormato.length() - 1; i >= 0; i--) {
-                    horaString = horaStringSinFormato.charAt(i) + horaString;
-                    decimalesmovidos++;
-                    if (decimalesmovidos == 3) {
-                        horaString = "." + horaString;
-                    } else if (decimalesmovidos == 5 || decimalesmovidos == 7) {
-                        horaString = "." + horaString;
-                    }
-                }
-                return horaString;
+            public String getFormattedValue(float value) {
+                SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
+                return formatoParaHoras.format(new Date(new Float(value).longValue()));
             }
         });
         graficaECG.invalidate();
@@ -171,24 +167,9 @@ public class HistorialDeMediciones extends AppCompatActivity {
         xAxisFrecuenciaCardiacaSpo2.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxisFrecuenciaCardiacaSpo2.setValueFormatter(new ValueFormatter() {
             @Override
-            public String getFormattedValue(float horaFloat) {
-                String horaString = "";
-                int hora = (int) horaFloat;
-                String horaStringSinFormato = Integer.toString(hora);
-                while (horaStringSinFormato.length() < 9) {
-                    horaStringSinFormato = "0" + horaStringSinFormato;
-                }
-                int decimalesmovidos = 0;
-                for (int i = horaStringSinFormato.length() - 1; i >= 0; i--) {
-                    horaString = horaStringSinFormato.charAt(i) + horaString;
-                    decimalesmovidos++;
-                    if (decimalesmovidos == 3) {
-                        horaString = "." + horaString;
-                    } else if (decimalesmovidos == 5 || decimalesmovidos == 7) {
-                        horaString = "." + horaString;
-                    }
-                }
-                return horaString;
+            public String getFormattedValue(float value) {
+                SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
+                return formatoParaHoras.format(new Date(new Float(value).longValue()));
             }
         });
         graficaFrecuenciaCardiacaSpo2.invalidate();
@@ -317,15 +298,18 @@ public class HistorialDeMediciones extends AppCompatActivity {
     }
 
     private void llenarLasGraficasConLosDatosObtenidos(ArrayList<Dato> datosMedidos) {
+        graficaECG.getData().clearValues();
+        graficaFrecuenciaCardiacaSpo2.getData().clearValues();
         for (Dato dato : datosMedidos) {
             String horaSinFiltrar = dato.getHora();
-            String horaFiltrada = "";
-            for (int i = 0; i < horaSinFiltrar.length(); i++) {
-                if (horaSinFiltrar.charAt(i) >= '0' && horaSinFiltrar.charAt(i) <= '9') {
-                    horaFiltrada += horaSinFiltrar.charAt(i);
-                }
+
+            SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
+            Date hora = null;
+            try {
+                hora = formatoParaHoras.parse(horaSinFiltrar);
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
-            Long hora = Long.parseLong(horaFiltrada);
 
             LineData informacionECG = graficaECG.getData();
             if (informacionECG != null) {
@@ -337,7 +321,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
                     informacionECG.addDataSet(setECG);
                 }
 
-                informacionECG.addEntry(new Entry(hora, dato.getEcg()), indiceSetParaECG);
+                informacionECG.addEntry(new Entry(new Long(hora.getTime()).floatValue(), dato.getEcg()), indiceSetParaECG);
 
             }
             informacionECG.notifyDataChanged();
@@ -351,7 +335,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
                     setFrecuenciaCardiaca = crearSetFrecuenciaCardiaca();
                     informacionCardiacaSpo2.addDataSet(setFrecuenciaCardiaca);
                 }
-                informacionCardiacaSpo2.addEntry(new Entry(hora, dato.getFrecuenciaCardiaca()),
+                informacionCardiacaSpo2.addEntry(new Entry(new Long(hora.getTime()).floatValue(), dato.getFrecuenciaCardiaca()),
                         indiceSetParaFrecuenciaCardiaca);
 
                 LineDataSet setSpo2 =
@@ -361,7 +345,7 @@ public class HistorialDeMediciones extends AppCompatActivity {
                     setSpo2 = crearSetSpo2();
                     informacionCardiacaSpo2.addDataSet(setSpo2);
                 }
-                informacionCardiacaSpo2.addEntry(new Entry(hora, dato.getSpo2()),
+                informacionCardiacaSpo2.addEntry(new Entry(new Long(hora.getTime()).floatValue(), dato.getSpo2()),
                         indiceSetParaSpo2);
 
 
@@ -376,5 +360,4 @@ public class HistorialDeMediciones extends AppCompatActivity {
         graficaFrecuenciaCardiacaSpo2
                 .moveViewToX(1);
     }
-
 }

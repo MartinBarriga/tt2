@@ -27,7 +27,10 @@ import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ResumenDeEmergencia extends AppCompatActivity {
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
@@ -129,27 +132,13 @@ public class ResumenDeEmergencia extends AppCompatActivity {
             graficaECG.getAxisRight().setAxisMinValue(200);
             graficaECG.setDrawBorders(false);
             XAxis xAxisGraficaECG = graficaECG.getXAxis();
+            xAxisGraficaECG.setLabelCount(5, true);
             xAxisGraficaECG.setPosition(XAxis.XAxisPosition.BOTTOM);
             xAxisGraficaECG.setValueFormatter(new ValueFormatter() {
                 @Override
-                public String getFormattedValue(float horaFloat) {
-                    String horaString = "";
-                    int hora = (int) horaFloat;
-                    String horaStringSinFormato = Integer.toString(hora);
-                    while (horaStringSinFormato.length() < 9) {
-                        horaStringSinFormato = "0" + horaStringSinFormato;
-                    }
-                    int decimalesmovidos = 0;
-                    for (int i = horaStringSinFormato.length() - 1; i >= 0; i--) {
-                        horaString = horaStringSinFormato.charAt(i) + horaString;
-                        decimalesmovidos++;
-                        if (decimalesmovidos == 3) {
-                            horaString = "." + horaString;
-                        } else if (decimalesmovidos == 5 || decimalesmovidos == 7) {
-                            horaString = "." + horaString;
-                        }
-                    }
-                    return horaString;
+                public String getFormattedValue(float value) {
+                    SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
+                    return formatoParaHoras.format(new Date(new Float(value).longValue()));
                 }
             });
             graficaECG.invalidate();
@@ -176,27 +165,13 @@ public class ResumenDeEmergencia extends AppCompatActivity {
             graficaFrecuenciaCardiacaSpo2.getAxisRight().setAxisMinValue(0);
             graficaFrecuenciaCardiacaSpo2.setDrawBorders(false);
             XAxis xAxisFrecuenciaCardiacaSpo2 = graficaFrecuenciaCardiacaSpo2.getXAxis();
+            xAxisFrecuenciaCardiacaSpo2.setLabelCount(5, true);
             xAxisFrecuenciaCardiacaSpo2.setPosition(XAxis.XAxisPosition.BOTTOM);
             xAxisFrecuenciaCardiacaSpo2.setValueFormatter(new ValueFormatter() {
                 @Override
-                public String getFormattedValue(float horaFloat) {
-                    String horaString = "";
-                    int hora = (int) horaFloat;
-                    String horaStringSinFormato = Integer.toString(hora);
-                    while (horaStringSinFormato.length() < 9) {
-                        horaStringSinFormato = "0" + horaStringSinFormato;
-                    }
-                    int decimalesmovidos = 0;
-                    for (int i = horaStringSinFormato.length() - 1; i >= 0; i--) {
-                        horaString = horaStringSinFormato.charAt(i) + horaString;
-                        decimalesmovidos++;
-                        if (decimalesmovidos == 3) {
-                            horaString = "." + horaString;
-                        } else if (decimalesmovidos == 5 || decimalesmovidos == 7) {
-                            horaString = "." + horaString;
-                        }
-                    }
-                    return horaString;
+                public String getFormattedValue(float value) {
+                    SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
+                    return formatoParaHoras.format(new Date(new Float(value).longValue()));
                 }
             });
             graficaFrecuenciaCardiacaSpo2.invalidate();
@@ -222,15 +197,18 @@ public class ResumenDeEmergencia extends AppCompatActivity {
     }
 
     private void llenarLasGraficasConLosDatosObtenidos(ArrayList<Dato> datosMedidos) {
+        graficaECG.getData().clearValues();
+        graficaFrecuenciaCardiacaSpo2.getData().clearValues();
         for (Dato dato : datosMedidos) {
             String horaSinFiltrar = dato.getHora();
-            String horaFiltrada = "";
-            for (int i = 0; i < horaSinFiltrar.length(); i++) {
-                if (horaSinFiltrar.charAt(i) >= '0' && horaSinFiltrar.charAt(i) <= '9') {
-                    horaFiltrada += horaSinFiltrar.charAt(i);
-                }
+
+            SimpleDateFormat formatoParaHoras = new SimpleDateFormat("HH:mm:ss.SSS");
+            Date hora = null;
+            try {
+                hora = formatoParaHoras.parse(horaSinFiltrar);
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
-            Long hora = Long.parseLong(horaFiltrada);
 
             LineData informacionECG = graficaECG.getData();
             if (informacionECG != null) {
@@ -242,7 +220,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
                     informacionECG.addDataSet(setECG);
                 }
 
-                informacionECG.addEntry(new Entry(hora, dato.getEcg()), indiceSetParaECG);
+                informacionECG.addEntry(new Entry(new Long(hora.getTime()).floatValue(), dato.getEcg()), indiceSetParaECG);
 
             }
             informacionECG.notifyDataChanged();
@@ -256,7 +234,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
                     setFrecuenciaCardiaca = crearSetFrecuenciaCardiaca();
                     informacionCardiacaSpo2.addDataSet(setFrecuenciaCardiaca);
                 }
-                informacionCardiacaSpo2.addEntry(new Entry(hora, dato.getFrecuenciaCardiaca()),
+                informacionCardiacaSpo2.addEntry(new Entry(new Long(hora.getTime()).floatValue(), dato.getFrecuenciaCardiaca()),
                         indiceSetParaFrecuenciaCardiaca);
 
                 LineDataSet setSpo2 =
@@ -266,7 +244,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
                     setSpo2 = crearSetSpo2();
                     informacionCardiacaSpo2.addDataSet(setSpo2);
                 }
-                informacionCardiacaSpo2.addEntry(new Entry(hora, dato.getSpo2()),
+                informacionCardiacaSpo2.addEntry(new Entry(new Long(hora.getTime()).floatValue(), dato.getSpo2()),
                         indiceSetParaSpo2);
 
 
@@ -289,6 +267,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
         set.setColor(Color.BLUE);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
+        set.setDrawCircles(false);
         return set;
     }
 
@@ -299,6 +278,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
         set.setColor(Color.RED);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
+        set.setDrawCircles(false);
         return set;
     }
 
@@ -309,6 +289,7 @@ public class ResumenDeEmergencia extends AppCompatActivity {
         set.setColor(Color.YELLOW);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setCubicIntensity(0.2f);
+        set.setDrawCircles(false);
         return set;
     }
 }
