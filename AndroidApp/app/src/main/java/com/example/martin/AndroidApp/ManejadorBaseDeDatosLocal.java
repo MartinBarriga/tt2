@@ -276,7 +276,8 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     public int obtenerCantidadDeContactos(String idUsuario) {
         SQLiteDatabase lectura = getReadableDatabase();
         Cursor cursor = lectura
-                .rawQuery("SELECT * FROM contacto WHERE idUsuario LIKE '" + idUsuario + "'", null);
+                .rawQuery("SELECT * FROM contacto WHERE idUsuario LIKE '" + idUsuario +
+                        "' AND ( recibeNotificaciones = 1 OR recibeSMS = 1 )", null);
         int cantidad = cursor.getCount();
         lectura.close();
         return cantidad;

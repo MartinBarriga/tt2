@@ -167,8 +167,10 @@ public class ServicioParaObtenerDatosDelCircuito extends Service{
 
             Log.d( "LOG", "HiloParaGuardarMediciones");
 
-            frecuenciaCardiacaMaxima = usuario.getFrecuenciaCardiacaMaxima();
-            frecuenciaCardiacaMinima = usuario.getFrecuenciaCardiacaMinima();
+            frecuenciaCardiacaMaxima = usuario.getFrecuenciaCardiacaMaxima() > 0 ?
+                    usuario.getFrecuenciaCardiacaMaxima() : 100;
+            frecuenciaCardiacaMinima = usuario.getFrecuenciaCardiacaMinima() > 0 ?
+                    usuario.getFrecuenciaCardiacaMinima() : 60;
 
             LocalBroadcastManager.getInstance(context).registerReceiver(
                     actualizacionesEnConexion,
