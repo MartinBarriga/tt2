@@ -59,7 +59,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public class ManejadorBaseDeDatosNube {
-    Boolean[] existeNumeroDeContacto = {false};
+    private boolean contactoEsUsuario = false;
     private FirebaseFirestore BaseDeDatos;
     private FirebaseAuth Auth;
     private FirebaseUser Usuario;
@@ -229,25 +229,66 @@ public class ManejadorBaseDeDatosNube {
                 });
     }
 
-    public Boolean existeNumeroDeContactoRegistradoEnFirebaseComoUsuario(Long telefono,
-                                                                         Context context) {
-        BaseDeDatos.collection("usuario").whereEqualTo("telefono", telefono).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            if (!task.getResult().isEmpty()) existeNumeroDeContacto[0] = true;
-                        } else {
-                            Log.d("LOG", "Error getting documents: ", task.getException());
-                            Toast.makeText(context,
-                                    "No encontramos un usuario con ese teléfono",
-                                    Toast.LENGTH_LONG).show();
+    public Boolean existeNumeroDeContactoRegistradoEnFirebaseComoUsuario( Long telefono ) {
+        try {
+            return !Tasks.await(BaseDeDatos.collection("usuario").whereEqualTo("telefono", telefono).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                if (!task.getResult().isEmpty()) Log.d( "LOG", "El contacto existe en los usuarios." );
+                            } else {
+                                Log.d("LOG", "Error getting documents: ", task.getException());
+                            }
                         }
-                    }
-                });
-        return existeNumeroDeContacto[0];
+                    })).isEmpty();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
+    public boolean buscarContactoEntreUsuarios( Long telefono, Context context ){
+        HiloParaBuscarContactoEntreUsuarios hiloParaBuscarContactoEntreUsuarios = new HiloParaBuscarContactoEntreUsuarios( telefono, context);
+        hiloParaBuscarContactoEntreUsuarios.start();
+        try {
+            hiloParaBuscarContactoEntreUsuarios.join();
+            if ( contactoEsUsuario ){
+                contactoEsUsuario = false;
+                return true;
+            } else {
+                return false;
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    protected class HiloParaBuscarContactoEntreUsuarios extends Thread{
+        private Long telefono;
+        private Context context;
+
+        public HiloParaBuscarContactoEntreUsuarios(Long telefono, Context context) {
+            this.telefono = telefono;
+            this.context = context;
+        }
+
+        @Override
+        public void run(){
+            if( !existeNumeroDeContactoRegistradoEnFirebaseComoUsuario( telefono ) ){
+                Looper.prepare();
+                Toast.makeText( context, "No se pudo encontrar a este contacto entre los usuarios de la aplicación.",
+                        Toast.LENGTH_LONG).show();
+                contactoEsUsuario = false;
+            } else {
+                contactoEsUsuario = true;
+            }
+        }
+    }
     private void eliminarNotificacion(Long idNotificacion) {
         BaseDeDatos.collection("notificacion")
                 .whereEqualTo("idUsuario", obtenerIdUsuario())

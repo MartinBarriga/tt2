@@ -91,13 +91,12 @@ public class RespaldoAutomatico extends BroadcastReceiver {
                             PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder notificacionBuilder =
-                    new NotificationCompat.Builder(context, "Alerta")
+                    new NotificationCompat.Builder(context, "Respaldo")
                             .setSmallIcon(R.drawable.ic_baseline_backup_24)
                             .setContentTitle("Respaldo automatico")
                             .setContentText("Un respaldo ha sido programado para el día de hoy")
                             .setPriority(NotificationCompat.PRIORITY_HIGH)
-                            .setVibrate(new long[]{3000, 3000, 3000, 3000, 3000,})
-                            .setLights(Color.RED, 2000, 2000)
+                            .setVibrate(new long[]{500,500,500,500})
                             .setContentIntent(intentNotificacionPendiente)
                             .setAutoCancel(true);
             NotificationManagerCompat notificacion = NotificationManagerCompat.from(context);

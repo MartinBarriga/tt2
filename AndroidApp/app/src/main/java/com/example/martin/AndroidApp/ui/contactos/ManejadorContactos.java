@@ -74,15 +74,14 @@ public class ManejadorContactos {
                         contacto);
     }
 
-    public void cambiarEstadoEnvioDeNotificacionesSeleccionado(final int posicion) {
+    public void cambiarEstadoEnvioDeNotificacionesSeleccionado(final int posicion ) {
         mContactos.get(posicion).setEnNube(false);
         if (mContactos.get(posicion).getRecibeNotificaciones()) {
             mContactos.get(posicion).setRecibeNotificaciones(false);
             actualizarCampoNotificacion(posicion);
         } else {
-            if (mManejadorBaseDeDatosNube
-                    .existeNumeroDeContactoRegistradoEnFirebaseComoUsuario(
-                            mContactos.get(posicion).getTelefono(), mContexto)) {
+            if ( mManejadorBaseDeDatosNube.buscarContactoEntreUsuarios(
+                            mContactos.get(posicion).getTelefono(), mContexto )) {
                 mContactos.get(posicion).setRecibeNotificaciones(true);
                 actualizarCampoNotificacion(posicion);
             }

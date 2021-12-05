@@ -290,11 +290,7 @@ public class ContactosFragment extends Fragment implements  ContactosRecyclerAda
     @Override
     public void onNotificacionClick(final int position) {
         mManejadorContactos.cambiarEstadoEnvioDeNotificacionesSeleccionado(position);
-         (new Handler()).postDelayed(new Runnable() {
-            public void run() {
-                mContactosRecyclerAdapter.notifyItemChanged(position);
-            }
-        }, 500);
+        mContactosRecyclerAdapter.notifyItemChanged(position);
 
     }
 }
