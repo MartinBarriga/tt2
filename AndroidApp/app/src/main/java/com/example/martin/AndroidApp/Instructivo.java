@@ -189,7 +189,7 @@ public class Instructivo extends AppCompatActivity {
                 descripcionPantalla.setText(
                         "A continuación podrás ver una breve explicación de cada una de las " +
                                 "pantallas que se encuentran en la aplicación, desliza de " +
-                                "izquierda a derecha para visuaalizarlas.");
+                                "izquierda a derecha para visualizarlas.");
                 circulo1.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
