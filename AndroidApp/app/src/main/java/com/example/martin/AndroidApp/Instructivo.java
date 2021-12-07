@@ -100,13 +100,12 @@ public class Instructivo extends AppCompatActivity {
         switch (pantallaActual) {
             case PANTALLA_CONTACTOS:
                 tituloPantalla.setText("Contactos");
-                descripcionPantalla.setText("Descripción pantalla contactos. En el presente " +
-                        "documento se propone un prototipo de sistema, el cual tiene como " +
-                        "objetivo alertar y dar seguimiento en tiempo real cuando un usuario " +
-                        "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                        "saturación de oxígeno en la sangre, para de este modo aumentar las " +
-                        "probabilidades de que sea atendido prontamente evitando la muerte o daño" +
-                        " cerebral.");
+                descripcionPantalla.setText(
+                        "Podrás agregar contactos a partir de la agenda personal en tu teléfono, " +
+                                "así como editar su nombre y seleccionar si deseas que se envíen " +
+                                "notificaciones o mensajes. Además de poder seleccionar si " +
+                                "quieres enviar y recibir notificaciones de usuarios cercanos a " +
+                                "ti.");
                 circulo2.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
@@ -114,13 +113,11 @@ public class Instructivo extends AppCompatActivity {
                 break;
             case PANTALLA_NOTIFICACIONES:
                 tituloPantalla.setText("Notificaciones");
-                descripcionPantalla.setText("Descripción pantalla notificaciones. En el presente " +
-                        "documento se propone un prototipo de sistema, el cual tiene como " +
-                        "objetivo alertar y dar seguimiento en tiempo real cuando un usuario " +
-                        "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                        "saturación de oxígeno en la sangre, para de este modo aumentar las " +
-                        "probabilidades de que sea atendido prontamente evitando la muerte o daño" +
-                        " cerebral.");
+                descripcionPantalla.setText(
+                        "Se muestra la colección de notificaciones tanto tuyas como las recibidas" +
+                                " de otros usuarios, tanto activas como terminadas. Puedes entrar" +
+                                " a ver más información extra sobre cada emergencia así como " +
+                                "quitarla de tu colección");
                 circulo3.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
@@ -128,13 +125,10 @@ public class Instructivo extends AppCompatActivity {
                 break;
             case PANTALLA_USUARIO:
                 tituloPantalla.setText("Usuario");
-                descripcionPantalla.setText("Descripción pantalla usuario. En el presente " +
-                        "documento se propone un prototipo de sistema, el cual tiene como " +
-                        "objetivo alertar y dar seguimiento en tiempo real cuando un usuario " +
-                        "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                        "saturación de oxígeno en la sangre, para de este modo aumentar las " +
-                        "probabilidades de que sea atendido prontamente evitando la muerte o daño" +
-                        " cerebral.");
+                descripcionPantalla.setText(
+                        "Desde la pantalla usuario puedes seleccionar entre entrar a los datos " +
+                                "medicos para hacer modificaciones, visualizar el instructivo de " +
+                                "la aplicación, crear un respaldo y cerrar sesión");
                 circulo4.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
@@ -143,17 +137,10 @@ public class Instructivo extends AppCompatActivity {
             case PANTALLA_DATOS_USUARIO:
                 tituloPantalla.setText("Datos Del Usuario");
                 descripcionPantalla
-                        .setText("Descripción pantalla datos del usuario. En el presente " +
-                                "documento se propone un prototipo de sistema, el cual tiene como" +
-                                " " +
-                                "objetivo alertar y dar seguimiento en tiempo real cuando un " +
-                                "usuario " +
-                                "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                                "saturación de oxígeno en la sangre, para de este modo aumentar " +
-                                "las " +
-                                "probabilidades de que sea atendido prontamente evitando la " +
-                                "muerte o daño" +
-                                " cerebral.");
+                        .setText(
+                                "Podrás actualizar tu información personal como nombre, número de" +
+                                        " teléfono y datos médicos relevantes para una emergencia" +
+                                        " así como tus rangos estables en tu frecuencia cardíaca");
                 circulo5.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
@@ -161,13 +148,11 @@ public class Instructivo extends AppCompatActivity {
                 break;
             case PANTALLA_RESPALDO:
                 tituloPantalla.setText("Respaldo");
-                descripcionPantalla.setText("Descripción pantalla respaldo. En el presente " +
-                        "documento se propone un prototipo de sistema, el cual tiene como " +
-                        "objetivo alertar y dar seguimiento en tiempo real cuando un usuario " +
-                        "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                        "saturación de oxígeno en la sangre, para de este modo aumentar las " +
-                        "probabilidades de que sea atendido prontamente evitando la muerte o daño" +
-                        " cerebral.");
+                descripcionPantalla.setText(
+                        "Tienes la opción de elegir entre hacer un respaldo de manera manual, al " +
+                                "instante, o de programar un respaldo para que se ejecute cada " +
+                                "cierto tiempo. Si la aplicación llega a ser borrada, al volverla" +
+                                " a instalar se descargará la información del respaldo.");
                 circulo6.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
@@ -176,17 +161,12 @@ public class Instructivo extends AppCompatActivity {
             case PANTALLA_MEDICIONES_TIEMPO_REAL:
                 tituloPantalla.setText("Mediciones En Tiempo Real");
                 descripcionPantalla
-                        .setText("Descripción pantalla mediciones en tiempo real. En el presente " +
-                                "documento se propone un prototipo de sistema, el cual tiene como" +
-                                " " +
-                                "objetivo alertar y dar seguimiento en tiempo real cuando un " +
-                                "usuario " +
-                                "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                                "saturación de oxígeno en la sangre, para de este modo aumentar " +
-                                "las " +
-                                "probabilidades de que sea atendido prontamente evitando la " +
-                                "muerte o daño" +
-                                " cerebral.");
+                        .setText(
+                                "Desde esta pantalla se podrá conectar al circuito para obtener " +
+                                        "tus mediciones y podrás ver éstas en tiempo real, " +
+                                        "cambiando entre ecg y frecuencia cardíaca al presionar " +
+                                        "su respectivo texto. También podrás acceder a historial " +
+                                        "de mediciones desde esta pantalla.");
                 circulo7.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
@@ -195,17 +175,9 @@ public class Instructivo extends AppCompatActivity {
             case PANTALLA_HISTORIAL_MEDICIONES:
                 tituloPantalla.setText("Historial de Mediciones");
                 descripcionPantalla
-                        .setText("Descripción pantalla historial de mediciones. En el presente " +
-                                "documento se propone un prototipo de sistema, el cual tiene como" +
-                                " " +
-                                "objetivo alertar y dar seguimiento en tiempo real cuando un " +
-                                "usuario " +
-                                "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                                "saturación de oxígeno en la sangre, para de este modo aumentar " +
-                                "las " +
-                                "probabilidades de que sea atendido prontamente evitando la " +
-                                "muerte o daño" +
-                                " cerebral.");
+                        .setText(
+                                "Seleccionando el día y hora en la que quieres ver tus mediciones" +
+                                        " podrás obtener todos los datos obtenidos en ese rango");
                 circulo8.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
@@ -214,13 +186,10 @@ public class Instructivo extends AppCompatActivity {
             case PANTALLA_INSTRUCTIVO:
             default:
                 tituloPantalla.setText("Pantalla Instructivo");
-                descripcionPantalla.setText("Descripción pantalla instructivo. En el presente " +
-                        "documento se propone un prototipo de sistema, el cual tiene como " +
-                        "objetivo alertar y dar seguimiento en tiempo real cuando un usuario " +
-                        "presente anomalías en su frecuencia cardiaca o niveles bajos de " +
-                        "saturación de oxígeno en la sangre, para de este modo aumentar las " +
-                        "probabilidades de que sea atendido prontamente evitando la muerte o daño" +
-                        " cerebral.");
+                descripcionPantalla.setText(
+                        "A continuación podrás ver una breve explicación de cada una de las " +
+                                "pantallas que se encuentran en la aplicación, desliza de " +
+                                "izquierda a derecha para visualizarlas.");
                 circulo1.setColorFilter(Color.GRAY);
                 video.setVideoURI(Uri.parse(
                         "android.resource://" + getPackageName() + "/" +
