@@ -37,6 +37,9 @@ public class DatosUsuario extends AppCompatActivity {
     private ManejadorBaseDeDatosLocal mManejadorBaseDeDatosLocal;
     private ManejadorBaseDeDatosNube mManejadorBaseDeDatosNube;
     ArrayList listaDeEnfermedades;
+    ArrayList listaDeMedicacion;
+    ArrayList listaDeToxicomanias;
+    ArrayList listaDeAlergias;
 
 
     @Override
@@ -64,8 +67,43 @@ public class DatosUsuario extends AppCompatActivity {
         text = findViewById(R.id.nss);
         if (usuario.getNss() != 0)
             text.setText(String.valueOf(usuario.getNss()));
-        text = findViewById(R.id.medicacion);
-        text.setText(usuario.getMedicacion());
+
+        listaDeMedicacion = mManejadorBaseDeDatosLocal.obtenerMedicaciones();
+        ArrayAdapter<String> adaptadorMedicacion = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, listaDeMedicacion);
+        AutoCompleteTextView textViewMedicacion = findViewById(R.id.medicacion);
+        textViewMedicacion.setAdapter(adaptadorMedicacion);
+        textViewMedicacion.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                listaDeMedicacion = mManejadorBaseDeDatosLocal.obtenerMedicaciones();
+                mManejadorBaseDeDatosLocal.agregarMedicacionAUsuario(usuario.getIdUsuario(),
+                        (long) (listaDeMedicacion.indexOf(adapterView.getItemAtPosition(position)) + 1) );
+                actualizarChipGroupDeMedicacion();
+                textViewMedicacion.setText("");
+            }
+        });
+        textViewMedicacion.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction()==KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    if ( textViewMedicacion.getText().toString() != null &&
+                            !textViewMedicacion.getText().toString().trim().matches("") ) {
+                        mManejadorBaseDeDatosLocal.agregarMedicacionAUsuario(usuario.getIdUsuario(),
+                                mManejadorBaseDeDatosLocal.agregarMedicacion(
+                                        textViewMedicacion.getText().toString()));
+                        listaDeMedicacion = mManejadorBaseDeDatosLocal.obtenerMedicaciones();
+                        adaptadorMedicacion.add(textViewMedicacion.getText().toString());
+                        textViewMedicacion.setAdapter(adaptadorMedicacion);
+                        textViewMedicacion.setText("");
+                        actualizarChipGroupDeMedicacion();
+                    }
+                }
+                return false;
+            }
+        });
+        actualizarChipGroupDeMedicacion();
+
         listaDeEnfermedades = mManejadorBaseDeDatosLocal.obtenerEnfermedades();
         ArrayAdapter<String> adaptadorEnfermedades = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, listaDeEnfermedades);
@@ -123,12 +161,82 @@ public class DatosUsuario extends AppCompatActivity {
             }
         });
         actualizarChipGroupDeEnfermedades();
-        text = findViewById(R.id.toxicomanias);
-        text.setText(usuario.getToxicomanias());
+
+        listaDeToxicomanias = mManejadorBaseDeDatosLocal.obtenerToxicomanias();
+        ArrayAdapter<String> adaptadorToxicomanias = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, listaDeToxicomanias);
+        AutoCompleteTextView textViewToxicomanias = findViewById(R.id.toxicomanias);
+        textViewToxicomanias.setAdapter(adaptadorToxicomanias);
+        textViewToxicomanias.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                listaDeToxicomanias = mManejadorBaseDeDatosLocal.obtenerToxicomanias();
+                mManejadorBaseDeDatosLocal.agregarToxicomaniaAUsuario(usuario.getIdUsuario(),
+                        (long) (listaDeToxicomanias.indexOf(adapterView.getItemAtPosition(position)) + 1) );
+                actualizarChipGroupDeToxicomanias();
+                textViewToxicomanias.setText("");
+            }
+        });
+        textViewToxicomanias.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction()==KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    if ( textViewToxicomanias.getText().toString() != null &&
+                            !textViewToxicomanias.getText().toString().trim().matches("") ) {
+                        mManejadorBaseDeDatosLocal.agregarToxicomaniaAUsuario(usuario.getIdUsuario(),
+                                mManejadorBaseDeDatosLocal.agregarToxicomania(
+                                        textViewToxicomanias.getText().toString()));
+                        listaDeToxicomanias = mManejadorBaseDeDatosLocal.obtenerToxicomanias();
+                        adaptadorToxicomanias.add(textViewToxicomanias.getText().toString());
+                        textViewToxicomanias.setAdapter(adaptadorToxicomanias);
+                        textViewToxicomanias.setText("");
+                        actualizarChipGroupDeToxicomanias();
+                    }
+                }
+                return false;
+            }
+        });
+        actualizarChipGroupDeToxicomanias();
+
         text = findViewById(R.id.tipoSangre);
         text.setText(usuario.getTipoSangre());
-        text = findViewById(R.id.Alergias);
-        text.setText(usuario.getAlergias());
+
+        listaDeAlergias = mManejadorBaseDeDatosLocal.obtenerAlergias();
+        ArrayAdapter<String> adaptadorAlergias = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, listaDeToxicomanias);
+        AutoCompleteTextView textViewAlergias = findViewById(R.id.Alergias);
+        textViewAlergias.setAdapter(adaptadorAlergias);
+        textViewAlergias.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                listaDeAlergias = mManejadorBaseDeDatosLocal.obtenerAlergias();
+                mManejadorBaseDeDatosLocal.agregarAlergiaAUsuario(usuario.getIdUsuario(),
+                        (long) (listaDeAlergias.indexOf(adapterView.getItemAtPosition(position)) + 1) );
+                actualizarChipGroupDeAlergias();
+                textViewAlergias.setText("");
+            }
+        });
+        textViewAlergias.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction()==KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    if ( textViewAlergias.getText().toString() != null &&
+                            !textViewAlergias.getText().toString().trim().matches("") ) {
+                        mManejadorBaseDeDatosLocal.agregarAlergiaAUsuario(usuario.getIdUsuario(),
+                                mManejadorBaseDeDatosLocal.agregarAlergia(
+                                        textViewAlergias.getText().toString()));
+                        listaDeAlergias = mManejadorBaseDeDatosLocal.obtenerAlergias();
+                        adaptadorAlergias.add(textViewAlergias.getText().toString());
+                        textViewAlergias.setAdapter(adaptadorAlergias);
+                        textViewAlergias.setText("");
+                        actualizarChipGroupDeAlergias();
+                    }
+                }
+                return false;
+            }
+        });
+        actualizarChipGroupDeAlergias();
+
         text = findViewById(R.id.religion);
         text.setText(usuario.getReligion());
         text = findViewById(R.id.frecuenciaCardiacaMinima);
@@ -287,6 +395,99 @@ public class DatosUsuario extends AppCompatActivity {
                 }
             });
             enfermedadesChipGroup.addView(chip);
+        }
+    }
+
+    private void actualizarChipGroupDeMedicacion(){
+        ChipGroup medicacionChipGroup = findViewById(R.id.medicacionChipGroup);
+        medicacionChipGroup.removeAllViews();
+        ArrayList<String> medicacionDelUsuario = mManejadorBaseDeDatosLocal.obtenerMedicacionDeUnUsuario(
+                mManejadorBaseDeDatosNube.obtenerIdUsuario());
+        for (String medicacion : medicacionDelUsuario) {
+            Chip chip = new Chip(this);
+            chip.setText(medicacion);
+            chip.setCheckable(false);
+            chip.setTextSize(18);
+            chip.setCheckedIconVisible(false);
+            chip.setCloseIconVisible(true);
+            chip.setOnCloseIconClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        Log.d("OnCloseIconClickListener", (String) ((Chip) view).getText());
+                        listaDeMedicacion = mManejadorBaseDeDatosLocal.obtenerMedicaciones();
+                        mManejadorBaseDeDatosLocal.eliminarMedicacionDeUsuario(
+                                mManejadorBaseDeDatosNube.obtenerIdUsuario(),
+                                (long) (listaDeMedicacion.indexOf(((Chip) view).getText()) + 1) );
+                        actualizarChipGroupDeMedicacion();
+                    } catch ( Exception e){
+                        Log.d("OnCloseIconClickListener", e.getMessage());
+                    }
+                }
+            });
+            medicacionChipGroup.addView(chip);
+        }
+    }
+
+    private void actualizarChipGroupDeToxicomanias(){
+        ChipGroup toxicomaniasChipGroup = findViewById(R.id.toxicomaniasChipGroup);
+        toxicomaniasChipGroup.removeAllViews();
+        ArrayList<String> toxicomaniasDelUsuario = mManejadorBaseDeDatosLocal.obtenerToxicomaniasDeUnUsuario(
+                mManejadorBaseDeDatosNube.obtenerIdUsuario());
+        for (String toxicomania : toxicomaniasDelUsuario) {
+            Chip chip = new Chip(this);
+            chip.setText(toxicomania);
+            chip.setCheckable(false);
+            chip.setTextSize(18);
+            chip.setCheckedIconVisible(false);
+            chip.setCloseIconVisible(true);
+            chip.setOnCloseIconClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        Log.d("OnCloseIconClickListener", (String) ((Chip) view).getText());
+                        listaDeToxicomanias = mManejadorBaseDeDatosLocal.obtenerToxicomanias();
+                        mManejadorBaseDeDatosLocal.eliminarToxicomaniaDeUsuario(
+                                mManejadorBaseDeDatosNube.obtenerIdUsuario(),
+                                (long) (listaDeToxicomanias.indexOf(((Chip) view).getText()) + 1) );
+                        actualizarChipGroupDeToxicomanias();
+                    } catch ( Exception e){
+                        Log.d("OnCloseIconClickListener", e.getMessage());
+                    }
+                }
+            });
+            toxicomaniasChipGroup.addView(chip);
+        }
+    }
+
+    private void actualizarChipGroupDeAlergias(){
+        ChipGroup alergiasChipGroup = findViewById(R.id.alergiasChipGroup);
+        alergiasChipGroup.removeAllViews();
+        ArrayList<String> alergiasDelUsuario = mManejadorBaseDeDatosLocal.obtenerAlergiasDeUnUsuario(
+                mManejadorBaseDeDatosNube.obtenerIdUsuario());
+        for (String alergia : alergiasDelUsuario) {
+            Chip chip = new Chip(this);
+            chip.setText(alergia);
+            chip.setCheckable(false);
+            chip.setTextSize(18);
+            chip.setCheckedIconVisible(false);
+            chip.setCloseIconVisible(true);
+            chip.setOnCloseIconClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        Log.d("OnCloseIconClickListener", (String) ((Chip) view).getText());
+                        listaDeAlergias = mManejadorBaseDeDatosLocal.obtenerAlergias();
+                        mManejadorBaseDeDatosLocal.eliminarAlergiaDeUsuario(
+                                mManejadorBaseDeDatosNube.obtenerIdUsuario(),
+                                (long) (listaDeAlergias.indexOf(((Chip) view).getText()) + 1) );
+                        actualizarChipGroupDeAlergias();
+                    } catch ( Exception e){
+                        Log.d("OnCloseIconClickListener", e.getMessage());
+                    }
+                }
+            });
+            alergiasChipGroup.addView(chip);
         }
     }
 }

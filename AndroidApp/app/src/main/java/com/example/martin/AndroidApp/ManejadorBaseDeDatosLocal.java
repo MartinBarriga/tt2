@@ -24,7 +24,7 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
 
     // Información de la base de datos
     private static final String NOMRE_BASE_DE_DATOS = "TT2020B065";
-    private static final int VERSION_DE_BASE_DE_DATOS = 102;
+    private static final int VERSION_DE_BASE_DE_DATOS = 105;
     private static final String NOMBRE_TABLA_USUARIO = "usuario";
     private static final String NOMBRE_TABLA_CONTACTO = "contacto";
     private static final String NOMBRE_TABLA_NOTIFICACION = "notificacion";
@@ -33,6 +33,12 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
     private static final String NOMBRE_TABLA_DATO = "dato";
     private static final String NOMBRE_TABLA_ENFERMEDAD = "enfermedad";
     private static final String NOMBRE_TABLA_ENFERMEDADESYUSUARIOS = "enfermedadesyusuarios";
+    private static final String NOMBRE_TABLA_MEDICACION = "medicacion";
+    private static final String NOMBRE_TABLA_MEDICACIONESYUSUARIOS = "medicacionesyusuarios";
+    private static final String NOMBRE_TABLA_TOXICOMANIA = "toxicomania";
+    private static final String NOMBRE_TABLA_TOXICOMANIASYUSUARIOS = "toxicomaniasyusuarios";
+    private static final String NOMBRE_TABLA_ALERGIA = "alergia";
+    private static final String NOMBRE_TABLA_ALERGIASYUSUARIOS = "alergiasyusuarios";
 
     // Instrucciones para la creación de la base de datos
     private static final String CREAR_TABLA_USUARIO = "CREATE TABLE IF NOT EXISTS " +
@@ -79,48 +85,46 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             " (idEnfermedad) " +
             ", idUsuario TEXT NOT NULL REFERENCES " + NOMBRE_TABLA_USUARIO + " (idUsuario), " +
             "PRIMARY KEY (idEnfermedad, idUsuario))";
+    private static final String CREAR_TABLA_MEDICACION = "CREATE TABLE IF NOT EXISTS " +
+            NOMBRE_TABLA_MEDICACION +
+            " (idMedicacion INTEGER PRIMARY KEY AUTOINCREMENT, medicacion TEXT NOT NULL)";
+    private static final String CREAR_TABLA_MEDICACIONESYUSUARIOS = "CREATE TABLE IF NOT EXISTS " +
+            NOMBRE_TABLA_MEDICACIONESYUSUARIOS +
+            " (idMedicacion INTEGER NOT NULL REFERENCES " + NOMBRE_TABLA_MEDICACION +
+            " (idMedicacion) " +
+            ", idUsuario TEXT NOT NULL REFERENCES " + NOMBRE_TABLA_USUARIO + " (idUsuario), " +
+            "PRIMARY KEY (idMedicacion, idUsuario))";
+    private static final String CREAR_TABLA_TOXICOMANIA = "CREATE TABLE IF NOT EXISTS " +
+            NOMBRE_TABLA_TOXICOMANIA +
+            " (idToxicomania INTEGER PRIMARY KEY AUTOINCREMENT, toxicomania TEXT NOT NULL)";
+    private static final String CREAR_TABLA_TOXICOMANIASYUSUARIOS = "CREATE TABLE IF NOT EXISTS " +
+            NOMBRE_TABLA_TOXICOMANIASYUSUARIOS +
+            " (idToxicomania INTEGER NOT NULL REFERENCES " + NOMBRE_TABLA_TOXICOMANIA +
+            " (idToxicomania) " +
+            ", idUsuario TEXT NOT NULL REFERENCES " + NOMBRE_TABLA_USUARIO + " (idUsuario), " +
+            "PRIMARY KEY (idToxicomania, idUsuario))";
+    private static final String CREAR_TABLA_ALERGIA = "CREATE TABLE IF NOT EXISTS " +
+            NOMBRE_TABLA_ALERGIA +
+            " (idAlergia INTEGER PRIMARY KEY AUTOINCREMENT, alergia TEXT NOT NULL)";
+    private static final String CREAR_TABLA_ALERGIASYUSUARIOS = "CREATE TABLE IF NOT EXISTS " +
+            NOMBRE_TABLA_ALERGIASYUSUARIOS +
+            " (idAlergia INTEGER NOT NULL REFERENCES " + NOMBRE_TABLA_ALERGIA +
+            " (idAlergia) " +
+            ", idUsuario TEXT NOT NULL REFERENCES " + NOMBRE_TABLA_USUARIO + " (idUsuario), " +
+            "PRIMARY KEY (idAlergia, idUsuario))";
 
     private static final String INSERTAR_ENFERMEDADES_INICIALES =
             "INSERT OR IGNORE INTO " + NOMBRE_TABLA_ENFERMEDAD +
-                    " (idEnfermedad, enfermedad) VALUES " +
-                    "(1, 'Asma'), " +
-                    "(2, 'Cancer'), " +
-                    "(3, 'VIH / SIDA'), " +
-                    "(4, 'Diabetes tipo 1'), " +
-                    "(5, 'Diabetes tipo 2'), " +
-                    "(6, 'Diabetes gestacional'), " +
-                    "(7, 'Hipertensión arterial'), " +
-                    "(8, 'Bronquitis crónica'), " +
-                    "(9, 'Fibrosis quística'), " +
-                    "(10, 'Cardiopatía coronaria / Arteriopatía coronaria'), " +
-                    "(11, 'Cardiopatía congénita'), " +
-                    "(12, 'Esclerosis múltiple'), " +
-                    "(13, 'Parkinson'), " +
-                    "(14, 'Insuficiencia renal crónica'), " +
-                    "(15, 'Hemofilia'), " +
-                    "(16, 'Artritis degenerativa / Osteoartritis'), " +
-                    "(17, 'Artritis reumatoide'), " +
-                    "(18, 'Lupus'), " +
-                    "(19, 'Hipotiroidismo'), " +
-                    "(20, 'Hipertiroidismo'), " +
-                    "(21, 'Gastritis crónica'), " +
-                    "(22, 'Demencia'), " +
-                    "(23, 'Apnea del sueño'), " +
-                    "(24, 'Hepatitis A'), " +
-                    "(25, 'Hepatitis B'), " +
-                    "(26, 'Hepatitis C'), " +
-                    "(27, 'Hepatitis D'), " +
-                    "(28, 'Hepatitis E'), " +
-                    "(29, 'Hepatitis alcohólica'), " +
-                    "(30, 'Hígado graso'), " +
-                    "(31, 'Enfermedad de Crohn'), " +
-                    "(32, 'Insuficiencia renal'), " +
-                    "(33, 'Insuficiencia cardíaca'), " +
-                    "(34, 'Linfangitis'), " +
-                    "(35, 'Angina de pecho'), " +
-                    "(36, 'Leucemia'), " +
-                    "(37, 'Cirrosis'), " +
-                    "(38, 'Cardiomegalia / Corazón dilatado'); ";
+                    " (idEnfermedad, enfermedad) VALUES (1, 'Asma'), (2, 'Cancer'), (3, 'VIH / SIDA'), (4, 'Diabetes tipo 1'), " +
+                    "(5, 'Diabetes tipo 2'), (6, 'Diabetes gestacional'), (7, 'Hipertensión arterial'), (8, 'Bronquitis crónica'), " +
+                    "(9, 'Fibrosis quística'), (10, 'Cardiopatía coronaria / Arteriopatía coronaria'), (11, 'Cardiopatía congénita'), " +
+                    "(12, 'Esclerosis múltiple'), (13, 'Parkinson'), (14, 'Insuficiencia renal crónica'), " +
+                    "(15, 'Hemofilia'), (16, 'Artritis degenerativa / Osteoartritis'), (17, 'Artritis reumatoide'), " +
+                    "(18, 'Lupus'), (19, 'Hipotiroidismo'), (20, 'Hipertiroidismo'), (21, 'Gastritis crónica'), (22, 'Demencia'), " +
+                    "(23, 'Apnea del sueño'), (24, 'Hepatitis A'), (25, 'Hepatitis B'), (26, 'Hepatitis C'), (27, 'Hepatitis D'), " +
+                    "(28, 'Hepatitis E'), (29, 'Hepatitis alcohólica'), (30, 'Hígado graso'), (31, 'Enfermedad de Crohn'), " +
+                    "(32, 'Insuficiencia renal'), (33, 'Insuficiencia cardíaca'), (34, 'Linfangitis'), (35, 'Angina de pecho'), " +
+                    "(36, 'Leucemia'), (37, 'Cirrosis'), (38, 'Cardiomegalia / Corazón dilatado'); ";
 
     public ManejadorBaseDeDatosLocal(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, NOMRE_BASE_DE_DATOS, factory, VERSION_DE_BASE_DE_DATOS);
@@ -137,6 +141,12 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         db.execSQL(CREAR_TABLA_ENFERMEDAD);
         db.execSQL(CREAR_TABLA_ENFERMEDADESYUSUARIOS);
         db.execSQL(INSERTAR_ENFERMEDADES_INICIALES);
+        db.execSQL(CREAR_TABLA_MEDICACION);
+        db.execSQL(CREAR_TABLA_MEDICACIONESYUSUARIOS);
+        db.execSQL(CREAR_TABLA_TOXICOMANIA);
+        db.execSQL(CREAR_TABLA_TOXICOMANIASYUSUARIOS);
+        db.execSQL(CREAR_TABLA_ALERGIA);
+        db.execSQL(CREAR_TABLA_ALERGIASYUSUARIOS);
     }
 
     @Override
@@ -150,6 +160,12 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_DATO);
             db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_ENFERMEDAD);
             db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_ENFERMEDADESYUSUARIOS);
+            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_MEDICACION);
+            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_MEDICACIONESYUSUARIOS);
+            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_TOXICOMANIA);
+            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_TOXICOMANIASYUSUARIOS);
+            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_ALERGIA);
+            db.execSQL("DROP TABLE IF EXISTS " + NOMBRE_TABLA_ALERGIASYUSUARIOS);
             onCreate(db);
         }
     }
@@ -777,6 +793,171 @@ public class ManejadorBaseDeDatosLocal extends SQLiteOpenHelper {
         ContentValues nuevaEnfermedad = new ContentValues();
         nuevaEnfermedad.put("enfermedad", enfermedad);
         Long id = escritura.insert(NOMBRE_TABLA_ENFERMEDAD, "idEnfermedad", nuevaEnfermedad);
+        escritura.close();
+        return id;
+    }
+
+    public ArrayList<String> obtenerMedicaciones() {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<String> medicaciones = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_MEDICACION,
+                null);
+        while (cursor.moveToNext()) {
+            medicaciones.add(cursor.getString(1));
+        }
+        lectura.close();
+        return medicaciones;
+    }
+
+    public ArrayList<String> obtenerMedicacionDeUnUsuario(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<String> medicacion = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_MEDICACION + " INNER JOIN " +
+                        NOMBRE_TABLA_MEDICACIONESYUSUARIOS +
+                        " USING(idMedicacion) WHERE " + NOMBRE_TABLA_MEDICACIONESYUSUARIOS
+                        + ".idUsuario LIKE '" + idUsuario + "'",
+                null);
+        while (cursor.moveToNext()) {
+            medicacion.add(cursor.getString(1));
+        }
+        lectura.close();
+        return medicacion;
+    }
+
+    public Long agregarMedicacionAUsuario(String idUsuario, Long idMedicacion) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        ContentValues medicacionYUsuario = new ContentValues();
+        medicacionYUsuario.put("idMedicacion", idMedicacion);
+        medicacionYUsuario.put("idUsuario", idUsuario);
+        Long id = escritura.insert(NOMBRE_TABLA_MEDICACIONESYUSUARIOS, null, medicacionYUsuario);
+        escritura.close();
+        return id;
+    }
+
+    public void eliminarMedicacionDeUsuario(String idUsuario, Long idMedicacion) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.execSQL("DELETE FROM " + NOMBRE_TABLA_MEDICACIONESYUSUARIOS + " WHERE " +
+                "idMedicacion = " + idMedicacion + " AND idUsuario LIKE '" + idUsuario + "'");
+        escritura.close();
+    }
+
+    public Long agregarMedicacion(String medicacion) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        ContentValues nuevaMedicacion = new ContentValues();
+        nuevaMedicacion.put("medicacion", medicacion);
+        Long id = escritura.insert(NOMBRE_TABLA_MEDICACION, "idMedicacion", nuevaMedicacion);
+        escritura.close();
+        return id;
+    }
+
+    public ArrayList<String> obtenerToxicomanias() {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<String> toxicomanias = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_TOXICOMANIA,
+                null);
+        while (cursor.moveToNext()) {
+            toxicomanias.add(cursor.getString(1));
+        }
+        lectura.close();
+        return toxicomanias;
+    }
+
+    public ArrayList<String> obtenerToxicomaniasDeUnUsuario(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<String> toxicomanias = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_TOXICOMANIA + " INNER JOIN " +
+                        NOMBRE_TABLA_TOXICOMANIASYUSUARIOS +
+                        " USING(idToxicomania) WHERE " + NOMBRE_TABLA_TOXICOMANIASYUSUARIOS
+                        + ".idUsuario LIKE '" + idUsuario + "'",
+                null);
+        while (cursor.moveToNext()) {
+            toxicomanias.add(cursor.getString(1));
+        }
+        lectura.close();
+        return toxicomanias;
+    }
+
+    public Long agregarToxicomaniaAUsuario(String idUsuario, Long idToxicomania) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        ContentValues toxicomaniaYUsuario = new ContentValues();
+        toxicomaniaYUsuario.put("idToxicomania", idToxicomania);
+        toxicomaniaYUsuario.put("idUsuario", idUsuario);
+        Long id = escritura.insert(NOMBRE_TABLA_TOXICOMANIASYUSUARIOS, null, toxicomaniaYUsuario);
+        escritura.close();
+        return id;
+    }
+
+    public void eliminarToxicomaniaDeUsuario(String idUsuario, Long idToxicomania) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.execSQL("DELETE FROM " + NOMBRE_TABLA_TOXICOMANIASYUSUARIOS + " WHERE " +
+                "idToxicomania = " + idToxicomania + " AND idUsuario LIKE '" + idUsuario + "'");
+        escritura.close();
+    }
+
+    public Long agregarToxicomania(String toxicomania) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        ContentValues nuevaToxicomania = new ContentValues();
+        nuevaToxicomania.put("toxicomania", toxicomania);
+        Long id = escritura.insert(NOMBRE_TABLA_TOXICOMANIA, "idToxicomania", nuevaToxicomania);
+        escritura.close();
+        return id;
+    }
+
+    public ArrayList<String> obtenerAlergias() {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<String> alergias = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_ALERGIA,
+                null);
+        while (cursor.moveToNext()) {
+            alergias.add(cursor.getString(1));
+        }
+        lectura.close();
+        return alergias;
+    }
+
+    public ArrayList<String> obtenerAlergiasDeUnUsuario(String idUsuario) {
+        SQLiteDatabase lectura = getReadableDatabase();
+        ArrayList<String> alergias = new ArrayList<>();
+        Cursor cursor = lectura.rawQuery(
+                "SELECT * FROM " + NOMBRE_TABLA_ALERGIA + " INNER JOIN " +
+                        NOMBRE_TABLA_ALERGIASYUSUARIOS +
+                        " USING(idAlergia) WHERE " + NOMBRE_TABLA_ALERGIASYUSUARIOS
+                        + ".idUsuario LIKE '" + idUsuario + "'",
+                null);
+        while (cursor.moveToNext()) {
+            alergias.add(cursor.getString(1));
+        }
+        lectura.close();
+        return alergias;
+    }
+
+    public Long agregarAlergiaAUsuario(String idUsuario, Long idAlergia) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        ContentValues alergiaYUsuario = new ContentValues();
+        alergiaYUsuario.put("idAlergia", idAlergia);
+        alergiaYUsuario.put("idUsuario", idUsuario);
+        Long id = escritura.insert(NOMBRE_TABLA_ALERGIASYUSUARIOS, null, alergiaYUsuario);
+        escritura.close();
+        return id;
+    }
+
+    public void eliminarAlergiaDeUsuario(String idUsuario, Long idAlergia) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        escritura.execSQL("DELETE FROM " + NOMBRE_TABLA_ALERGIASYUSUARIOS + " WHERE " +
+                "idAlergia = " + idAlergia + " AND idUsuario LIKE '" + idUsuario + "'");
+        escritura.close();
+    }
+
+    public Long agregarAlergia(String alergia) {
+        SQLiteDatabase escritura = getWritableDatabase();
+        ContentValues nuevaAlergia = new ContentValues();
+        nuevaAlergia.put("alergia", alergia);
+        Long id = escritura.insert(NOMBRE_TABLA_ALERGIA, "idAlergia", nuevaAlergia);
         escritura.close();
         return id;
     }
